@@ -310,6 +310,15 @@ class APIClient {
     );
   }
 
+  async getAdminTeacherDues(page = 1, limit = 20) {
+    return this.request(
+      `/admin/payments/dues?page=${page}&limit=${limit}`,
+      "GET",
+      null,
+      true,
+    );
+  }
+
   async approvePayment(paymentId) {
     return this.request(
       `/admin/payments/${paymentId}/approve`,

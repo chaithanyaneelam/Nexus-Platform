@@ -28,7 +28,21 @@ class NexusApp {
     // Handle hash change
     window.addEventListener("hashchange", () => {
       router.navigate();
+      // Close mobile menu on navigate
+      const navbarMenu = document.getElementById("navbarMenu");
+      if (navbarMenu.classList.contains("active")) {
+        navbarMenu.classList.remove("active");
+      }
     });
+
+    // Mobile menu toggle
+    const mobileMenuToggle = document.getElementById("mobileMenuToggle");
+    const navbarMenu = document.getElementById("navbarMenu");
+    if (mobileMenuToggle) {
+      mobileMenuToggle.addEventListener("click", () => {
+        navbarMenu.classList.toggle("active");
+      });
+    }
   }
 
   /**

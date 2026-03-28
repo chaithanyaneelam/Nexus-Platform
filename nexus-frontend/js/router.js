@@ -102,11 +102,25 @@ class Router {
       render: () => this.renderAdminTeachers(),
     };
 
+    this.routes["admin-teacher-dues"] = {
+      path: "#admin-teacher-dues",
+      requiresAuth: true,
+      role: "admin",
+      render: () => this.renderAdminTeacherDues(),
+    };
+
     this.routes["admin-teacher-details"] = {
       path: "#admin-teacher-details",
       requiresAuth: true,
       role: "admin",
       render: () => this.renderAdminTeacherDetails(),
+    };
+
+    this.routes["admin-details"] = {
+      path: "#admin-details",
+      requiresAuth: true,
+      role: "admin",
+      render: () => this.renderAdminDetails(),
     };
 
     this.routes["my-courses"] = {
@@ -160,6 +174,12 @@ class Router {
       path: "#support",
       requiresAuth: true,
       render: () => this.renderSupport(),
+    };
+
+    this.routes["documentations"] = {
+      path: "#documentations",
+      requiresAuth: true,
+      render: () => this.renderDocumentations(),
     };
   }
 
@@ -248,6 +268,9 @@ class Router {
     const studentsMenuItem = document.getElementById("studentsMenuItem");
     const adminMenuItem = document.getElementById("adminMenuItem");
     const supportMenuItem = document.getElementById("supportMenuItem");
+    const documentationsMenuItem = document.getElementById(
+      "documentationsMenuItem",
+    );
     const userInfo = document.getElementById("userInfo");
     const userName = document.getElementById("userName");
     const userRole = document.getElementById("userRole");
@@ -270,6 +293,7 @@ class Router {
       studentsMenuItem.style.display = "none";
       adminMenuItem.style.display = "none";
       supportMenuItem.style.display = "none";
+      documentationsMenuItem.style.display = "none";
 
       // Show menu items based on role
       if (user.role === "student") {
@@ -277,13 +301,16 @@ class Router {
         yourCoursesMenuItem.style.display = "inline";
         myEnrollmentsMenuItem.style.display = "inline";
         supportMenuItem.style.display = "inline";
+        documentationsMenuItem.style.display = "inline";
       } else if (user.role === "teacher") {
         myCoursesMenuItem.style.display = "inline";
         studentsMenuItem.style.display = "inline";
         supportMenuItem.style.display = "inline";
+        documentationsMenuItem.style.display = "inline";
       } else if (user.role === "admin") {
         coursesMenuItem.style.display = "inline";
         adminMenuItem.style.display = "inline";
+        documentationsMenuItem.style.display = "inline";
       }
     } else {
       loginLink.style.display = "inline";
@@ -298,6 +325,7 @@ class Router {
       studentsMenuItem.style.display = "none";
       adminMenuItem.style.display = "none";
       if (supportMenuItem) supportMenuItem.style.display = "none";
+      if (documentationsMenuItem) documentationsMenuItem.style.display = "none";
     }
   }
 
@@ -530,14 +558,24 @@ class Router {
                   <h3>${course.title}</h3>
                   <div style="background: #f0f4ff; padding: 0.75rem; border-radius: 6px; margin-bottom: 0.75rem;">
                     <p style="margin: 0.25rem 0; color: #333; font-weight: 600; font-size: 0.95rem;">
-                      👨‍🏫 ${teacher.name || "Unknown Teacher"}
+                      Instructor: ${teacher.name || "Unknown Teacher"}
                     </p>
                     <p style="margin: 0.25rem 0; color: #666; font-size: 0.85rem;">
-                      🏢 ${teacher.company || "N/A"}
+                      Company: ${teacher.company || "N/A"}
                     </p>
                     <p style="margin: 0.25rem 0; color: #666; font-size: 0.85rem;">
-                      💼 ${teacher.profession || teacher.role || "Instructor"}
+                      Role: ${teacher.profession || teacher.role || "Instructor"}
                     </p>
+                    ${
+                      teacher.mobileNumber
+                        ? `<p style="margin: 0.25rem 0; color: #666; font-size: 0.85rem;">📞 Contact: ${teacher.mobileNumber}</p>
+                    <a href="https://wa.me/${teacher.mobileNumber.replace(/[^\d+]/g, "")}" target="_blank" style="display: inline-block; margin-top: 5px; color: #25d366; font-weight: bold; text-decoration: none;">💬 WhatsApp</a>`
+                        : ""
+                    }
+                    <div style="margin-top: 0.5rem; display: flex; gap: 0.75rem;">
+                      ${teacher.linkedinUrl ? `<a href="${teacher.linkedinUrl}" target="_blank" style="color: #0077b5; text-decoration: none; font-size: 0.85rem; font-weight: bold;">🔗 LinkedIn</a>` : ""}
+                      ${teacher.githubUrl ? `<a href="${teacher.githubUrl}" target="_blank" style="color: #333; text-decoration: none; font-size: 0.85rem; font-weight: bold;">🐙 GitHub</a>` : ""}
+                    </div>
                     <p style="margin: 0.25rem 0; color: #667eea; font-size: 0.85rem; font-weight: 600;">
                       👥 ${course.enrolledCount || 0} students registered
                     </p>
@@ -644,6 +682,14 @@ class Router {
               <label for="role">Role:</label>
               <input type="text" value="${user.role.toUpperCase()}" disabled>
             </div>
+            <div class="form-group">
+              <label for="linkedinUrl">LinkedIn URL:</label>
+              <input type="url" id="linkedinUrl" name="linkedinUrl" value="${user.linkedinUrl || ""}" placeholder="https://linkedin.com/in/yourprofile">
+            </div>
+            <div class="form-group">
+              <label for="githubUrl">GitHub URL:</label>
+              <input type="url" id="githubUrl" name="githubUrl" value="${user.githubUrl || ""}" placeholder="https://github.com/yourprofile">
+            </div>
             <button type="submit" class="btn btn-primary">Update Profile</button>
           </form>
 
@@ -672,7 +718,13 @@ class Router {
       .addEventListener("submit", async (e) => {
         e.preventDefault();
         const name = document.getElementById("name").value;
-        const result = await auth.updateProfile({ name });
+        const linkedinUrl = document.getElementById("linkedinUrl").value;
+        const githubUrl = document.getElementById("githubUrl").value;
+        const result = await auth.updateProfile({
+          name,
+          linkedinUrl,
+          githubUrl,
+        });
         const messageDiv = document.getElementById("message");
         messageDiv.className = `message ${result.success ? "success" : "error"}`;
         messageDiv.textContent = result.message;
@@ -878,6 +930,18 @@ class Router {
             <h3>👨‍🏫 Teachers View</h3>
             <p>Monitor teacher-side enrollment visibility and student activation status.</p>
             <a href="#admin-teachers" class="btn btn-secondary">Inspect</a>
+          </div>
+
+          <div class="dashboard-card admin-card">
+            <h3>💸 Dues to Teacher</h3>
+            <p>Settle the pending payments to teachers after taking the commission.</p>
+            <a href="#admin-teacher-dues" class="btn btn-primary">Settle Dues</a>
+          </div>
+
+          <div class="dashboard-card admin-card">
+            <h3>👥 User Details</h3>
+            <p>View all registered students and teachers contact information.</p>
+            <a href="#admin-details" class="btn btn-secondary">View Details</a>
           </div>
 
           <div class="dashboard-card admin-card">
@@ -1276,14 +1340,112 @@ class Router {
     }
   }
 
+  async renderAdminDetails() {
+    const appDiv = document.getElementById("app");
+    appDiv.innerHTML = "<div class='loading'>Loading user details...</div>";
+
+    try {
+      const [studentsResponse, teachersResponse] = await Promise.all([
+        api.getAllUsers("student", 1, 100),
+        api.getAllUsers("teacher", 1, 100),
+      ]);
+
+      const students = studentsResponse.data || [];
+      const teachers = teachersResponse.data || [];
+
+      let html = `
+        <div class="admin-details-page" style="padding: 2rem;">
+          <div class="page-header" style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <h2>👥 User Details Directory</h2>
+              <p>View contact information for all registered students and teachers.</p>
+            </div>
+            <a href="#admin-dashboard" class="btn btn-secondary">Back to Dashboard</a>
+          </div>
+
+          <!-- Tabs -->
+          <div style="display: flex; gap: 1rem; margin-bottom: 2rem;">
+            <button id="btn-tab-students" onclick="switchAdminDetailsTab('students')" class="btn" style="background: #2563eb; color: white;">Students (${students.length})</button>
+            <button id="btn-tab-teachers" onclick="switchAdminDetailsTab('teachers')" class="btn btn-secondary">Teachers (${teachers.length})</button>
+          </div>
+
+          <!-- Students Content -->
+          <div id="content-admin-students" style="display: grid; gap: 1.5rem; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));">
+            ${
+              students.length > 0
+                ? students
+                    .map(
+                      (s) => `
+              <div onclick="this.querySelector('.contact-info').style.display = 'block'" 
+                   style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1.5rem; cursor: pointer; transition: all 0.2s;"
+                   onmouseover="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 4px 6px -1px rgba(59, 130, 246, 0.1)'"
+                   onmouseout="this.style.borderColor='#e2e8f0'; this.style.boxShadow='none'">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <h3 style="margin: 0; color: #0f172a;">${s.name || "Unknown"}</h3>
+                  <span style="font-size: 0.8rem; background: #dbf4ff; color: #1e3a8a; padding: 0.2rem 0.6rem; border-radius: 12px;">Student</span>
+                </div>
+                <p style="margin: 0.5rem 0 0 0; color: #64748b; font-size: 0.85rem;">Click to view details</p>
+                <div class="contact-info" style="display: none; margin-top: 1rem; padding-top: 1rem; border-top: 1px dashed #e2e8f0;">
+                  <p style="margin: 0.25rem 0; color: #475569; font-size: 0.9rem;"><strong>Email:</strong> ${s.email || "N/A"}</p>
+                  <p style="margin: 0.25rem 0; color: #475569; font-size: 0.9rem;"><strong>Mobile:</strong> ${s.mobileNumber || "N/A"}</p>
+                </div>
+              </div>
+            `,
+                    )
+                    .join("")
+                : '<p style="color: #64748b;">No students found.</p>'
+            }
+          </div>
+
+          <!-- Teachers Content -->
+          <div id="content-admin-teachers" style="display: none; gap: 1.5rem; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));">
+            ${
+              teachers.length > 0
+                ? teachers
+                    .map(
+                      (t) => `
+              <div onclick="this.querySelector('.contact-info').style.display = 'block'" 
+                   style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1.5rem; cursor: pointer; transition: all 0.2s;"
+                   onmouseover="this.style.borderColor='#10b981'; this.style.boxShadow='0 4px 6px -1px rgba(16, 185, 129, 0.1)'"
+                   onmouseout="this.style.borderColor='#e2e8f0'; this.style.boxShadow='none'">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <h3 style="margin: 0; color: #0f172a;">${t.name || "Unknown"}</h3>
+                  <span style="font-size: 0.8rem; background: #d1fae5; color: #065f46; padding: 0.2rem 0.6rem; border-radius: 12px;">Teacher</span>
+                </div>
+                <p style="margin: 0.5rem 0 0 0; color: #64748b; font-size: 0.85rem;">Click to view details</p>
+                <div class="contact-info" style="display: none; margin-top: 1rem; padding-top: 1rem; border-top: 1px dashed #e2e8f0;">
+                  <p style="margin: 0.25rem 0; color: #475569; font-size: 0.9rem;"><strong>Email:</strong> ${t.email || "N/A"}</p>
+                  <p style="margin: 0.25rem 0; color: #475569; font-size: 0.9rem;"><strong>Mobile:</strong> ${t.mobileNumber || "N/A"}</p>
+                  <p style="margin: 0.25rem 0; color: #475569; font-size: 0.9rem;"><strong>Company:</strong> ${t.company || "N/A"}</p>
+                  <p style="margin: 0.25rem 0; color: #475569; font-size: 0.9rem;"><strong>Role:</strong> ${t.profession || t.role || "Instructor"}</p>
+                </div>
+              </div>
+            `,
+                    )
+                    .join("")
+                : '<p style="color: #64748b;">No teachers found.</p>'
+            }
+          </div>
+
+        </div>
+      `;
+
+      appDiv.innerHTML = html;
+      this.updateNavbar();
+    } catch (error) {
+      appDiv.innerHTML = `<div class="error-message">Error loading user details: ${error.message}</div>`;
+    }
+  }
+
   async renderAdminPayments() {
     const appDiv = document.getElementById("app");
-
     appDiv.innerHTML = `
-      <div class="admin-payments-page">
-        <div style="padding: 2rem;">
-          <h1 style="margin: 2rem 0 0.5rem 0; font-size: 2.5rem; background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
-            💰 Payment Management
+      <div class="courses-page" style="padding: 2rem;">
+        <div class="page-header" style="text-align: left; padding: 2rem 0; border-bottom: 2px solid var(--border-color); margin-bottom: 2rem;">
+          <h1 style="font-size: 2.5rem; text-transform: uppercase; letter-spacing: 2px;
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+            Payment Approvals
           </h1>
           <p style="color: #cbd5e1; margin: 0 0 2rem 0; font-size: 1rem;">
             Review and process all student payments
@@ -2389,6 +2551,133 @@ class Router {
     this.updateNavbar();
   }
 
+  renderDocumentations() {
+    const appDiv = document.getElementById("app");
+
+    // Array of objects as requested
+    const docs = [
+      {
+        title: "HTML",
+        link: "https://nexus-upskill-html-course.vercel.app/",
+      },
+    ];
+
+    let html = `
+      <div class="dashboard-header">
+        <h1>📚 Documentations</h1>
+        <p>Access course documentation and study materials.</p>
+      </div>
+      <div style="padding: 2rem;">
+        <div style="display: grid; gap: 1.5rem; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));">
+    `;
+
+    docs.forEach((doc) => {
+      html += `
+          <div style="background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.5rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+            <h3 style="margin-top: 0; margin-bottom: 1rem; color: #0f172a;">${doc.title} Documentation</h3>
+            <p style="color: #64748b; margin-bottom: 1.5rem;">Access the comprehensive guide and learning materials for ${doc.title}.</p>
+            <a href="${doc.link}" target="_blank" style="display: inline-block; background: #2563eb; color: white; padding: 0.75rem 1.5rem; border-radius: 8px; text-decoration: none; font-weight: 600;">View Documentation ↗</a>
+          </div>
+      `;
+    });
+
+    html += `
+        </div>
+      </div>
+    `;
+
+    appDiv.innerHTML = html;
+    this.updateNavbar();
+  }
+
+  async renderAdminTeacherDues() {
+    const appDiv = document.getElementById("app");
+    appDiv.innerHTML = "<div class='loading'>Loading teacher dues...</div>";
+
+    try {
+      const response = await api.getAdminTeacherDues();
+      const dues = response.data || [];
+
+      let html = `
+        <div class="admin-approve-courses-page">
+          <div class="page-header">
+            <h2>💸 Dues to Teacher</h2>
+            <p>Settle pending payments to teachers after taking platform commission.</p>
+          </div>
+      `;
+
+      if (dues.length === 0) {
+        html += `
+          <div class="no-data-message" style="margin: 2rem;">
+            <p>✅ All teachers are fully paid. No pending dues.</p>
+          </div>
+        `;
+      } else {
+        html += `<div class="courses-list" style="display: grid; gap: 1.5rem; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); padding: 0 2rem; margin-bottom: 2rem;">`;
+
+        dues.forEach((due) => {
+          const teacher = due.teacherId || {};
+          const student = due.studentId || {};
+          const course = due.courseId || {};
+
+          html += `
+            <div style="background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.5rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); position: relative;">
+              <div style="position: absolute; top: 1rem; right: 1rem;">
+                <span style="background: #fef08a; color: #b45309; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600;">Awaiting Settlement</span>
+              </div>
+              
+              <h3 style="margin: 0 0 1rem 0; color: #0f172a; padding-right: 6rem;">👨‍🏫 Teacher: ${teacher.name || "Unknown"}</h3>
+              
+              <div style="background: #f8fafc; border-radius: 8px; padding: 1rem; margin-bottom: 1rem;">
+                <p style="margin: 0 0 0.5rem 0; font-size: 0.9rem;"><strong>Bank/UPI:</strong> ${teacher.upiId || "Not provided"}</p>
+                <p style="margin: 0 0 0.5rem 0; font-size: 0.9rem;"><strong>Mobile:</strong> ${teacher.mobileNumber || "Not provided"}</p>
+              </div>
+
+              <div style="margin-bottom: 1rem;">
+                <p style="margin: 0.25rem 0; font-size: 0.9rem; color: #475569;"><strong>Course:</strong> ${course.title || "Unknown"}</p>
+                <p style="margin: 0.25rem 0; font-size: 0.9rem; color: #475569;"><strong>Student:</strong> ${student.name || "Unknown"}</p>
+              </div>
+
+              <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1.5rem; border-top: 1px solid #e2e8f0; padding-top: 1rem;">
+                <div style="display: flex; justify-content: space-between;">
+                  <span style="color: #64748b;">Total Amount Paid</span>
+                  <span style="font-weight: 600;">₹${due.amount || 0}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                  <span style="color: #ef4444;">Platform Commission</span>
+                  <span style="font-weight: 600; color: #ef4444;">- ₹${due.adminCommission || 0}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 1.1rem; margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px dashed #e2e8f0;">
+                  <span style="color: #0f172a; font-weight: 700;">Due to Teacher</span>
+                  <span style="font-weight: 700; color: #10b981;">₹${due.teacherPayment || 0}</span>
+                </div>
+              </div>
+
+              <div style="display: flex; align-items: center; gap: 0.75rem; background: #fffbeb; padding: 0.75rem; border-radius: 8px; border: 1px solid #fde68a;">
+                <input type="checkbox" id="settle-${due._id}" style="width: 20px; height: 20px; cursor: pointer;">
+                <label for="settle-${due._id}" style="font-size: 0.9rem; color: #92400e; cursor: pointer;">
+                  I confirm I have transferred <strong>₹${due.teacherPayment || 0}</strong> to <strong>${teacher.name || "the teacher"}</strong> after taking my commission.
+                </label>
+              </div>
+
+              <button onclick="settleSpecificTeacherDue('${due._id}')" 
+                      style="width: 100%; margin-top: 1rem; padding: 0.75rem; background: #10b981; color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer;">
+                Mark as Paid
+              </button>
+            </div>
+          `;
+        });
+
+        html += `</div>`;
+      }
+
+      html += `</div>`;
+      appDiv.innerHTML = html;
+    } catch (error) {
+      appDiv.innerHTML = `<div class="error-message">Error loading dues: ${error.message}</div>`;
+    }
+  }
+
   renderNotFound() {
     const appDiv = document.getElementById("app");
     appDiv.innerHTML = `
@@ -2703,6 +2992,36 @@ async function approvePaymentInRouter(paymentId) {
   }
 }
 
+async function settleSpecificTeacherDue(paymentId) {
+  const checkbox = document.getElementById(`settle-${paymentId}`);
+  if (!checkbox.checked) {
+    showInfoPopup(
+      "Please check the confirmation box to verify you have paid the teacher.",
+      "Confirmation Required",
+    );
+    return;
+  }
+
+  try {
+    const response = await api.settleTeacherPayment(paymentId);
+    if (response.success) {
+      showInfoPopup(
+        "Successfully marked as paid to teacher!",
+        "Settlement Complete",
+      );
+      router.navigate("#admin-teacher-dues");
+      return;
+    }
+
+    showInfoPopup(
+      response.message || "Failed to settle payment",
+      "Settlement Error",
+    );
+  } catch (error) {
+    showInfoPopup(`Error: ${error.message}`, "Settlement Error");
+  }
+}
+
 async function rejectPaymentInRouter(paymentId) {
   const reason = await showPromptPopup(
     "Enter rejection reason:",
@@ -2872,6 +3191,37 @@ function whatsappStudent(phoneNumber) {
   const cleanPhone = phoneNumber.replace(/[^\d+]/g, "");
   const whatsappURL = `https://wa.me/${cleanPhone}`;
   window.open(whatsappURL, "_blank");
+}
+
+function switchAdminDetailsTab(tabName) {
+  const studentsContent = document.getElementById("content-admin-students");
+  const teachersContent = document.getElementById("content-admin-teachers");
+  const studentsBtn = document.getElementById("btn-tab-students");
+  const teachersBtn = document.getElementById("btn-tab-teachers");
+
+  if (!studentsContent || !teachersContent) return;
+
+  if (tabName === "students") {
+    studentsContent.style.display = "grid";
+    teachersContent.style.display = "none";
+    studentsBtn.style.background = "#2563eb";
+    studentsBtn.style.color = "white";
+    studentsBtn.classList.remove("btn-secondary");
+
+    teachersBtn.style.background = "";
+    teachersBtn.style.color = "";
+    teachersBtn.classList.add("btn-secondary");
+  } else if (tabName === "teachers") {
+    studentsContent.style.display = "none";
+    teachersContent.style.display = "grid";
+    teachersBtn.style.background = "#2563eb";
+    teachersBtn.style.color = "white";
+    teachersBtn.classList.remove("btn-secondary");
+
+    studentsBtn.style.background = "";
+    studentsBtn.style.color = "";
+    studentsBtn.classList.add("btn-secondary");
+  }
 }
 
 // Load course students

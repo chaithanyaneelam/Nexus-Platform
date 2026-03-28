@@ -41,6 +41,11 @@ router.get("/payments/pending", (req, res) =>
   adminController.getPendingPayments(req, res),
 );
 
+// Get teacher dues (approved payments waiting to be settled)
+router.get("/payments/dues", (req, res) =>
+  adminController.getTeacherDues(req, res),
+);
+
 // Approve payment (after student submits transaction ID)
 router.post("/payments/:paymentId/approve", (req, res) =>
   adminController.approvePayment(req, res),

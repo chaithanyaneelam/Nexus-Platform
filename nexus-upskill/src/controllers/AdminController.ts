@@ -121,6 +121,30 @@ export class AdminController {
   }
 
   /**
+   * Get all teacher dues (payments approved, awaiting settlement)
+   */
+  async getTeacherDues(req: Request, res: Response) {
+    try {
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 20;
+
+      const result = await this.adminService.getTeacherDues(page, limit);
+
+      res.json({
+        success: true,
+        message: "Teacher dues retrieved successfully",
+        data: result.payments,
+        pagination: result.pagination,
+      });
+    } catch (error: any) {
+      res.status(500).json({
+        success: false,
+        message: error.message || "Failed to fetch teacher dues",
+      });
+    }
+  }
+
+  /**
    * Admin approves payment (after verifying transaction ID)
    */
   async approvePayment(req: Request, res: Response) {

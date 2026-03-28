@@ -216,6 +216,33 @@ export class AdminService {
     };
   }
 
+  async getTeacherDues(page: number = 1, limit: number = 20) {
+    const skip = (page - 1) * limit;
+
+    const payments = await PaymentModel.find({
+      status: "approved",
+    })
+      .populate({ path: "studentId", select: "name email mobileNumber" })
+      .populate({ path: "teacherId", select: "name upiId mobileNumber" })
+      .populate({ path: "courseId", select: "title price" })
+      .skip(skip)
+      .limit(limit)
+      .sort({ adminApprovedAt: -1 });
+
+    const total = await PaymentModel.countDocuments({
+      status: "approved",
+    });
+
+    return {
+      payments,
+      pagination: {
+        total,
+        page,
+        pages: Math.ceil(total / limit),
+      },
+    };
+  }
+
   /**
    * Admin confirms payment receipt (escrow credited) and activates enrollment.
    */
@@ -403,7 +430,9 @@ export class AdminService {
     const query = role ? { role } : {};
 
     const users = await UserModel.find(query)
-      .select("name email role profession company interests")
+      .select(
+        "name email role profession company interests mobileNumber linkedinUrl githubUrl",
+      )
       .skip(skip)
       .limit(limit)
       .sort({ createdAt: -1 });
