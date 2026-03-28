@@ -171,18 +171,6 @@ The server will start on `http://localhost:5000`
 - Transaction ID & screenshot URL
 - Status tracking with timestamps
 
-## 🔑 Environment Variables
-
-```env
-NODE_ENV=development
-PORT=5000
-MONGODB_URI=mongodb+srv://user:pass@cluster.mongodb.net/nexus-upskill
-JWT_SECRET=your-secret-key
-JWT_EXPIRY=7d
-ADMIN_UPI_ID=admin@upi
-PAYMENT_COMMISSION_PERCENTAGE=20
-```
-
 ## 📝 Validation
 
 Using **Zod** for type-safe validation:
