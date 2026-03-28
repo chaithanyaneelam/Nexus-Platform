@@ -22,7 +22,7 @@ export class AdminService {
         select: "title price teacherId",
         populate: {
           path: "teacherId",
-          select: "name email",
+          select: "name email mobileNumber profession company role",
         },
       })
       .skip(skip)
@@ -56,10 +56,68 @@ export class AdminService {
       throw new Error("Enrollment not found");
     }
 
+    if (
+      enrollment.status === "payment_requested" ||
+      enrollment.status === "payment_submitted"
+    ) {
+      const existingPayment = await PaymentModel.findOne({
+        enrollmentId: enrollment._id,
+      }).sort({ createdAt: -1 });
+
+      if (!existingPayment) {
+        throw new Error(
+          "Payment state found on enrollment but payment record is missing. Please contact support.",
+        );
+      }
+
+      return {
+        enrollment,
+        payment: {
+          _id: existingPayment._id,
+          amount: existingPayment.amount,
+          status: existingPayment.status,
+          adminUpiId: existingPayment.adminUpiId,
+          message: `Payment already requested. Student should pay ${existingPayment.amount} to ${existingPayment.adminUpiId}`,
+        },
+      };
+    }
+
     if (enrollment.status !== "awaiting_admin_approval") {
       throw new Error(
-        `Enrollment is ${enrollment.status}. Cannot request payment.`,
+        `Enrollment is ${enrollment.status}. Payment request is only allowed from awaiting_admin_approval.`,
       );
+    }
+
+    const existingPendingPayment = await PaymentModel.findOne({
+      enrollmentId: enrollment._id,
+      status: {
+        $in: ["payment_requested", "transaction_submitted", "approved"],
+      },
+    }).sort({ createdAt: -1 });
+
+    if (existingPendingPayment) {
+      enrollment.status =
+        existingPendingPayment.status === "transaction_submitted"
+          ? "payment_submitted"
+          : "payment_requested";
+      enrollment.paymentStatus =
+        existingPendingPayment.status === "transaction_submitted"
+          ? ("payment_submitted" as any)
+          : ("payment_requested" as any);
+      enrollment.paymentRequestedAt =
+        enrollment.paymentRequestedAt || new Date();
+      await enrollment.save();
+
+      return {
+        enrollment,
+        payment: {
+          _id: existingPendingPayment._id,
+          amount: existingPendingPayment.amount,
+          status: existingPendingPayment.status,
+          adminUpiId: existingPendingPayment.adminUpiId,
+          message: `Payment request already exists for this enrollment.`,
+        },
+      };
     }
 
     const course = enrollment.courseId as any;
@@ -83,7 +141,7 @@ export class AdminService {
       studentId: enrollment.studentId,
       teacherId: course.teacherId,
       courseId: enrollment.courseId,
-      enrollmentId,
+      enrollmentId: enrollment._id,
       amount,
       adminCommission,
       teacherPayment,
@@ -138,7 +196,7 @@ export class AdminService {
       status: { $in: ["payment_requested", "transaction_submitted"] },
     })
       .populate({ path: "studentId", select: "name email mobileNumber" })
-      .populate({ path: "teacherId", select: "name upiId" })
+      .populate({ path: "teacherId", select: "name upiId mobileNumber" })
       .populate({ path: "courseId", select: "title price" })
       .skip(skip)
       .limit(limit)

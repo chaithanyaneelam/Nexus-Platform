@@ -68,13 +68,16 @@ export class PaymentController {
       const payment = await this.paymentService.submitTransactionId(
         paymentId,
         studentId,
-        transactionId,
+        {
+          utrNumber: transactionId,
+          transactionId: transactionId,
+        },
       );
 
       res.status(200).json({
         success: true,
         message:
-          "Transaction ID submitted successfully. Waiting for admin approval.",
+          "Payment details submitted successfully. Waiting for admin approval.",
         data: payment,
       });
     } catch (error) {
@@ -217,6 +220,40 @@ export class PaymentController {
   }
 
   /**
+   * Get admin pending payments for review
+   */
+  async getAdminPendingPayments(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
+    try {
+      const userRole = (req as any).userRole || "user";
+
+      if (userRole !== "admin") {
+        throw new AppError("Only admins can access this endpoint", 403);
+      }
+
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 20;
+
+      const result = await this.paymentService.getAdminPendingPayments(
+        page,
+        limit,
+      );
+
+      res.status(200).json({
+        success: true,
+        message: "Admin pending payments fetched successfully",
+        data: result.payments,
+        pagination: result.pagination,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
    * Get admin dashboard stats
    */
   async getAdminStats(
@@ -231,6 +268,76 @@ export class PaymentController {
         success: true,
         message: "Admin stats fetched successfully",
         data: stats,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Admin approves a payment
+   */
+  async approvePayment(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
+    try {
+      const userRole = (req as any).userRole || "user";
+
+      if (userRole !== "admin") {
+        throw new AppError("Only admins can approve payments", 403);
+      }
+
+      const { paymentId } = req.params;
+
+      if (!paymentId) {
+        throw new AppError("Payment ID is required", 400);
+      }
+
+      const payment = await this.paymentService.approvePayment(paymentId);
+
+      res.status(200).json({
+        success: true,
+        message: "Payment approved successfully",
+        data: payment,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Admin rejects a payment
+   */
+  async rejectPayment(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
+    try {
+      const userRole = (req as any).userRole || "user";
+
+      if (userRole !== "admin") {
+        throw new AppError("Only admins can reject payments", 403);
+      }
+
+      const { paymentId } = req.params;
+      const { rejectionReason } = req.body;
+
+      if (!paymentId) {
+        throw new AppError("Payment ID is required", 400);
+      }
+
+      const payment = await this.paymentService.rejectPayment(
+        paymentId,
+        rejectionReason,
+      );
+
+      res.status(200).json({
+        success: true,
+        message: "Payment rejected successfully",
+        data: payment,
       });
     } catch (error) {
       next(error);

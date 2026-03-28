@@ -81,11 +81,32 @@ class Router {
       render: () => this.renderAdminApproveCourses(),
     };
 
+    this.routes["admin-student-approvals"] = {
+      path: "#admin-student-approvals",
+      requiresAuth: true,
+      role: "admin",
+      render: () => this.renderAdminStudentApprovals(),
+    };
+
     this.routes["admin-payments"] = {
       path: "#admin-payments",
       requiresAuth: true,
       role: "admin",
       render: () => this.renderAdminPayments(),
+    };
+
+    this.routes["admin-teachers"] = {
+      path: "#admin-teachers",
+      requiresAuth: true,
+      role: "admin",
+      render: () => this.renderAdminTeachers(),
+    };
+
+    this.routes["admin-teacher-details"] = {
+      path: "#admin-teacher-details",
+      requiresAuth: true,
+      role: "admin",
+      render: () => this.renderAdminTeacherDetails(),
     };
 
     this.routes["my-courses"] = {
@@ -127,6 +148,18 @@ class Router {
       requiresAuth: true,
       role: "teacher",
       render: () => this.renderTeacherStudents(),
+    };
+
+    this.routes["settings"] = {
+      path: "#settings",
+      requiresAuth: true,
+      render: () => this.renderSettings(),
+    };
+
+    this.routes["support"] = {
+      path: "#support",
+      requiresAuth: true,
+      render: () => this.renderSupport(),
     };
   }
 
@@ -170,7 +203,7 @@ class Router {
 
     // Check role
     if (route.role && auth.getUserRole() !== route.role) {
-      alert(`Access denied. This page is for ${route.role}s only.`);
+      showInfoPopup(`Access denied. This page is for ${route.role}s only.`);
       this.redirectToDashboard();
       return;
     }
@@ -192,8 +225,7 @@ class Router {
 
     const role = auth.getUserRole();
     if (role === "admin") {
-      // Redirect admin to the dedicated admin.html page
-      window.location.href = "admin.html";
+      window.location.hash = "#admin-dashboard";
     } else if (role === "teacher") {
       window.location.hash = "#teacher-dashboard";
     } else {
@@ -207,7 +239,6 @@ class Router {
   updateNavbar() {
     const loginLink = document.getElementById("loginLink");
     const settingsLink = document.getElementById("settingsLink");
-    const settingsMenu = document.getElementById("settingsMenu");
     const coursesMenuItem = document.getElementById("coursesMenuItem");
     const yourCoursesMenuItem = document.getElementById("yourCoursesMenuItem");
     const myEnrollmentsMenuItem = document.getElementById(
@@ -216,6 +247,7 @@ class Router {
     const myCoursesMenuItem = document.getElementById("myCoursesMenuItem");
     const studentsMenuItem = document.getElementById("studentsMenuItem");
     const adminMenuItem = document.getElementById("adminMenuItem");
+    const supportMenuItem = document.getElementById("supportMenuItem");
     const userInfo = document.getElementById("userInfo");
     const userName = document.getElementById("userName");
     const userRole = document.getElementById("userRole");
@@ -223,7 +255,6 @@ class Router {
     if (auth.isAuthenticated()) {
       loginLink.style.display = "none";
       settingsLink.style.display = "inline-block";
-      settingsMenu.style.display = "none";
       userInfo.style.display = "flex";
 
       const user = auth.getCurrentUser();
@@ -238,15 +269,18 @@ class Router {
       myCoursesMenuItem.style.display = "none";
       studentsMenuItem.style.display = "none";
       adminMenuItem.style.display = "none";
+      supportMenuItem.style.display = "none";
 
       // Show menu items based on role
       if (user.role === "student") {
         coursesMenuItem.style.display = "inline";
         yourCoursesMenuItem.style.display = "inline";
         myEnrollmentsMenuItem.style.display = "inline";
+        supportMenuItem.style.display = "inline";
       } else if (user.role === "teacher") {
         myCoursesMenuItem.style.display = "inline";
         studentsMenuItem.style.display = "inline";
+        supportMenuItem.style.display = "inline";
       } else if (user.role === "admin") {
         coursesMenuItem.style.display = "inline";
         adminMenuItem.style.display = "inline";
@@ -254,7 +288,6 @@ class Router {
     } else {
       loginLink.style.display = "inline";
       settingsLink.style.display = "none";
-      settingsMenu.style.display = "none";
       userInfo.style.display = "none";
 
       // Hide all dynamic menu items for non-authenticated users
@@ -264,6 +297,7 @@ class Router {
       myCoursesMenuItem.style.display = "none";
       studentsMenuItem.style.display = "none";
       adminMenuItem.style.display = "none";
+      if (supportMenuItem) supportMenuItem.style.display = "none";
     }
   }
 
@@ -277,8 +311,8 @@ class Router {
       <div class="home-page">
         <div class="hero-section">
           <h1>Welcome to Nexus Platform</h1>
-          <p>Learn from Industry Experts</p>
-          <p class="subtitle">Upskill yourself with real-world tech and build production-ready projects</p>
+          <p>Learn Directly from Industry Experts</p>
+          <p class="subtitle">Experience a premium one-to-one platform where real-world job professionals will directly mentor and teach you.</p>
           <div class="button-group">
             <a href="#courses" class="btn btn-primary">Explore Courses</a>
             ${!auth.isAuthenticated() ? `<a href="#register" class="btn btn-secondary">Get Started</a>` : ""}
@@ -287,8 +321,8 @@ class Router {
 
         <div class="features-section">
           <div class="feature">
-            <h3>🎓 Expert Instructors</h3>
-            <p>Learn from industry-level experts with real-world experience</p>
+            <h3>🤝 1-on-1 Mentorship</h3>
+            <p>Get personalized attention and learn directly from real-world working professionals.</p>
           </div>
           <div class="feature">
             <h3>💼 Project-Based Learning</h3>
@@ -427,13 +461,19 @@ class Router {
       } else {
         messageDiv.className = "message error";
 
-        // Display field-specific errors
+        // Display field-specific errors - show only the most important ones
         if (result.errors) {
-          const errorMessages = Object.entries(result.errors)
-            .map(([field, message]) => `• ${message}`)
-            .join("\n");
-          messageDiv.textContent = errorMessages;
-          messageDiv.style.whiteSpace = "pre-line";
+          // Prioritize password errors
+          if (result.errors.password) {
+            messageDiv.textContent = `• ${result.errors.password}`;
+          } else {
+            // Show only the first error for other fields
+            const firstError = Object.entries(result.errors)[0];
+            if (firstError) {
+              messageDiv.textContent = `• ${firstError[1]}`;
+            }
+          }
+          messageDiv.style.whiteSpace = "normal";
         } else {
           messageDiv.textContent = result.message;
           messageDiv.style.whiteSpace = "normal";
@@ -802,28 +842,48 @@ class Router {
     const user = auth.getCurrentUser();
 
     appDiv.innerHTML = `
-      <div class="dashboard admin-dashboard">
-        <h2>Admin Dashboard 🛡️</h2>
-        <div class="dashboard-grid">
-          <div class="dashboard-card">
-            <h3>📚 Approve Courses</h3>
-            <p>Review and approve pending teacher courses</p>
-            <a href="#admin-approve-courses" class="btn btn-secondary">Manage</a>
+      <div class="admin-hub">
+        <div class="admin-hub-header">
+          <div>
+            <p class="admin-kicker">Control Center</p>
+            <h2>Platform Administration</h2>
+            <p class="admin-subtitle">Manage approvals, payments, and operations from one place.</p>
           </div>
-          <div class="dashboard-card">
-            <h3>💰 Payment Management</h3>
-            <p>Monitor and manage student payments between students and teachers</p>
-            <a href="#admin-payments" class="btn btn-secondary">Manage</a>
+          <div class="admin-user-chip">
+            <span>Signed in as</span>
+            <strong>${user?.email || "admin"}</strong>
           </div>
-          <div class="dashboard-card">
-            <h3>All Courses</h3>
-            <p>Monitor all platform courses</p>
-            <a href="#courses" class="btn btn-secondary">View</a>
+        </div>
+
+        <div class="dashboard-grid admin-hub-grid">
+          <div class="dashboard-card admin-card">
+            <h3>📚 Course Approvals</h3>
+            <p>Review newly created teacher courses and publish quality content quickly.</p>
+            <a href="#admin-approve-courses" class="btn btn-primary">Open Queue</a>
           </div>
-          <div class="dashboard-card">
-            <h3>Reports</h3>
-            <p>View analytics and reports</p>
-            <a href="#reports" class="btn btn-secondary">View</a>
+
+          <div class="dashboard-card admin-card">
+            <h3>🧑‍🎓 Student Approvals</h3>
+            <p>Review student registration requests and move approved learners to payment.</p>
+            <a href="#admin-student-approvals" class="btn btn-primary">Review Requests</a>
+          </div>
+
+          <div class="dashboard-card admin-card">
+            <h3>💰 Payment Operations</h3>
+            <p>Validate student transactions and complete approvals without leaving this dashboard.</p>
+            <a href="#admin-payments" class="btn btn-primary">Manage Payments</a>
+          </div>
+
+          <div class="dashboard-card admin-card">
+            <h3>👨‍🏫 Teachers View</h3>
+            <p>Monitor teacher-side enrollment visibility and student activation status.</p>
+            <a href="#admin-teachers" class="btn btn-secondary">Inspect</a>
+          </div>
+
+          <div class="dashboard-card admin-card">
+            <h3>⚙️ Account Settings</h3>
+            <p>Centralized profile, account security options, and logout under one settings page.</p>
+            <a href="#settings" class="btn btn-secondary">Go to Settings</a>
           </div>
         </div>
       </div>
@@ -936,7 +996,12 @@ class Router {
   }
 
   async rejectCourse(courseId) {
-    if (!confirm("Are you sure you want to reject this course?")) {
+    const shouldReject = await showConfirmPopup(
+      "Are you sure you want to reject this course?",
+      "Reject Course",
+    );
+
+    if (!shouldReject) {
       return;
     }
 
@@ -960,102 +1025,478 @@ class Router {
     }
   }
 
+  async renderAdminStudentApprovals() {
+    const appDiv = document.getElementById("app");
+    appDiv.innerHTML =
+      "<div class='loading'>Loading student approvals...</div>";
+
+    try {
+      const response = await api.getPendingEnrollments(1, 100);
+      const pendingEnrollments = response.data || [];
+
+      let approvalsHtml = `
+        <div class="admin-approve-courses-page">
+          <div class="page-header">
+            <h2>🧑‍🎓 Student Approvals</h2>
+            <p>Approve student registrations and request payment from eligible learners.</p>
+          </div>
+      `;
+
+      if (pendingEnrollments.length === 0) {
+        approvalsHtml += `
+          <div class="no-data-message">
+            <p>✅ No pending student approvals right now.</p>
+          </div>`;
+      } else {
+        approvalsHtml += '<div class="courses-approval-list">';
+
+        for (const enrollment of pendingEnrollments) {
+          const student = enrollment.studentId || {};
+          const course = enrollment.courseId || {};
+          const teacher = course.teacherId || {};
+
+          approvalsHtml += `
+            <div class="course-approval-card">
+              <div class="course-approval-header">
+                <h3>${course.title || "Untitled Course"}</h3>
+                <span class="status-badge draft">Awaiting Admin Decision</span>
+              </div>
+              <div class="course-approval-details">
+                <p><strong>Student:</strong> ${student.name || "Unknown"}</p>
+                <p><strong>Email:</strong> ${student.email || "N/A"}</p>
+                <p><strong>Mobile:</strong> ${student.mobileNumber || "N/A"}</p>
+                <p><strong>Teacher:</strong> ${teacher.name || "Unknown"}</p>
+                <p><strong>Teacher Company:</strong> ${teacher.company || "N/A"}</p>
+                <p><strong>Teacher Role:</strong> ${teacher.profession || teacher.role || "Instructor"}</p>
+                <p><strong>Course Price:</strong> ₹${course.price || 0}</p>
+                <p><strong>Requested On:</strong> ${new Date(enrollment.createdAt || enrollment.enrolledAt || Date.now()).toLocaleDateString()}</p>
+              </div>
+              <div class="course-approval-actions">
+                <button class="btn btn-success enrollment-approve-btn" data-enrollment-id="${enrollment._id}">✓ Approve & Request Payment</button>
+                <button class="btn btn-danger enrollment-reject-btn" data-enrollment-id="${enrollment._id}">✗ Reject Request</button>
+              </div>
+            </div>`;
+        }
+
+        approvalsHtml += "</div>";
+      }
+
+      approvalsHtml += `
+        <div id="enrollmentApprovalMessage" class="message"></div>
+      </div>`;
+
+      appDiv.innerHTML = approvalsHtml;
+
+      document.querySelectorAll(".enrollment-approve-btn").forEach((btn) => {
+        btn.addEventListener("click", async (e) => {
+          const enrollmentId = e.target.dataset.enrollmentId;
+          await this.approveStudentEnrollment(enrollmentId);
+        });
+      });
+
+      document.querySelectorAll(".enrollment-reject-btn").forEach((btn) => {
+        btn.addEventListener("click", async (e) => {
+          const enrollmentId = e.target.dataset.enrollmentId;
+          await this.rejectStudentEnrollment(enrollmentId);
+        });
+      });
+    } catch (error) {
+      appDiv.innerHTML = `<div class="error-message">Error loading pending student approvals: ${error.message}</div>`;
+    }
+
+    this.updateNavbar();
+  }
+
+  async approveStudentEnrollment(enrollmentId) {
+    const messageDiv = document.getElementById("enrollmentApprovalMessage");
+
+    try {
+      const response = await api.requestPayment(enrollmentId);
+      if (response.success) {
+        messageDiv.className = "message success";
+        messageDiv.textContent =
+          "Student approved successfully. Payment request sent to student.";
+        setTimeout(() => {
+          window.location.hash = "#admin-student-approvals";
+        }, 1200);
+      } else {
+        messageDiv.className = "message error";
+        messageDiv.textContent = response.message || "Approval failed";
+      }
+    } catch (error) {
+      messageDiv.className = "message error";
+      messageDiv.textContent = error.message;
+    }
+  }
+
+  async rejectStudentEnrollment(enrollmentId) {
+    const reason = await showPromptPopup(
+      "Enter rejection reason for the student request:",
+      "Reason is required",
+      "Reject Student Request",
+    );
+
+    if (!reason || !reason.trim()) {
+      showInfoPopup("Rejection cancelled. A reason is required.", "Notice");
+      return;
+    }
+
+    const messageDiv = document.getElementById("enrollmentApprovalMessage");
+
+    try {
+      const response = await api.rejectEnrollment(enrollmentId, reason.trim());
+      if (response.success) {
+        messageDiv.className = "message success";
+        messageDiv.textContent = "Student request rejected.";
+        setTimeout(() => {
+          window.location.hash = "#admin-student-approvals";
+        }, 1200);
+      } else {
+        messageDiv.className = "message error";
+        messageDiv.textContent = response.message || "Failed to reject";
+      }
+    } catch (error) {
+      messageDiv.className = "message error";
+      messageDiv.textContent = error.message;
+    }
+  }
+
+  async renderAdminTeachers() {
+    const appDiv = document.getElementById("app");
+    appDiv.innerHTML = "<div class='loading'>Loading teachers...</div>";
+
+    try {
+      const response = await api.getAllUsers("teacher", 1, 50);
+      const teachers = response.data?.users || response.data || [];
+
+      let html = `
+        <div class="admin-teachers-page">
+          <div class="page-header">
+            <h2>👨‍🏫 Teachers Overview</h2>
+            <p>View all teachers and their course statistics</p>
+          </div>
+          <div class="table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+      `;
+
+      if (teachers.length === 0) {
+        html += `<tr><td colspan="3">No teachers found.</td></tr>`;
+      } else {
+        teachers.forEach((t) => {
+          html += `
+            <tr>
+              <td>${t.name}</td>
+              <td>${t.email}</td>
+              <td>
+                <button class="btn btn-secondary btn-small" onclick="window.location.hash='#admin-teacher-details?id=${t._id}&name=${encodeURIComponent(t.name)}'">View Courses & Students</button>
+              </td>
+            </tr>
+          `;
+        });
+      }
+
+      html += `
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+      appDiv.innerHTML = html;
+      this.updateNavbar();
+    } catch (error) {
+      appDiv.innerHTML = `<div class="error">Failed to load teachers: ${error.message}</div>`;
+    }
+  }
+
+  async renderAdminTeacherDetails() {
+    const appDiv = document.getElementById("app");
+    const teacherId = this.queryParams?.id;
+    const teacherName = this.queryParams?.name
+      ? decodeURIComponent(this.queryParams.name)
+      : "Teacher";
+
+    if (!teacherId) {
+      window.location.hash = "#admin-teachers";
+      return;
+    }
+
+    appDiv.innerHTML = "<div class='loading'>Loading teacher data...</div>";
+
+    try {
+      const response = await api.getTeacherCoursesWithStudents(
+        teacherId,
+        1,
+        50,
+      );
+      // Data format depends on the API response structure (usually response.data.courses according to service)
+      const courses = response.data?.courses || response.data || [];
+
+      let html = `
+        <div class="admin-teacher-details-page">
+          <div class="page-header" style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <h2>📚 Courses by: \${teacherName}</h2>
+              <p>Total published courses and registered active students</p>
+            </div>
+            <a href="#admin-teachers" class="btn btn-secondary">Back to Teachers</a>
+          </div>
+      `;
+
+      if (courses.length === 0) {
+        html += `<div class="no-data-message"><p>This teacher has not created any courses yet.</p></div>`;
+      } else {
+        html += `<div class="dashboard-grid">`;
+        courses.forEach((c) => {
+          const studentCount = c.activeStudentCount || 0;
+          html += `
+            <div class="dashboard-card">
+              <h3>${c.title}</h3>
+              <p><strong>Students Registered (Active):</strong> ${studentCount}</p>
+              <p><strong>Category:</strong> ${c.category || "General"}</p>
+              <p><strong>Price:</strong> ₹${c.price || 0}</p>
+            </div>
+          `;
+        });
+        html += `</div>`;
+      }
+
+      html += `</div>`;
+      appDiv.innerHTML = html;
+      this.updateNavbar();
+    } catch (error) {
+      appDiv.innerHTML = `<div class="error">Failed to load teacher details: ${error.message}</div>`;
+    }
+  }
+
   async renderAdminPayments() {
     const appDiv = document.getElementById("app");
 
     appDiv.innerHTML = `
       <div class="admin-payments-page">
-        <div class="page-header">
-          <h2>💰 Payment Management - Admin as Mediator</h2>
-          <p>Manage all transactions between students and teachers</p>
-        </div>
-        <div class="payment-management-container">
-          <div class="payment-stats">
-            <div class="stat-card">
-              <h3>Pending Payments</h3>
-              <p id="pending-count">0</p>
+        <div style="padding: 2rem;">
+          <h1 style="margin: 2rem 0 0.5rem 0; font-size: 2.5rem; background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+            💰 Payment Management
+          </h1>
+          <p style="color: #cbd5e1; margin: 0 0 2rem 0; font-size: 1rem;">
+            Review and process all student payments
+          </p>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+            <div style="background: linear-gradient(135deg, #667eea, #764ba2); padding: 1.5rem; border-radius: 12px; color: white; box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);">
+              <h3 style="margin: 0 0 0.5rem 0; font-size: 0.9rem; opacity: 0.9;">⏳ Pending Review</h3>
+              <p style="margin: 0; font-size: 2rem; font-weight: bold;" id="pending-count">0</p>
+              <p style="margin: 0.5rem 0 0 0; font-size: 0.85rem; opacity: 0.8;">Awaiting confirmation</p>
             </div>
-            <div class="stat-card">
-              <h3>Completed Payments</h3>
-              <p id="completed-count">0</p>
+            <div style="background: linear-gradient(135deg, #10b981, #059669); padding: 1.5rem; border-radius: 12px; color: white; box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);">
+              <h3 style="margin: 0 0 0.5rem 0; font-size: 0.9rem; opacity: 0.9;">✅ Approved</h3>
+              <p style="margin: 0; font-size: 2rem; font-weight: bold;" id="completed-count">0</p>
+              <p style="margin: 0.5rem 0 0 0; font-size: 0.85rem; opacity: 0.8;">Successfully confirmed</p>
             </div>
-            <div class="stat-card">
-              <h3>Total Revenue</h3>
-              <p id="total-revenue">₹0</p>
+            <div style="background: linear-gradient(135deg, #f59e0b, #d97706); padding: 1.5rem; border-radius: 12px; color: white; box-shadow: 0 8px 20px rgba(245, 158, 11, 0.3);">
+              <h3 style="margin: 0 0 0.5rem 0; font-size: 0.9rem; opacity: 0.9;">💵 Total Revenue</h3>
+              <p style="margin: 0; font-size: 2rem; font-weight: bold;" id="total-revenue">₹0</p>
+              <p style="margin: 0.5rem 0 0 0; font-size: 0.85rem; opacity: 0.8;">Platform commission</p>
             </div>
           </div>
-          <div class="payments-table">
-            <table>
-              <thead>
-                <tr>
-                  <th>Student</th>
-                  <th>Course</th>
-                  <th>Amount</th>
-                  <th>Status</th>
-                  <th>Date</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody id="paymentsTableBody">
-                <tr>
-                  <td colspan="6" style="text-align: center; padding: 2rem;">Loading payments...</td>
-                </tr>
-              </tbody>
-            </table>
+
+          <div id="paymentsList" style="display: grid; gap: 1.5rem;">
+            <div style="text-align: center; padding: 3rem; color: #cbd5e1;">Loading payments...</div>
           </div>
+
+          <div id="paymentMessage" class="message" style="margin-top: 2rem;"></div>
         </div>
-        <div id="paymentMessage" class="message"></div>
       </div>
     `;
 
     // Load payment data
     try {
-      const response = await api.getPendingPayments();
+      const [response, statsResponse] = await Promise.all([
+        api.getAdminPendingPayments(),
+        api.getAdminDashboardStats(),
+      ]);
       const payments = response.data || [];
+      const stats = statsResponse.data || {};
 
-      // Aggregate stats
-      const pending = payments.filter(
-        (p) => p.status === "transaction_submitted",
-      ).length;
-      const completed = payments.filter((p) => p.status === "approved").length;
-      const total = payments.reduce((sum, p) => sum + (p.amount || 0), 0);
+      document.getElementById("pending-count").textContent =
+        stats.pendingPayments || 0;
+      document.getElementById("completed-count").textContent =
+        stats.approvedPayments || 0;
+      document.getElementById("total-revenue").textContent =
+        `₹${stats.totalCommissionEarned || 0}`;
 
-      document.getElementById("pending-count").textContent = pending;
-      document.getElementById("completed-count").textContent = completed;
-      document.getElementById("total-revenue").textContent = `₹${total}`;
-
-      // Load payments table
+      // Load payments list
+      const paymentsList = document.getElementById("paymentsList");
       if (payments.length === 0) {
-        document.getElementById("paymentsTableBody").innerHTML = `
-          <tr>
-            <td colspan="6" style="text-align: center; padding: 2rem;">No payments yet</td>
-          </tr>
+        paymentsList.innerHTML = `
+          <div style="text-align: center; padding: 3rem; color: #cbd5e1; background: rgba(102, 126, 234, 0.05); border-radius: 12px; border: 1px dashed var(--border-color);">
+            <p style="font-size: 1.1rem; margin: 0;">✨ No pending payments</p>
+            <p style="margin: 0.5rem 0 0 0; font-size: 0.95rem; color: #94a3b8;">All student payments have been processed!</p>
+          </div>
         `;
       } else {
-        document.getElementById("paymentsTableBody").innerHTML = payments
-          .map(
-            (payment) => `
-          <tr>
-            <td>${payment.student?.name || payment.studentName || "Unknown"}</td>
-            <td>${payment.course?.title || payment.courseName || "Unknown"}</td>
-            <td>₹${payment.amount || 0}</td>
-            <td><span class="status-badge ${payment.status || "transaction_submitted"}">${(payment.status || "transaction_submitted").replace(/_/g, " ")}</span></td>
-            <td>${new Date(payment.createdAt).toLocaleDateString()}</td>
-            <td>
-              <button class="btn btn-small btn-success" onclick="approvePaymentInRouter('${payment._id}')">Confirm Receipt</button>
-              <button class="btn btn-small btn-danger" onclick="rejectPaymentInRouter('${payment._id}')">Reject</button>
-            </td>
-          </tr>
-        `,
-          )
+        paymentsList.innerHTML = payments
+          .map((payment) => {
+            const student = payment.studentId || {};
+            const course = payment.courseId || {};
+            const teacher = payment.teacherId || {};
+            const isSubmitted = payment.status === "transaction_submitted";
+            const isApproved = payment.status === "approved";
+
+            return `
+              <div style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+                          border: 2px solid rgba(102, 126, 234, 0.1);
+                          border-left: 4px solid ${isApproved ? "#10b981" : isSubmitted ? "#f59e0b" : "#667eea"};
+                          border-radius: 12px; padding: 1.5rem; transition: all 0.3s;"
+                   onmouseover="this.style.borderColor='rgba(102, 126, 234, 0.3)'; this.style.boxShadow='0 8px 20px rgba(102, 126, 234, 0.15)'"
+                   onmouseout="this.style.borderColor='rgba(102, 126, 234, 0.1)'; this.style.boxShadow='none'">
+                
+                <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem;">
+                  
+                  <!-- Left Section: Student & Course Details -->
+                  <div>
+                    <!-- Status Badge -->
+                    <div style="display: inline-block; margin-bottom: 1rem; padding: 0.4rem 0.8rem; border-radius: 20px; font-size: 0.8rem; font-weight: 600;
+                                ${isApproved ? "background: rgba(16, 185, 129, 0.2); color: #a7f3d0;" : isSubmitted ? "background: rgba(245, 158, 11, 0.2); color: #fbbf24;" : "background: rgba(102, 126, 234, 0.2); color: #93c5fd;"}">
+                      ${isApproved ? "✅ Approved" : isSubmitted ? "⏳ Payment Submitted" : "🔄 Processing"}
+                    </div>
+
+                    <!-- Student Info -->
+                    <div style="margin-bottom: 1.5rem;">
+                      <h3 style="margin: 0 0 0.5rem 0; color: #e2e8f0; font-size: 1.1rem;">
+                        👤 Student: ${payment.studentName || student.name || "Unknown"}
+                      </h3>
+                      <div style="background: rgba(102, 126, 234, 0.1); padding: 0.75rem; border-radius: 6px; margin-top: 0.5rem;">
+                        <p style="margin: 0.25rem 0; color: #cbd5e1; font-size: 0.9rem;">
+                          <strong>Email:</strong> ${student.email || "N/A"}
+                        </p>
+                        <p style="margin: 0.25rem 0; color: #cbd5e1; font-size: 0.9rem;">
+                          <strong>Phone:</strong> ${student.mobileNumber || "N/A"}
+                        </p>
+                      </div>
+                    </div>
+
+                    <!-- Course Info -->
+                    <div style="margin-bottom: 1.5rem;">
+                      <h4 style="margin: 0 0 0.5rem 0; color: #e2e8f0; font-size: 1rem;">
+                        📚 Course: ${payment.courseName || course.title || "Unknown"}
+                      </h4>
+                      <p style="margin: 0.25rem 0; color: #cbd5e1; font-size: 0.9rem;">
+                        <strong>Duration:</strong> ${course.duration || "Self-paced"}
+                      </p>
+                    </div>
+
+                    <!-- Teacher Info -->
+                    <div>
+                      <h4 style="margin: 0 0 0.5rem 0; color: #e2e8f0; font-size: 1rem;">
+                        👨‍🏫 Instructor: ${payment.teacherName || teacher.name || "Unknown"}
+                      </h4>
+                      <div style="background: rgba(16, 185, 129, 0.1); padding: 0.75rem; border-radius: 6px;">
+                        <p style="margin: 0.25rem 0; color: #cbd5e1; font-size: 0.9rem;">
+                          <strong>UPI ID:</strong> ${teacher.upiId || "Not specified by teacher"}
+                        </p>
+                        <p style="margin: 0.25rem 0; color: #cbd5e1; font-size: 0.9rem;">
+                          <strong>Phone:</strong> ${payment.teacherPhone || teacher.mobileNumber || "N/A"}
+                        </p>
+                        <p style="margin: 0.75rem 0 0 0; color: #10b981; font-size: 0.85rem; font-weight: 500;">
+                          💸 Route platform payments to this teacher's UPI.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Right Section: Payment Details & Actions -->
+                  <div style="display: flex; flex-direction: column;">
+                    <!-- Payment Amount Box -->
+                    <div style="background: linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(118, 75, 162, 0.2) 100%);
+                                padding: 1.5rem; border-radius: 12px; margin-bottom: 1rem; text-align: center;">
+                      <p style="margin: 0; color: #cbd5e1; font-size: 0.9rem; opacity: 0.8;">Amount Paid</p>
+                      <p style="margin: 0.5rem 0 0 0; color: #e2e8f0; font-size: 2rem; font-weight: bold;">
+                        ₹${payment.amountSent || payment.amount || 0}
+                      </p>
+                      <p style="margin: 0.5rem 0 0 0; color: #cbd5e1; font-size: 0.8rem;">
+                        Original: ₹${payment.amount || 0}
+                      </p>
+                    </div>
+
+                    <!-- Transaction Details -->
+                    <div style="background: rgba(102, 126, 234, 0.05); padding: 0.75rem; border-radius: 8px; margin-bottom: 1rem; border-left: 3px solid #667eea;">
+                      <p style="margin: 0 0 0.5rem 0; color: #cbd5e1; font-size: 0.85rem;">
+                        <strong>UTR/Transaction ID:</strong>
+                      </p>
+                      <p style="margin: 0; color: #e2e8f0; font-family: monospace; font-size: 0.9rem; word-break: break-all;">
+                        ${payment.utrNumber || payment.transactionId || "N/A"}
+                      </p>
+                    </div>
+
+                    <!-- Date Info -->
+                    <div style="background: rgba(102, 126, 234, 0.05); padding: 0.75rem; border-radius: 8px; margin-bottom: 1rem; border-left: 3px solid #667eea; font-size: 0.85rem;">
+                      <p style="margin: 0.25rem 0; color: #cbd5e1;">
+                        <strong>Submitted:</strong> ${new Date(
+                          payment.transactionSubmittedAt || payment.createdAt,
+                        ).toLocaleDateString("en-IN", {
+                          weekday: "short",
+                          year: "numeric",
+                          month: "short",
+                          day: "numeric",
+                        })}
+                      </p>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div style="display: flex; gap: 0.75rem; margin-top: auto;">
+                      ${
+                        isSubmitted
+                          ? `
+                        <button onclick="approvePaymentInRouter('${payment._id}')"
+                                style="flex: 1; padding: 0.75rem; background: #10b981; color: white; 
+                                        border: none; border-radius: 6px; font-weight: 600; cursor: pointer;
+                                        transition: all 0.3s; font-size: 0.9rem;"
+                                onmouseover="this.style.background='#059669'; this.style.transform='translateY(-2px)'"
+                                onmouseout="this.style.background='#10b981'; this.style.transform='translateY(0)'">
+                          ✅ Accept Course Payment
+                        </button>
+                        <button onclick="rejectPaymentInRouter('${payment._id}')"
+                                style="flex: 1; padding: 0.75rem; background: #ef4444; color: white; 
+                                        border: none; border-radius: 6px; font-weight: 600; cursor: pointer;
+                                        transition: all 0.3s; font-size: 0.9rem;"
+                                onmouseover="this.style.background='#dc2626'; this.style.transform='translateY(-2px)'"
+                                onmouseout="this.style.background='#ef4444'; this.style.transform='translateY(0)'">
+                          ❌ Reject
+                        </button>
+                      `
+                          : isApproved
+                            ? `
+                        <button onclick="showInfoPopup('Payment already approved'); return false;"
+                                style="flex: 1; padding: 0.75rem; background: #94a3b8; color: white; 
+                                        border: none; border-radius: 6px; font-weight: 600; cursor: not-allowed; font-size: 0.9rem;">
+                          ✓ Approved
+                        </button>
+                      `
+                            : ""
+                      }
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+            `;
+          })
           .join("");
       }
     } catch (error) {
       console.log("Payment data not yet configured:", error.message);
-      document.getElementById("paymentsTableBody").innerHTML = `
-        <tr>
-          <td colspan="6" style="text-align: center; padding: 2rem;">No pending payment confirmations</td>
-        </tr>
+      document.getElementById("paymentsList").innerHTML = `
+        <div style="text-align: center; padding: 3rem; color: #cbd5e1;">
+          <p style="font-size: 1.1rem; margin: 0;">No pending payment confirmations</p>
+        </div>
       `;
     }
 
@@ -1182,7 +1623,7 @@ class Router {
         ".highlight-input-group",
       );
       if (highlightInputs.length >= 10) {
-        alert("Maximum 10 highlights allowed");
+        showInfoPopup("Maximum 10 highlights allowed", "Limit Reached");
         return;
       }
 
@@ -1312,15 +1753,21 @@ class Router {
             const status = enrollment.status || "awaiting_admin_approval";
 
             let statusBadge = "";
+            let infoMessage = "";
             if (status === "awaiting_admin_approval") {
               statusBadge =
                 '<span style="background: #fef3c7; color: #92400e; padding: 0.25rem 0.75rem; border-radius: 4px; font-size: 0.85rem; font-weight: 600;">⏳ Awaiting Admin Approval</span>';
             } else if (status === "payment_requested") {
               statusBadge =
                 '<span style="background: #e0f2fe; color: #075985; padding: 0.25rem 0.75rem; border-radius: 4px; font-size: 0.85rem; font-weight: 600;">💳 Pay Now</span>';
-            } else if (status === "payment_submitted") {
+            } else if (
+              status === "payment_submitted" ||
+              status === "transaction_submitted"
+            ) {
               statusBadge =
                 '<span style="background: #ede9fe; color: #5b21b6; padding: 0.25rem 0.75rem; border-radius: 4px; font-size: 0.85rem; font-weight: 600;">🧾 Payment Submitted</span>';
+              infoMessage =
+                '<div style="margin-top: 10px; font-size: 0.85rem; color: #5b21b6; background: #ede9fe; padding: 8px; border-radius: 4px;">Thank you! Following the payment submission, the admin or Nexus Platform will reach out to you within 24 hours.</div>';
             } else if (status === "active") {
               statusBadge =
                 '<span style="background: #d1fae5; color: #065f46; padding: 0.25rem 0.75rem; border-radius: 4px; font-size: 0.85rem; font-weight: 600;">✅ Active</span>';
@@ -1353,6 +1800,7 @@ class Router {
                   <div style="margin-bottom: 1rem;display: inline-block;">
                     ${statusBadge}
                   </div>
+                  ${infoMessage}
 
                   <!-- Teacher Information Box -->
                   <div style="background: ${status === "active" ? "#f0f4ff" : "#fff3cd"}; border-left: 4px solid ${status === "active" ? "#667eea" : "#ff9800"}; padding: 1rem; 
@@ -1427,7 +1875,7 @@ class Router {
 
                   <!-- Action Buttons -->
                   <div style="display: flex; gap: 0.75rem; margin-top: 1rem;">
-                        <button onclick="${canAccessTeacher ? `openWhatsApp('${teacher.mobileNumber || ""}', '${course.title || ""}')` : 'alert("Teacher contact is available after activation")'}"
+                        <button onclick="${canAccessTeacher ? `openWhatsApp('${teacher.mobileNumber || ""}', '${course.title || ""}')` : `showInfoPopup('Teacher contact is available after activation')`}"
                           style="flex: 1; padding: 0.75rem; background: ${canAccessTeacher ? "#25d366" : "#ccc"}; color: white; 
                                     border: none; border-radius: 6px; font-weight: 600; cursor: ${status === "active" ? "pointer" : "not-allowed"};
                                     transition: background 0.3s;"
@@ -1436,7 +1884,7 @@ class Router {
                           ${!canAccessTeacher ? "disabled" : ""}>
                       💬 WhatsApp
                     </button>
-                            <button onclick="${canAccessTeacher ? `router.navigate('#course-detail/${course._id || enrollment.courseId}')` : showPayNow ? `submitPaymentPrompt('${enrollment._id}', '${course.title || "Course"}', '${amount}')` : showWaitingPaymentConfirm ? 'alert("Your payment is submitted. Please wait for admin confirmation.")' : 'alert("Please wait for admin approval")'}"
+                            <button onclick="${canAccessTeacher ? `router.navigate('#course-detail/${course._id || enrollment.courseId}')` : showPayNow ? `submitPaymentPrompt('${enrollment.paymentId || enrollment._id}', '${course.title || "Course"}', '${amount}')` : showWaitingPaymentConfirm ? `showInfoPopup('Your payment is submitted. Please wait for admin confirmation.')` : `showInfoPopup('Please wait for admin approval')`}"
                               style="flex: 1; padding: 0.75rem; background: ${canAccessTeacher ? "#667eea" : showPayNow ? "#0ea5e9" : "#ccc"}; color: white; 
                                 border: none; border-radius: 6px; font-weight: 600; cursor: ${canAccessTeacher || showPayNow ? "pointer" : "not-allowed"};
                                     transition: background 0.3s;"
@@ -1524,84 +1972,103 @@ class Router {
     try {
       const response = await api.getMyEnrollments();
       const allEnrollments = response.data || [];
-      // Filter for only approved courses
+
+      // Separate approved and pending courses
       const approvedEnrollments = allEnrollments.filter(
         (e) => e.status === "active",
+      );
+      const pendingEnrollments = allEnrollments.filter(
+        (e) =>
+          e.status === "payment_submitted" ||
+          e.status === "awaiting_admin_approval",
       );
 
       let html = `
         <div class="your-courses-page">
-          <h2>Your Courses</h2>
+          <div style="padding: 0 2rem;">
+            <h1 style="margin: 2rem 0 0.5rem 0; font-size: 2.5rem; background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+              Your Courses Dashboard
+            </h1>
+            <p style="color: #cbd5e1; margin: 0 0 2rem 0; font-size: 1.1rem;">
+              Manage your enrolled courses and track their status
+            </p>
+          </div>
+      `;
+
+      // ===== APPROVED COURSES SECTION =====
+      html += `
+        <div style="padding: 0 2rem;">
+          <div class="courses-section-header approved">
+            ✅ Active Courses (${approvedEnrollments.length})
+          </div>
       `;
 
       if (approvedEnrollments.length > 0) {
-        html += `
-          <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-                      color: white; padding: 1.5rem; border-radius: 12px; margin-bottom: 2rem;
-                      box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);">
-            <h3 style="margin: 0 0 0.5rem 0; font-size: 1.1rem;">
-              ✅ Approved Courses
-            </h3>
-            <p style="margin: 0; font-size: 0.95rem;">
-              You have ${approvedEnrollments.length} approved course(s). Start learning now!
-            </p>
-          </div>
-        `;
-      }
+        html += `<div class="courses-list" style="display: grid; gap: 1.5rem; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); margin-bottom: 3rem;">`;
 
-      html += `<div class="courses-list" style="display: grid; gap: 1.5rem; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));">`;
-
-      if (approvedEnrollments.length > 0) {
         html += approvedEnrollments
           .map((enrollment) => {
             const course = enrollment.courseId || {};
             const teacher = course.teacherId || {};
 
             return `
-              <div style="background: white; border: 2px solid #ddd; border-radius: 12px; 
-                          padding: 1.5rem; cursor: pointer; transition: all 0.3s;
-                          box-shadow: 0 2px 8px rgba(0,0,0,0.1);"
-                   onmouseover="this.style.borderColor='#667eea'; this.style.boxShadow='0 8px 20px rgba(102,126,234,0.2)'"
-                   onmouseout="this.style.borderColor='#ddd'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.1)'">
+              <div style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+                          border: 2px solid rgba(16, 185, 129, 0.2);
+                          border-left: 4px solid #10b981;
+                          border-radius: 12px; padding: 1.5rem; cursor: pointer; 
+                          transition: all 0.3s; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.1);"
+                   onmouseover="this.style.borderColor='#10b981'; this.style.boxShadow='0 8px 25px rgba(16, 185, 129, 0.2)'"
+                   onmouseout="this.style.borderColor='rgba(16, 185, 129, 0.2)'; this.style.boxShadow='0 4px 15px rgba(16, 185, 129, 0.1)'">
                 
+                <!-- Status Badge -->
+                <div style="display: inline-block; background: rgba(16, 185, 129, 0.2); 
+                            color: #a7f3d0; padding: 0.4rem 0.8rem; border-radius: 20px; 
+                            font-size: 0.8rem; font-weight: 600; margin-bottom: 1rem;">
+                  ✓ Active & Approved
+                </div>
+
                 <!-- Course Title -->
-                <h3 style="margin: 0 0 0.5rem 0; color: #333; font-size: 1.1rem;">
+                <h3 style="margin: 0 0 0.5rem 0; color: #e2e8f0; font-size: 1.1rem;">
                   ${course.title || "Unknown Course"}
                 </h3>
 
                 <!-- Teacher Information Box -->
-                <div style="background: #f0f4ff; border-left: 4px solid #667eea; padding: 1rem; 
-                            border-radius: 8px; margin-bottom: 1rem;">
+                <div style="background: rgba(102, 126, 234, 0.1); border-left: 4px solid #667eea; 
+                            padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
                   <h4 style="margin: 0 0 0.5rem 0; color: #667eea; font-size: 0.9rem;">
-                    👨‍🏫 Teacher Information
+                    👨‍🏫 Your Instructor
                   </h4>
-                  <p style="margin: 0.25rem 0; color: #333; font-weight: 600;">
+                  <p style="margin: 0.25rem 0; color: #e2e8f0; font-weight: 600;">
                     ${teacher.name || "Unknown Teacher"}
                   </p>
-                  <p style="margin: 0.25rem 0; color: #666; font-size: 0.9rem;">
+                  <p style="margin: 0.25rem 0; color: #cbd5e1; font-size: 0.9rem;">
                     🏢 ${teacher.company || "N/A"}
                   </p>
-                  <p style="margin: 0.25rem 0; color: #666; font-size: 0.9rem;">
-                    💼 ${teacher.profession || teacher.role || "Instructor"}
+                  <p style="margin: 0.25rem 0; color: #cbd5e1; font-size: 0.9rem;">
+                    💼 ${teacher.profession || teacher.role || "Expert Instructor"}
+                  </p>
+                  <p style="margin: 0.5rem 0 0 0; color: #10b981; font-size: 0.9rem; font-weight: 500;">
+                    📱 Contact ready for learning support
                   </p>
                 </div>
 
                 <!-- Course Details Grid -->
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; 
+                            padding: 1rem; background: rgba(102, 126, 234, 0.05); border-radius: 8px;">
                   <div>
-                    <span style="color: #999; font-size: 0.85rem; text-transform: uppercase; font-weight: 600;">
-                      💵 Price
+                    <span style="color: #cbd5e1; font-size: 0.8rem; text-transform: uppercase; font-weight: 600;">
+                      💵 Fee Amount
                     </span>
-                    <p style="margin: 0.25rem 0 0 0; color: #333; font-size: 1.1rem; font-weight: bold;">
+                    <p style="margin: 0.25rem 0 0 0; color: #e2e8f0; font-size: 1.1rem; font-weight: bold;">
                       ₹${course.price || 0}
                     </p>
                   </div>
                   <div>
-                    <span style="color: #999; font-size: 0.85rem; text-transform: uppercase; font-weight: 600;">
-                      👥 Registered
+                    <span style="color: #cbd5e1; font-size: 0.8rem; text-transform: uppercase; font-weight: 600;">
+                      📚 Duration
                     </span>
-                    <p style="margin: 0.25rem 0 0 0; color: #333; font-size: 1.1rem; font-weight: bold;">
-                      ${course.enrolledCount || 0} students
+                    <p style="margin: 0.25rem 0 0 0; color: #e2e8f0; font-size: 1.1rem; font-weight: bold;">
+                      ${course.duration || "Self-paced"}
                     </p>
                   </div>
                 </div>
@@ -1609,11 +2076,11 @@ class Router {
                 <!-- Progress Bar -->
                 <div style="margin-bottom: 1rem;">
                   <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                    <span style="font-size: 0.9rem; color: #666;">Progress</span>
-                    <span style="font-weight: 600; color: #667eea;">${enrollment.progress || 0}%</span>
+                    <span style="font-size: 0.9rem; color: #cbd5e1;">Learning Progress</span>
+                    <span style="font-weight: 600; color: #10b981;">${enrollment.progress || 0}%</span>
                   </div>
-                  <div style="width: 100%; height: 8px; background: #e5e7eb; border-radius: 4px; overflow: hidden;">
-                    <div style="width: ${enrollment.progress || 0}%; height: 100%; background: linear-gradient(90deg, #667eea, #764ba2); border-radius: 4px;"></div>
+                  <div style="width: 100%; height: 8px; background: rgba(102, 126, 234, 0.2); border-radius: 4px; overflow: hidden;">
+                    <div style="width: ${enrollment.progress || 0}%; height: 100%; background: linear-gradient(90deg, #10b981, #059669); border-radius: 4px; transition: width 0.3s;"></div>
                   </div>
                 </div>
 
@@ -1622,17 +2089,17 @@ class Router {
                   <button onclick="openWhatsApp('${teacher.mobileNumber || ""}', '${course.title || ""}')"
                           style="flex: 1; padding: 0.75rem; background: #25d366; color: white; 
                                   border: none; border-radius: 6px; font-weight: 600; cursor: pointer;
-                                  transition: background 0.3s;"
-                          onmouseover="this.style.background='#20ba5a'"
-                          onmouseout="this.style.background='#25d366'">
-                    💬 WhatsApp
+                                  transition: all 0.3s; font-size: 0.9rem;"
+                          onmouseover="this.style.background='#20ba5a'; this.style.transform='translateY(-2px)'"
+                          onmouseout="this.style.background='#25d366'; this.style.transform='translateY(0)'">
+                    💬 Contact Teacher
                   </button>
                   <button onclick="router.navigate('#course-detail/${enrollment.courseId}')"
                           style="flex: 1; padding: 0.75rem; background: #667eea; color: white; 
                                   border: none; border-radius: 6px; font-weight: 600; cursor: pointer;
-                                  transition: background 0.3s;"
-                          onmouseover="this.style.background='#5568d3'"
-                          onmouseout="this.style.background='#667eea'">
+                                  transition: all 0.3s; font-size: 0.9rem;"
+                          onmouseover="this.style.background='#5568d3'; this.style.transform='translateY(-2px)'"
+                          onmouseout="this.style.background='#667eea'; this.style.transform='translateY(0)'">
                     📖 View Course
                   </button>
                 </div>
@@ -1640,12 +2107,126 @@ class Router {
             `;
           })
           .join("");
+
+        html += `</div>`;
       } else {
-        html +=
-          "<p style='grid-column: 1/-1; text-align: center; padding: 2rem; color: #999;'>No approved courses yet. Complete your registration and wait for admin approval!</p>";
+        html += `
+          <div class="empty-section">
+            🎓 No active courses yet. Complete your payment to get started!
+          </div>
+        `;
       }
 
-      html += `</div></div>`;
+      html += `</div>`; // Close approved section
+
+      // ===== PENDING/PAYMENT AWAITING COURSES SECTION =====
+      html += `
+        <div style="padding: 0 2rem;">
+          <div class="courses-section-header pending">
+            ⏳ Pending Approval (${pendingEnrollments.length})
+          </div>
+      `;
+
+      if (pendingEnrollments.length > 0) {
+        html += `<div class="courses-list" style="display: grid; gap: 1.5rem; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); margin-bottom: 2rem;">`;
+
+        html += pendingEnrollments
+          .map((enrollment) => {
+            const course = enrollment.courseId || {};
+            const teacher = course.teacherId || {};
+            const statusText =
+              enrollment.status === "payment_submitted"
+                ? "Waiting for Admin Review"
+                : "Awaiting Admin Approval";
+
+            return `
+              <div style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+                          border: 2px solid rgba(245, 158, 11, 0.2);
+                          border-left: 4px solid #f59e0b;
+                          border-radius: 12px; padding: 1.5rem; cursor: pointer; 
+                          transition: all 0.3s; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.1);"
+                   onmouseover="this.style.borderColor='#f59e0b'; this.style.boxShadow='0 8px 25px rgba(245, 158, 11, 0.2)'"
+                   onmouseout="this.style.borderColor='rgba(245, 158, 11, 0.2)'; this.style.boxShadow='0 4px 15px rgba(245, 158, 11, 0.1)'">
+                
+                <!-- Status Badge -->
+                <div style="display: inline-block; background: rgba(245, 158, 11, 0.2); 
+                            color: #fbbf24; padding: 0.4rem 0.8rem; border-radius: 20px; 
+                            font-size: 0.8rem; font-weight: 600; margin-bottom: 1rem;">
+                  ⏳ ${statusText}
+                </div>
+
+                <!-- Course Title -->
+                <h3 style="margin: 0 0 0.5rem 0; color: #e2e8f0; font-size: 1.1rem;">
+                  ${course.title || "Unknown Course"}
+                </h3>
+
+                <!-- Teacher Information Box -->
+                <div style="background: rgba(245, 158, 11, 0.1); border-left: 4px solid #f59e0b; 
+                            padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                  <h4 style="margin: 0 0 0.5rem 0; color: #f59e0b; font-size: 0.9rem;">
+                    👨‍🏫 Instructor: ${teacher.name || "Unknown"}
+                  </h4>
+                  <p style="margin: 0.25rem 0; color: #cbd5e1; font-size: 0.9rem;">
+                    💼 ${teacher.profession || teacher.role || "Expert"}
+                  </p>
+                </div>
+
+                <!-- Course Details -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; 
+                            padding: 1rem; background: rgba(102, 126, 234, 0.05); border-radius: 8px;">
+                  <div>
+                    <span style="color: #cbd5e1; font-size: 0.8rem; text-transform: uppercase; font-weight: 600;">
+                      💵 Course Fee
+                    </span>
+                    <p style="margin: 0.25rem 0 0 0; color: #e2e8f0; font-size: 1.1rem; font-weight: bold;">
+                      ₹${course.price || 0}
+                    </p>
+                  </div>
+                  <div>
+                    <span style="color: #cbd5e1; font-size: 0.8rem; text-transform: uppercase; font-weight: 600;">
+                      📅 Submitted
+                    </span>
+                    <p style="margin: 0.25rem 0 0 0; color: #e2e8f0; font-size: 0.95rem;">
+                      ${new Date(enrollment.enrolledAt).toLocaleDateString()}
+                    </p>
+                  </div>
+                </div>
+
+                <!-- Information Box -->
+                <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2);
+                            padding: 1rem; border-radius: 8px; margin-bottom: 1rem; color: #fca5a5; font-size: 0.9rem;">
+                  <p style="margin: 0; line-height: 1.5;">
+                    Your payment is under review by the admin. You'll receive confirmation shortly. 
+                    Once approved, you can access the course immediately.
+                  </p>
+                </div>
+
+                <!-- Action Button -->
+                <button onclick="router.navigate('#my-enrollments')"
+                        style="width: 100%; padding: 0.75rem; background: #667eea; color: white; 
+                                border: none; border-radius: 6px; font-weight: 600; cursor: pointer;
+                                transition: all 0.3s; font-size: 0.9rem;"
+                        onmouseover="this.style.background='#5568d3'; this.style.transform='translateY(-2px)'"
+                        onmouseout="this.style.background='#667eea'; this.style.transform='translateY(0)'">
+                  📋 View Details
+                </button>
+              </div>
+            `;
+          })
+          .join("");
+
+        html += `</div>`;
+      } else {
+        html += `
+          <div class="empty-section">
+            ✨ No pending courses. All your registrations are approved!
+          </div>
+        `;
+      }
+
+      html += `</div>`; // Close pending section
+      html += `</div>`; // Close main container
+
       appDiv.innerHTML = html;
     } catch (error) {
       appDiv.innerHTML = `<div class="error-message">Error loading your courses: ${error.message}</div>`;
@@ -1727,6 +2308,87 @@ class Router {
     this.updateNavbar();
   }
 
+  renderSupport() {
+    const appDiv = document.getElementById("app");
+    const user = auth.getCurrentUser() || {};
+
+    appDiv.innerHTML = `
+      <div class="dashboard-header">
+        <h1>📞 Customer Support</h1>
+      </div>
+      <div class="content-card" style="max-width: 600px; margin: 0 auto; padding: 2rem;">
+        <h2 style="margin-top: 0;">Get in Touch</h2>
+        <p style="color: #666; margin-bottom: 2rem;">Experiencing an issue? Please fill out the form below and we will get back to you shortly.</p>
+        
+        <form onsubmit="submitSupportForm(event)" style="display: flex; flex-direction: column; gap: 1.5rem;">
+          <div class="form-group">
+            <label for="supName">Name / UserId</label>
+            <input type="text" id="supName" value="${user.name || user._id || ""}" required style="width: 100%; padding: 0.8rem; border: 1px solid #ddd; border-radius: 8px;">
+          </div>
+          
+          <div class="form-group">
+            <label for="supEmail">Email Address</label>
+            <input type="email" id="supEmail" value="${user.email || ""}" required style="width: 100%; padding: 0.8rem; border: 1px solid #ddd; border-radius: 8px;">
+          </div>
+          
+          <div class="form-group">
+            <label for="supMobile">Mobile Number</label>
+            <input type="tel" id="supMobile" value="${user.mobileNumber || ""}" required style="width: 100%; padding: 0.8rem; border: 1px solid #ddd; border-radius: 8px;">
+          </div>
+          
+          <div class="form-group">
+            <label for="supIssue">Issue you are facing</label>
+            <textarea id="supIssue" rows="5" required placeholder="Describe your problem in detail..." style="width: 100%; padding: 0.8rem; border: 1px solid #ddd; border-radius: 8px; resize: vertical;"></textarea>
+          </div>
+          
+          <button type="submit" class="btn btn-primary" style="padding: 1rem; margin-top: 1rem;">
+            Send to Support (neelamchaithanya9@gmail.com)
+          </button>
+        </form>
+      </div>
+    `;
+    this.updateNavbar();
+  }
+
+  renderSettings() {
+    const appDiv = document.getElementById("app");
+    const user = auth.getCurrentUser() || {};
+
+    appDiv.innerHTML = `
+      <div class="settings-page">
+        <div class="settings-hero">
+          <p class="admin-kicker">Account Center</p>
+          <h2>Settings</h2>
+          <p>Profile details, account controls, and secure logout in one place.</p>
+        </div>
+
+        <div class="settings-grid">
+          <section class="settings-card">
+            <h3>👤 Profile</h3>
+            <div class="settings-list">
+              <div><span>Full Name</span><strong>${user.name || "Not specified"}</strong></div>
+              <div><span>Email</span><strong>${user.email || "Not specified"}</strong></div>
+              <div><span>Mobile Number</span><strong>${user.mobileNumber || "Not specified"}</strong></div>
+              <div><span>Role</span><strong>${user.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : "Unknown"}</strong></div>
+              <div><span>Profession</span><strong>${user.profession || "Not specified"}</strong></div>
+              <div><span>Company</span><strong>${user.company || "Not specified"}</strong></div>
+            </div>
+            <button class="btn btn-secondary" onclick="router.navigate('#profile')">Edit Profile</button>
+          </section>
+
+          <section class="settings-card settings-security-card">
+            <h3>🔐 Security</h3>
+            <p class="settings-muted">Keep your account protected and end sessions securely.</p>
+            <button class="btn btn-secondary" onclick="showPasswordComingSoon()">Change Password</button>
+            <button class="btn btn-danger settings-logout-btn" onclick="confirmLogoutFromSettings()">Logout</button>
+          </section>
+        </div>
+      </div>
+    `;
+
+    this.updateNavbar();
+  }
+
   renderNotFound() {
     const appDiv = document.getElementById("app");
     appDiv.innerHTML = `
@@ -1743,43 +2405,192 @@ class Router {
 // Create global router instance
 const router = new Router();
 
-// Handle settings dropdown
-function toggleSettingsMenu() {
-  const menu = document.getElementById("settingsMenu");
-  if (menu) {
-    if (menu.style.display === "none" || menu.style.display === "") {
-      menu.style.display = "block";
-    } else {
-      menu.style.display = "none";
-    }
+function ensurePopupHost() {
+  let host = document.getElementById("customPopupHost");
+  if (!host) {
+    host = document.createElement("div");
+    host.id = "customPopupHost";
+    host.style.position = "fixed";
+    host.style.inset = "0";
+    host.style.zIndex = "12000";
+    host.style.pointerEvents = "none";
+    document.body.appendChild(host);
   }
+  return host;
+}
+
+function escapeHtml(value) {
+  return String(value || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function showDialogPopup(options) {
+  const {
+    title = "Notice",
+    message = "",
+    variant = "info",
+    withCancel = false,
+    confirmText = "OK",
+    cancelText = "Cancel",
+    withInput = false,
+    defaultValue = "",
+    placeholder = "",
+  } = options || {};
+
+  const colors = {
+    info: "#2563eb",
+    danger: "#dc2626",
+    success: "#059669",
+    warning: "#d97706",
+  };
+
+  const accent = colors[variant] || colors.info;
+  const host = ensurePopupHost();
+  const popupId = `popup-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+
+  return new Promise((resolve) => {
+    const overlay = document.createElement("div");
+    overlay.id = popupId;
+    overlay.style.position = "absolute";
+    overlay.style.inset = "0";
+    overlay.style.display = "flex";
+    overlay.style.alignItems = "center";
+    overlay.style.justifyContent = "center";
+    overlay.style.background = "rgba(15, 23, 42, 0.6)";
+    overlay.style.backdropFilter = "blur(2px)";
+    overlay.style.pointerEvents = "auto";
+    overlay.innerHTML = `
+      <div style="width:min(92vw, 440px); background:#ffffff; color:#0f172a; border-radius:14px;
+                  border:1px solid #dbeafe; box-shadow:0 18px 50px rgba(15,23,42,0.35); overflow:hidden;">
+        <div style="padding:1rem 1.25rem; border-bottom:1px solid #e2e8f0; display:flex; align-items:center; gap:0.6rem;">
+          <span style="width:0.7rem; height:0.7rem; border-radius:999px; background:${accent}; display:inline-block;"></span>
+          <strong style="font-size:1rem;">${escapeHtml(title)}</strong>
+        </div>
+        <div style="padding:1rem 1.25rem 0.75rem; font-size:0.95rem; line-height:1.5; color:#1f2937; white-space:pre-line;">
+          ${escapeHtml(message)}
+        </div>
+        ${
+          withInput
+            ? `<div style="padding:0.5rem 1.25rem 0.75rem;"><input id="${popupId}-input" type="text" value="${escapeHtml(defaultValue)}" placeholder="${escapeHtml(placeholder)}" style="width:100%; border:1px solid #cbd5e1; border-radius:8px; padding:0.65rem 0.75rem; font-size:0.95rem; color:#0f172a; background:#ffffff;"></div>`
+            : ""
+        }
+        <div style="display:flex; justify-content:flex-end; gap:0.65rem; padding:0.85rem 1.25rem 1.1rem;">
+          ${
+            withCancel
+              ? `<button id="${popupId}-cancel" style="border:1px solid #cbd5e1; background:#ffffff; color:#0f172a; border-radius:8px; padding:0.52rem 0.9rem; font-weight:600; cursor:pointer;">${escapeHtml(cancelText)}</button>`
+              : ""
+          }
+          <button id="${popupId}-confirm" style="border:none; background:${accent}; color:#ffffff; border-radius:8px; padding:0.52rem 0.9rem; font-weight:600; cursor:pointer;">${escapeHtml(confirmText)}</button>
+        </div>
+      </div>
+    `;
+
+    const cleanup = (value) => {
+      overlay.remove();
+      resolve(value);
+    };
+
+    host.appendChild(overlay);
+
+    const confirmBtn = document.getElementById(`${popupId}-confirm`);
+    const cancelBtn = document.getElementById(`${popupId}-cancel`);
+    const inputEl = document.getElementById(`${popupId}-input`);
+
+    confirmBtn.addEventListener("click", () => {
+      cleanup(withInput ? inputEl.value : true);
+    });
+
+    if (cancelBtn) {
+      cancelBtn.addEventListener("click", () =>
+        cleanup(withInput ? null : false),
+      );
+    }
+
+    if (!withCancel && !withInput) {
+      overlay.addEventListener("click", (event) => {
+        if (event.target === overlay) {
+          cleanup(true);
+        }
+      });
+    }
+
+    if (inputEl) {
+      inputEl.focus();
+      inputEl.select();
+      inputEl.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+          cleanup(inputEl.value);
+        }
+      });
+    }
+  });
+}
+
+function showInfoPopup(message, title = "Notice") {
+  return showDialogPopup({
+    title,
+    message,
+    variant: "info",
+    confirmText: "OK",
+  });
+}
+
+function showConfirmPopup(message, title = "Confirm") {
+  return showDialogPopup({
+    title,
+    message,
+    variant: "warning",
+    withCancel: true,
+    confirmText: "Yes",
+    cancelText: "No",
+  });
+}
+
+function showPromptPopup(message, defaultValue = "", title = "Input Required") {
+  return showDialogPopup({
+    title,
+    message,
+    variant: "warning",
+    withCancel: true,
+    withInput: true,
+    defaultValue,
+    confirmText: "Submit",
+    cancelText: "Cancel",
+    placeholder: "Type here",
+  });
+}
+
+function showPasswordComingSoon() {
+  showInfoPopup("Password change feature is coming soon.", "Coming Soon");
+}
+
+async function confirmLogoutFromSettings() {
+  const shouldLogout = await showConfirmPopup(
+    "Are you sure you want to logout?",
+    "Confirm Logout",
+  );
+
+  if (!shouldLogout) {
+    return;
+  }
+
+  auth.logout();
+  router.navigate("#login");
 }
 
 function goToProfile() {
-  window.location.hash = "#profile";
-  document.getElementById("settingsMenu").style.display = "none";
+  window.location.hash = "#settings";
 }
 
 function logout() {
   auth.logout();
   router.updateNavbar();
   window.location.hash = "#home";
-  document.getElementById("settingsMenu").style.display = "none";
 }
-
-// Close settings menu when clicking outside
-document.addEventListener("click", (e) => {
-  const settingsLink = document.getElementById("settingsLink");
-  const settingsMenu = document.getElementById("settingsMenu");
-  if (
-    settingsMenu &&
-    settingsLink &&
-    !settingsLink.contains(e.target) &&
-    !settingsMenu.contains(e.target)
-  ) {
-    settingsMenu.style.display = "none";
-  }
-});
 
 // Navigate on page load
 window.addEventListener("load", () => {
@@ -1791,63 +2602,112 @@ async function enrollCourse(courseId) {
   try {
     const response = await api.enrollInCourse({ courseId });
     if (response.success) {
-      alert("Enrolled successfully!");
+      showInfoPopup(
+        "Enrollment request sent. Please wait for admin approval.",
+        "Enrollment Submitted",
+      );
       router.navigate("#my-enrollments");
     } else {
-      alert(response.message || "Enrollment failed");
+      showInfoPopup(response.message || "Enrollment failed", "Enrollment");
     }
   } catch (error) {
-    alert(`Error: ${error.message}`);
+    showInfoPopup(`Error: ${error.message}`, "Enrollment Error");
   }
 }
 
-async function submitPaymentPrompt(enrollmentId, courseTitle, amount) {
-  const transactionId = prompt(
-    `Enter transaction ID for ${courseTitle} (Amount: INR ${amount}):`,
-  );
+async function submitPaymentPrompt(paymentId, courseTitle, amount) {
+  // Store the payment data in window for the modal to access
+  window.currentPaymentData = {
+    paymentId: paymentId,
+    courseTitle: courseTitle,
+    amount: amount,
+  };
 
-  if (!transactionId || !transactionId.trim()) {
+  // Show the payment modal
+  const modal = document.getElementById("paymentModal");
+  modal.style.display = "flex";
+
+  // Populate the form
+  document.getElementById("courseName").value = courseTitle;
+  document.getElementById("courseAmount").value = amount;
+  document.getElementById("utrNumber").value = "";
+  document.getElementById("utrNumber").focus();
+}
+
+// Close the payment modal
+function closePaymentModal() {
+  const modal = document.getElementById("paymentModal");
+  modal.style.display = "none";
+  window.currentPaymentData = null;
+}
+
+// Submit the payment form
+async function submitPaymentForm(event) {
+  event.preventDefault();
+
+  const paymentData = window.currentPaymentData;
+  if (!paymentData) {
+    showInfoPopup("Payment session expired. Please try again.", "Payment");
+    return;
+  }
+
+  const utrNumber = document.getElementById("utrNumber").value.trim();
+
+  if (!utrNumber) {
+    showInfoPopup("Please enter a valid UTR/Transaction number", "Missing UTR");
     return;
   }
 
   try {
-    const response = await api.submitPayment(enrollmentId, {
-      transactionId: transactionId.trim(),
-    });
+    const response = await api.submitTransaction(
+      paymentData.paymentId,
+      utrNumber,
+    );
 
     if (response.success) {
-      alert(
-        "Payment submitted successfully. Please wait for admin confirmation.",
+      closePaymentModal();
+      showInfoPopup(
+        "✅ Payment details submitted successfully!\n\nPlease wait for admin confirmation.",
+        "Payment Submitted",
       );
       router.navigate("#my-enrollments");
       return;
     }
 
-    alert(response.message || "Failed to submit payment");
+    showInfoPopup(response.message || "Failed to submit payment", "Payment");
   } catch (error) {
-    alert(`Error: ${error.message}`);
+    showInfoPopup(`Error: ${error.message}`, "Payment Error");
   }
 }
+
+// Close modal when clicking outside of it
+window.addEventListener("click", (event) => {
+  const modal = document.getElementById("paymentModal");
+  if (modal && event.target === modal) {
+    closePaymentModal();
+  }
+});
 
 async function approvePaymentInRouter(paymentId) {
   try {
     const response = await api.approvePayment(paymentId);
     if (response.success) {
-      alert("Payment approved successfully");
+      showInfoPopup("Payment approved successfully", "Payment Approved");
       router.navigate("#admin-payments");
       return;
     }
 
-    alert(response.message || "Failed to approve payment");
+    showInfoPopup(response.message || "Failed to approve payment", "Payment");
   } catch (error) {
-    alert(`Error: ${error.message}`);
+    showInfoPopup(`Error: ${error.message}`, "Payment Error");
   }
 }
 
 async function rejectPaymentInRouter(paymentId) {
-  const reason = prompt(
+  const reason = await showPromptPopup(
     "Enter rejection reason:",
     "Payment details are invalid",
+    "Reject Payment",
   );
   if (!reason || !reason.trim()) {
     return;
@@ -1856,78 +2716,27 @@ async function rejectPaymentInRouter(paymentId) {
   try {
     const response = await api.rejectPayment(paymentId, reason.trim());
     if (response.success) {
-      alert("Payment rejected");
+      showInfoPopup("Payment rejected", "Payment Rejected");
       router.navigate("#admin-payments");
       return;
     }
 
-    alert(response.message || "Failed to reject payment");
+    showInfoPopup(response.message || "Failed to reject payment", "Payment");
   } catch (error) {
-    alert(`Error: ${error.message}`);
+    showInfoPopup(`Error: ${error.message}`, "Payment Error");
   }
 }
 
 // Load course students
-async function loadCourseStudents(courseId, courseTitle) {
-  const container = document.getElementById("studentDetails");
-  container.innerHTML = `<div style="text-align: center; padding: 2rem; color: #667eea;">Loading students for ${courseTitle}...</div>`;
-
-  try {
-    const response = await api.request(
-      `/enrollments/course/${courseId}/enrollments`,
-      "GET",
-      null,
-      true,
-    );
-    const enrollments = response.data || [];
-
-    if (enrollments.length === 0) {
-      container.innerHTML = `<div style="text-align: center; padding: 2rem; color: #999;">No students enrolled in this course yet</div>`;
-      return;
-    }
-
-    let html = `
-      <div style="margin-top: 2rem;">
-        <h3 style="color: #333; margin-bottom: 1rem;">👥 Students in ${courseTitle}</h3>
-        <div style="display: grid; gap: 1rem; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));">
-    `;
-
-    enrollments.forEach((enrollment) => {
-      const student = enrollment.studentId;
-      html += `
-        <div style="background: white; border: 2px solid #ddd; border-radius: 12px; padding: 1.5rem;">
-          <h4 style="margin: 0 0 0.75rem 0; color: #333;">${student.name || "Unknown"}</h4>
-          <div style="margin-bottom: 1rem; font-size: 0.9rem; color: #666;">
-            <p style="margin: 0.25rem 0;">📧 ${student.email || "N/A"}</p>
-            <p style="margin: 0.25rem 0;">📱 ${student.mobileNumber || "N/A"}</p>
-            <p style="margin: 0.25rem 0;">📊 Progress: ${enrollment.progressPercentage || 0}%</p>
-          </div>
-          <div style="display: flex; gap: 0.75rem;">
-            <button onclick="callStudent('${student.mobileNumber || ""}')"
-                    style="flex: 1; padding: 0.5rem; background: #3b82f6; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">
-              📞 Call
-            </button>
-            <button onclick="whatsappStudent('${student.mobileNumber || ""}')"
-                    style="flex: 1; padding: 0.5rem; background: #25d366; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">
-              💬 Chat
-            </button>
-          </div>
-        </div>
-      `;
-    });
-
-    html += `</div></div>`;
-    container.innerHTML = html;
-  } catch (error) {
-    container.innerHTML = `<div style="color: red; padding: 2rem; text-align: center;">Error loading students: ${error.message}</div>`;
-  }
-}
 
 // WhatsApp Integration Function
 function openWhatsApp(teacherPhone, courseName) {
   // Validate phone number
   if (!teacherPhone || teacherPhone === "N/A" || teacherPhone.trim() === "") {
-    alert("Teacher phone number not available. Please contact the admin.");
+    showInfoPopup(
+      "Teacher phone number not available. Please contact the admin.",
+      "Contact Unavailable",
+    );
     return;
   }
 
@@ -1939,7 +2748,10 @@ function openWhatsApp(teacherPhone, courseName) {
 
   // Validate phone number format
   if (!cleanPhone || cleanPhone.length < 10) {
-    alert("Invalid phone number format. Please contact the admin.");
+    showInfoPopup(
+      "Invalid phone number format. Please contact the admin.",
+      "Invalid Contact",
+    );
     return;
   }
 
@@ -2044,7 +2856,7 @@ async function loadTeacherStudents() {
 // Call Student Function
 function callStudent(phoneNumber) {
   if (!phoneNumber || phoneNumber === "N/A" || phoneNumber.trim() === "") {
-    alert("Phone number not available");
+    showInfoPopup("Phone number not available", "Contact");
     return;
   }
   const cleanPhone = phoneNumber.replace(/[^\d+]/g, "");
@@ -2054,7 +2866,7 @@ function callStudent(phoneNumber) {
 // WhatsApp Student Function
 function whatsappStudent(phoneNumber) {
   if (!phoneNumber || phoneNumber === "N/A" || phoneNumber.trim() === "") {
-    alert("Phone number not available");
+    showInfoPopup("Phone number not available", "Contact");
     return;
   }
   const cleanPhone = phoneNumber.replace(/[^\d+]/g, "");
@@ -2074,10 +2886,17 @@ async function loadCourseStudents(courseId, courseTitle) {
       null,
       true,
     );
-    const enrollments = response.data || [];
+    let enrollments = response.data || [];
+
+    // Filter to show only active (approved) enrollments
+    enrollments = enrollments.filter((e) => e.status === "active");
 
     if (enrollments.length === 0) {
-      container.innerHTML = `<div style="text-align: center; padding: 2rem; color: #999;">No students enrolled in this course yet</div>`;
+      container.innerHTML = `
+        <div style="margin-top: 2rem; padding: 2rem; background: rgba(102, 126, 234, 0.1); border-radius: 12px; border-left: 4px solid #667eea; color: #667eea;">
+          <p style="margin: 0;">ℹ️ No approved students in this course yet. Students will appear here once their enrollments are approved by admin.</p>
+        </div>
+      `;
       return;
     }
 
@@ -2095,7 +2914,7 @@ async function loadCourseStudents(courseId, courseTitle) {
           <div style="margin-bottom: 1rem; font-size: 0.9rem; color: #666;">
             <p style="margin: 0.25rem 0;">📧 ${student.email || "N/A"}</p>
             <p style="margin: 0.25rem 0;">📱 ${student.mobileNumber || "N/A"}</p>
-            <p style="margin: 0.25rem 0;">📊 Progress: ${enrollment.progressPercentage || 0}%</p>
+            <p style="margin: 0.25rem 0;">📊 Progress: ${enrollment.progress || 0}%</p>
           </div>
           <div style="display: flex; gap: 0.75rem;">
             <button onclick="callStudent('${student.mobileNumber || ""}')"

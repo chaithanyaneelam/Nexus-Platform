@@ -278,11 +278,11 @@ class APIClient {
     );
   }
 
-  async submitTransaction(paymentId, transactionId) {
+  async submitTransaction(paymentId, utrNumber) {
     return this.request(
       `/payments/${paymentId}/submit-transaction`,
       "POST",
-      { transactionId },
+      { transactionId: utrNumber },
       true,
     );
   }

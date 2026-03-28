@@ -3,13 +3,19 @@ import { PAYMENT_STATUS } from "../config/constants";
 
 export interface IPayment extends Document {
   studentId: ObjectId;
+  studentName?: string;
   teacherId: ObjectId;
+  teacherName?: string;
+  teacherPhone?: string;
   courseId: ObjectId;
+  courseName?: string;
   enrollmentId: ObjectId;
   amount: number;
+  amountSent?: number; // Amount sent by student during payment submission
   adminCommission: number;
   teacherPayment: number;
   transactionId?: string; // Made optional - filled by student later
+  utrNumber?: string; // UTR/Transaction number provided by student
   status:
     | "payment_requested"
     | "transaction_submitted"
@@ -33,15 +39,31 @@ const PaymentSchema = new Schema<IPayment>(
       ref: "User",
       required: true,
     },
+    studentName: {
+      type: String,
+      default: null,
+    },
     teacherId: {
       type: Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
+    teacherName: {
+      type: String,
+      default: null,
+    },
+    teacherPhone: {
+      type: String,
+      default: null,
+    },
     courseId: {
       type: Schema.Types.ObjectId,
       ref: "Course",
       required: true,
+    },
+    courseName: {
+      type: String,
+      default: null,
     },
     enrollmentId: {
       type: Schema.Types.ObjectId,
@@ -52,6 +74,10 @@ const PaymentSchema = new Schema<IPayment>(
       type: Number,
       required: true,
       min: 0,
+    },
+    amountSent: {
+      type: Number,
+      default: null,
     },
     adminCommission: {
       type: Number,
@@ -64,6 +90,11 @@ const PaymentSchema = new Schema<IPayment>(
       min: 0,
     },
     transactionId: {
+      type: String,
+      default: null,
+      sparse: true,
+    },
+    utrNumber: {
       type: String,
       default: null,
       sparse: true,

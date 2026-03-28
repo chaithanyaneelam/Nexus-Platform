@@ -4,6 +4,12 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Nexus Platform - Learn from Industry Experts</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="css/style.css" />
     <link rel="stylesheet" href="css/responsive.css" />
   </head>
@@ -35,55 +41,17 @@
           <li id="adminMenuItem" style="display: none">
             <a href="#admin-dashboard" class="nav-link">Admin Dashboard</a>
           </li>
-          <li style="position: relative">
+          <li id="supportMenuItem" style="display: none">
+            <a href="#support" class="nav-link">Support</a>
+          </li>
+          <li>
             <a
-              href="javascript:void(0)"
+              href="#settings"
               class="nav-link"
               id="settingsLink"
-              style="display: none; cursor: pointer"
-              onclick="
-                toggleSettingsMenu();
-                return false;
-              "
+              style="display: none"
               >⚙️ Settings</a
             >
-            <div
-              class="settings-dropdown"
-              id="settingsMenu"
-              style="display: none"
-            >
-              <a
-                href="javascript:void(0)"
-                onclick="
-                  goToProfile();
-                  return false;
-                "
-                style="
-                  padding: 0.75rem 1rem;
-                  display: block;
-                  color: #333;
-                  text-decoration: none;
-                  border-bottom: 1px solid #eee;
-                  cursor: pointer;
-                "
-                >👤 Profile</a
-              >
-              <a
-                href="javascript:void(0)"
-                onclick="
-                  logout();
-                  return false;
-                "
-                style="
-                  padding: 0.75rem 1rem;
-                  display: block;
-                  color: #d32f2f;
-                  text-decoration: none;
-                  cursor: pointer;
-                "
-                >🚪 Logout</a
-              >
-            </div>
           </li>
           <li>
             <a href="#login" class="nav-link" id="loginLink">Login</a>
@@ -101,10 +69,79 @@
       <!-- This will be populated by the router -->
     </div>
 
+    <!-- Payment Modal -->
+    <div id="paymentModal" class="modal" style="display: none">
+      <div class="modal-content payment-modal">
+        <div class="modal-header">
+          <h2>💳 Submit Payment Details</h2>
+          <button class="modal-close" onclick="closePaymentModal()">
+            &times;
+          </button>
+        </div>
+        <form id="paymentForm" onsubmit="submitPaymentForm(event)">
+          <div class="form-group">
+            <label for="courseName">Course Name:</label>
+            <input
+              type="text"
+              id="courseName"
+              readonly
+              style="
+                background: #eef2ff;
+                color: #0f172a;
+                border: 1px solid #cbd5e1;
+                cursor: not-allowed;
+              "
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="courseAmount">Amount to Pay (₹):</label>
+            <input
+              type="number"
+              id="courseAmount"
+              readonly
+              style="
+                background: #eef2ff;
+                color: #0f172a;
+                border: 1px solid #cbd5e1;
+                cursor: not-allowed;
+              "
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="utrNumber">UTR / Transaction ID:</label>
+            <input
+              type="text"
+              id="utrNumber"
+              placeholder="e.g., SBIN0001234567"
+              required
+            />
+            <small style="color: #334155"
+              >Unique Transaction Reference number from your bank</small
+            >
+          </div>
+
+          <div class="form-actions">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              onclick="closePaymentModal()"
+            >
+              Cancel
+            </button>
+            <button type="submit" class="btn btn-primary">
+              Submit Payment
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
     <!-- Footer -->
     <footer class="footer">
       <p>
-        &copy; 2024 Nexus Platform. Learn from Industry Experts. All rights
+        &copy; 2026 Nexus Platform. Learn from Industry Experts. All rights
         reserved.
       </p>
     </footer>

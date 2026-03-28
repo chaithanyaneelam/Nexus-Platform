@@ -1,15 +1,18 @@
 import { AppError, ValidationError } from "../utils/errors";
 import { EnrollmentRepository } from "../repositories/EnrollmentRepository";
 import { CourseRepository } from "../repositories/CourseRepository";
+import { PaymentRepository } from "../repositories/PaymentRepository";
 import type { IEnrollment } from "../models/Enrollment";
 
 export class EnrollmentService {
   private enrollmentRepository: EnrollmentRepository;
   private courseRepository: CourseRepository;
+  private paymentRepository: PaymentRepository;
 
   constructor() {
     this.enrollmentRepository = new EnrollmentRepository();
     this.courseRepository = new CourseRepository();
+    this.paymentRepository = new PaymentRepository();
   }
 
   /**
@@ -74,7 +77,7 @@ export class EnrollmentService {
     );
     const total = await this.enrollmentRepository.countByStudent(studentId);
 
-    // Add enrollment counts to each enrolled course
+    // Add enrollment counts and payment data to each enrolled course
     const enrollmentsWithCounts = await Promise.all(
       enrollments.map(async (enrollment: any) => {
         const courseId =
@@ -97,6 +100,19 @@ export class EnrollmentService {
           typeof enrollmentObj.courseId === "object"
         ) {
           enrollmentObj.courseId.enrolledCount = enrolledCount;
+        }
+
+        // Fetch associated payment if enrollment status is payment_requested or higher
+        if (
+          enrollment.status === "payment_requested" ||
+          enrollment.status === "payment_submitted"
+        ) {
+          const payment = await this.paymentRepository.findByEnrollmentId(
+            enrollment._id.toString(),
+          );
+          if (payment) {
+            enrollmentObj.paymentId = payment._id;
+          }
         }
 
         return enrollmentObj;
@@ -450,7 +466,7 @@ export class EnrollmentService {
     const skip = (page - 1) * limit;
 
     // We need to use a different approach - get teachers from courses
-    const courses = await this.courseRepository.findAll(skip, limit);
+    const courses = await this.courseRepository.findAll({}, skip, limit);
     const total = await this.courseRepository.countAll();
 
     // Group by teacher

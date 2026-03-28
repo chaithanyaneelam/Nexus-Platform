@@ -20,18 +20,20 @@
     font-size: 1.3rem;
   }
 
-  .hero-section h1 {
-    font-size: 2rem;
-  }
-
   .hero-section {
     padding: 2rem 1rem;
     margin: 1rem;
   }
 
-  .features-section {
+  .hero-section h1 {
+    font-size: 2rem;
+  }
+
+  .features-section,
+  .courses-grid,
+  .dashboard-grid,
+  .enrollments-list {
     grid-template-columns: 1fr;
-    padding: 2rem 1rem;
   }
 
   .course-header {
@@ -40,30 +42,6 @@
 
   .course-header img {
     width: 100%;
-  }
-
-  .courses-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .dashboard-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .courses-table {
-    overflow-x: auto;
-  }
-
-  .courses-table table {
-    min-width: 600px;
-  }
-
-  .enrollments-list {
-    grid-template-columns: 1fr;
-  }
-
-  .auth-card {
-    padding: 2rem 1.5rem;
   }
 
   .button-group {
@@ -86,6 +64,83 @@
 
   .page-header .btn {
     width: 100%;
+  }
+
+  .courses-table,
+  .payment-table {
+    overflow-x: auto;
+  }
+
+  .courses-table table,
+  .payment-table table {
+    min-width: 600px;
+  }
+
+  .auth-card {
+    padding: 2rem 1.5rem;
+  }
+
+  .admin-hub-header {
+    flex-direction: column;
+  }
+
+  .admin-user-chip {
+    width: 100%;
+    min-width: unset;
+  }
+
+  .settings-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .settings-list div {
+    flex-direction: column;
+  }
+
+  .settings-list strong {
+    text-align: left;
+  }
+
+  .form-large {
+    padding: 1.5rem 1rem;
+  }
+
+  .payment-stats {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .stat-card {
+    padding: 1.5rem 1rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .navbar-menu {
+    gap: 0.75rem;
+  }
+
+  .navbar-menu a {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.85rem;
+  }
+
+  .user-info {
+    font-size: 0.85rem;
+  }
+
+  .hero-section {
+    padding: 1.5rem 1rem;
+  }
+
+  .hero-section h1 {
+    font-size: 1.8rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .course-meta {
+    grid-template-columns: 1fr;
+    gap: 1rem;
   }
 }
 
@@ -190,58 +245,30 @@
     font-size: 1.1rem;
   }
 
-  .course-detail-page {
-    padding: 1rem;
-  }
-
-  .course-header h1 {
-    font-size: 1.8rem;
-  }
-
-  .course-meta {
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  .course-content {
-    padding: 1.5rem 1rem;
-  }
-
+  .course-detail-page,
+  .courses-page,
   .dashboard {
     padding: 1rem;
   }
 
-  .dashboard h2 {
+  .dashboard h2,
+  .page-header h2 {
     font-size: 1.5rem;
     margin-bottom: 1.5rem;
   }
 
-  .dashboard-card {
-    padding: 1.5rem 1rem;
+  .dashboard-card,
+  .enrollment-card {
+    padding: 1.2rem 1rem;
   }
 
-  .dashboard-card h3 {
+  .dashboard-card h3,
+  .enrollment-card h3 {
     font-size: 1.1rem;
   }
 
   .dashboard-card p {
     font-size: 0.9rem;
-  }
-
-  .courses-page {
-    padding: 1rem;
-  }
-
-  .page-header h2 {
-    font-size: 1.5rem;
-  }
-
-  .enrollment-card {
-    padding: 1.2rem 1rem;
-  }
-
-  .enrollment-card h3 {
-    font-size: 1.1rem;
   }
 
   .enrollment-meta {
@@ -253,10 +280,7 @@
     font-size: 0.85rem;
   }
 
-  .courses-table th {
-    padding: 0.75rem;
-  }
-
+  .courses-table th,
   .courses-table td {
     padding: 0.75rem;
   }
@@ -319,338 +343,5 @@
 
   .course-header h1 {
     font-size: 1.4rem;
-  }
-}
-
-/* Responsive for grids and overlays */
-@media (max-width: 768px) {
-  /* Settings dropdown on mobile */
-  .settings-dropdown {
-    position: fixed;
-    top: auto;
-    bottom: auto;
-    right: auto;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 85vw;
-    max-width: 300px;
-  }
-
-  /* Grid layouts */
-  .my-courses-page [style*="grid"],
-  .teacher-students-page [style*="grid"],
-  .courses-grid,
-  .enrollments-list {
-    grid-template-columns: 1fr !important;
-  }
-
-  /* Course cards responsiveness */
-  .course-card {
-    width: 100%;
-  }
-
-  /* Dashboard grid */
-  .dashboard-grid {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-
-  /* Enrollment cards */
-  .my-enrollments-page [style*="grid"] {
-    grid-template-columns: 1fr;
-  }
-
-  /* Form responsiveness */
-  .form-large {
-    padding: 1.5rem 1rem;
-  }
-
-  /* Table responsiveness */
-  .courses-table {
-    overflow-x: auto;
-  }
-
-  .courses-table table {
-    font-size: 0.9rem;
-  }
-
-  /* Payment stats */
-  .payment-stats {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-
-  /* Stat cards */
-  .stat-card {
-    padding: 1.5rem 1rem;
-  }
-}
-
-@media (max-width: 600px) {
-  /* Navbar items should wrap */
-  .navbar-menu {
-    flex-wrap: wrap;
-    gap: 0.75rem;
-  }
-
-  .navbar-menu a {
-    padding: 0.5rem 0.75rem;
-    font-size: 0.85rem;
-  }
-
-  /* User info on mobile */
-  .user-info {
-    font-size: 0.85rem;
-  }
-
-  /* Hero section */
-  .hero-section {
-    padding: 1.5rem 1rem;
-  }
-
-  .hero-section h1 {
-    font-size: 1.8rem;
-    margin-bottom: 0.75rem;
-  }
-
-  .button-group {
-    flex-direction: column;
-    gap: 0.75rem;
-  }
-
-  .button-group .btn {
-    width: 100%;
-  }
-
-  /* Course detail */
-  .course-meta {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-
-  /* Page headers */
-  .page-header {
-    flex-direction: column;
-  }
-
-  .page-header .btn {
-    width: 100%;
-  }
-
-  /* Form groups */
-  .form-group {
-    margin-bottom: 1.5rem;
-  }
-
-  /* Buttons on forms */
-  .form-group .btn,
-  .auth-card .btn {
-    width: 100%;
-    padding: 0.75rem;
-  }
-
-  /* Course cards in grid */
-  [style*="grid-template-columns: repeat(auto-fill"] {
-    grid-template-columns: 1fr !important;
-  }
-
-  /* Dropdown menu responsiveness */
-  .settings-dropdown {
-    min-width: 150px;
-    right: 0;
-    left: auto;
-  }
-}
-
-@media (max-width: 480px) {
-  /* Extra small optimizations */
-  .navbar-container {
-    padding: 0.5rem;
-  }
-
-  .navbar-brand h1 {
-    font-size: 1rem;
-  }
-
-  .app-container {
-    padding: 1rem 0.75rem;
-  }
-
-  .dashboard {
-    padding: 0.75rem;
-  }
-
-  .auth-card {
-    padding: 1.25rem 1rem;
-    margin: 0.5rem 0.5rem;
-  }
-
-  table {
-    font-size: 0.75rem;
-  }
-
-  th,
-  td {
-    padding: 0.5rem 0.25rem;
-  }
-
-  .btn-small {
-    padding: 0.35rem 0.6rem;
-    font-size: 0.7rem;
-  }
-
-  /* Settings dropdown for very small screens */
-  .settings-dropdown {
-    width: 150px;
-    font-size: 0.9rem;
-  }
-
-  .settings-dropdown a {
-    padding: 0.6rem 0.75rem;
-  }
-
-  /* Highlight inputs */
-  .highlight-input-group {
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  .highlight-input,
-  .highlight-input-group .btn {
-    width: 100%;
-  }
-}
-
-/* Print Styles */
-@media print {
-  .navbar,
-  .footer,
-  .btn,
-  #profileLink,
-  #logoutLink {
-    display: none;
-  }
-
-  body {
-    background-color: white;
-    color: black;
-  }
-
-  .course-detail-page,
-  .profile-card {
-    box-shadow: none;
-    border: 1px solid #ccc;
-  }
-}
-
-/* Dark Mode (if system prefers it) */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg-color: #0f172a;
-    --text-color: #e2e8f0;
-    --card-bg: #1e293b;
-    --border-color: #334155;
-  }
-}
-
-/* Light Mode Alternative (Optional) */
-@media (prefers-color-scheme: light) {
-  :root {
-    --bg-color: #f8f9fa;
-    --text-color: #1e293b;
-    --card-bg: #ffffff;
-    --border-color: #e2e8f0;
-  }
-
-  .navbar {
-    border-bottom-color: #e2e8f0;
-  }
-
-  .course-card:hover,
-  .feature:hover,
-  .dashboard-card:hover,
-  .enrollment-card:hover {
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-  }
-}
-
-/* Large Desktops */
-@media (min-width: 1200px) {
-  .app-container {
-    max-width: 95%;
-  }
-
-  .courses-grid {
-    grid-template-columns: repeat(4, 1fr);
-  }
-
-  .dashboard-grid {
-    grid-template-columns: repeat(4, 1fr);
-  }
-
-  .features-section {
-    grid-template-columns: repeat(4, 1fr);
-  }
-
-  .enrollments-list {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-/* Landscape Orientation */
-@media (max-height: 500px) and (orientation: landscape) {
-  .navbar-container {
-    padding: 0.5rem 1rem;
-  }
-
-  .hero-section {
-    padding: 1.5rem 1rem;
-  }
-
-  .hero-section h1 {
-    margin-bottom: 0.5rem;
-  }
-
-  .auth-card {
-    max-height: 90vh;
-    overflow-y: auto;
-  }
-}
-
-/* Accessibility for reduced motion */
-@media (prefers-reduced-motion: reduce) {
-  * {
-    animation: none !important;
-    transition: none !important;
-  }
-}
-
-/* High contrast */
-@media (prefers-contrast: more) {
-  :root {
-    --border-color: #000;
-    --primary-color: #0066cc;
-  }
-
-  .btn-primary {
-    border: 2px solid black;
-  }
-}
-
-/* Touch-friendly sizes */
-@media (hover: none) and (pointer: coarse) {
-  .btn,
-  .nav-link,
-  a {
-    min-height: 44px;
-    min-width: 44px;
-    padding: 12px 16px;
-  }
-
-  .form-group input,
-  .form-group textarea,
-  .form-group select {
-    min-height: 44px;
-    padding: 12px;
   }
 }

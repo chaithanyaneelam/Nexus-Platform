@@ -3,6 +3,7 @@ import { PaymentRepository } from "../repositories/PaymentRepository";
 import { EnrollmentRepository } from "../repositories/EnrollmentRepository";
 import { CourseRepository } from "../repositories/CourseRepository";
 import type { IPayment } from "../models/Payment";
+import PaymentModel from "../models/Payment";
 
 export class PaymentService {
   private paymentRepository: PaymentRepository;
@@ -72,45 +73,73 @@ export class PaymentService {
   async submitTransactionId(
     paymentId: string,
     studentId: string,
-    transactionId: string,
+    transactionData: {
+      utrNumber: string;
+      transactionId?: string;
+    },
   ): Promise<IPayment> {
-    const payment = await this.paymentRepository.findById(paymentId);
+    let payment = await this.paymentRepository.findById(paymentId);
+
+    // FIX: If frontend accidentally passed the Enrollment ID directly, try to locate the corresponding Payment
+    if (!payment) {
+      const paymentByEnrollment = await PaymentModel.findOne({
+        enrollmentId: paymentId,
+        status: { $in: ["payment_requested", "transaction_submitted"] },
+      });
+      if (paymentByEnrollment) {
+        payment = paymentByEnrollment;
+      }
+    }
 
     if (!payment) {
       throw new AppError("Payment request not found", 404);
     }
 
-    if (payment.studentId.toString() !== studentId) {
+    const payStudentId = (payment.studentId as any)._id
+      ? (payment.studentId as any)._id.toString()
+      : payment.studentId.toString();
+
+    if (payStudentId !== studentId) {
       throw new AppError(
         "You can only submit transaction ID for your own payments",
         403,
       );
     }
 
-    if (payment.status !== "payment_requested") {
+    if (
+      payment.status !== "payment_requested" &&
+      payment.status !== "transaction_submitted"
+    ) {
       throw new ValidationError(
         `Cannot submit transaction ID for payment with status: ${payment.status}`,
       );
     }
 
-    // Check if transaction ID already exists
-    const existingPayment =
-      await this.paymentRepository.findByTransactionId(transactionId);
+    // Check if UTR number already exists
+    const existingPayment = await this.paymentRepository.findByTransactionId(
+      transactionData.utrNumber,
+    );
     if (existingPayment && existingPayment._id.toString() !== paymentId) {
       throw new ValidationError(
         "This transaction ID has already been submitted",
       );
     }
 
-    // Update payment
-    payment.transactionId = transactionId;
+    // Update payment with all details
+    payment.utrNumber = transactionData.utrNumber;
+    payment.amountSent = payment.amount; // Use expected amount
+    payment.transactionId =
+      transactionData.transactionId || transactionData.utrNumber;
     payment.status = "transaction_submitted";
     payment.transactionSubmittedAt = new Date();
     await payment.save();
 
-    const enrollment = await this.enrollmentRepository.findById(
-      payment.enrollmentId.toString(),
-    );
+    const enrollId = (payment.enrollmentId as any)._id
+      ? (payment.enrollmentId as any)._id.toString()
+      : payment.enrollmentId.toString();
+
+    const enrollment = await this.enrollmentRepository.findById(enrollId);
+
     if (enrollment) {
       enrollment.status = "payment_submitted" as any;
       enrollment.paymentStatus = "payment_submitted" as any;
@@ -252,6 +281,43 @@ export class PaymentService {
   }
 
   /**
+   * Get admin pending payments for review
+   */
+  async getAdminPendingPayments(page: number = 1, limit: number = 20) {
+    const skip = (page - 1) * limit;
+
+    let payments: IPayment[] = [];
+    let total = 0;
+
+    try {
+      const allPayments = await this.paymentRepository.findAll({}, 0, 999);
+      const pendingPayments = allPayments.filter(
+        (p) => p.status === "transaction_submitted" || p.status === "approved",
+      );
+      total = pendingPayments.length;
+      payments = pendingPayments.slice(skip, skip + limit);
+    } catch (error) {
+      total = 0;
+      payments = [];
+    }
+
+    return {
+      payments: payments.map((p) => ({
+        ...p.toObject(),
+        studentName: p.studentName || "Unknown",
+        courseName: p.courseName || "Unknown",
+        teacherName: p.teacherName || "Unknown",
+        teacherPhone: p.teacherPhone || "N/A",
+      })),
+      pagination: {
+        total,
+        page,
+        pages: Math.ceil(total / limit),
+      },
+    };
+  }
+
+  /**
    * Get admin dashboard stats
    */
   async getAdminStats() {
@@ -293,6 +359,93 @@ export class PaymentService {
         rejected: allPayments.filter((p) => p.status === "rejected").length,
       },
     };
+  }
+
+  /**
+   * Admin approves payment
+   */
+  async approvePayment(paymentId: string): Promise<IPayment> {
+    const payment = await this.paymentRepository.findById(paymentId);
+
+    if (!payment) {
+      throw new AppError("Payment not found", 404);
+    }
+
+    if (payment.status !== "transaction_submitted") {
+      throw new ValidationError(
+        `Cannot approve payment with status: ${payment.status}`,
+      );
+    }
+
+    // Update payment status
+    payment.status = "approved";
+    payment.adminApprovedAt = new Date();
+
+    // Update corresponding enrollment to active
+    const enrollment = await this.enrollmentRepository.findById(
+      payment.enrollmentId.toString(),
+    );
+    if (enrollment) {
+      enrollment.status = "active";
+      enrollment.paymentConfirmedAt = new Date();
+      await enrollment.save();
+    }
+
+    const updatedPayment = await this.paymentRepository.updateById(paymentId, {
+      status: "approved",
+      adminApprovedAt: new Date(),
+    } as any);
+
+    if (!updatedPayment) {
+      throw new AppError("Failed to update payment", 500);
+    }
+
+    return updatedPayment;
+  }
+
+  /**
+   * Admin rejects payment
+   */
+  async rejectPayment(
+    paymentId: string,
+    rejectionReason?: string,
+  ): Promise<IPayment> {
+    const payment = await this.paymentRepository.findById(paymentId);
+
+    if (!payment) {
+      throw new AppError("Payment not found", 404);
+    }
+
+    if (payment.status !== "transaction_submitted") {
+      throw new ValidationError(
+        `Cannot reject payment with status: ${payment.status}`,
+      );
+    }
+
+    // Update payment status
+    payment.status = "rejected";
+    payment.rejectionReason = rejectionReason;
+
+    // Update corresponding enrollment back to awaiting_admin_approval
+    const enrollment = await this.enrollmentRepository.findById(
+      payment.enrollmentId.toString(),
+    );
+    if (enrollment) {
+      enrollment.status = "awaiting_admin_approval";
+      enrollment.paymentStatus = "not_requested" as any;
+      await enrollment.save();
+    }
+
+    const updatedPayment = await this.paymentRepository.updateById(paymentId, {
+      status: "rejected",
+      rejectionReason,
+    } as any);
+
+    if (!updatedPayment) {
+      throw new AppError("Failed to update payment", 500);
+    }
+
+    return updatedPayment;
   }
 }
 

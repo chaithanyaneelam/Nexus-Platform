@@ -28,6 +28,17 @@ export class PaymentRepository {
   }
 
   /**
+   * Find payment by enrollment ID
+   */
+  async findByEnrollmentId(enrollmentId: string): Promise<IPayment | null> {
+    return await Payment.findOne({ enrollmentId })
+      .populate("studentId", "-password")
+      .populate("teacherId", "-password")
+      .populate("courseId")
+      .populate("enrollmentId");
+  }
+
+  /**
    * Find payments by student ID
    */
   async findByStudentId(studentId: string): Promise<IPayment[]> {
