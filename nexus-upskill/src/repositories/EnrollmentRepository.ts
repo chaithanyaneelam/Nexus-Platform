@@ -15,8 +15,7 @@ export class EnrollmentRepository {
   async findById(id: string): Promise<IEnrollment | null> {
     return await Enrollment.findById(id)
       .populate("studentId", "-password")
-      .populate("courseId")
-      .populate("courseId.teacherId", "-password");
+      .populate({ path: "courseId", populate: { path: "teacherId", select: "-password" } });
   }
 
   /**
@@ -39,8 +38,7 @@ export class EnrollmentRepository {
   ): Promise<IEnrollment[]> {
     return await Enrollment.find({ studentId })
       .populate("studentId", "-password")
-      .populate("courseId")
-      .populate("courseId.teacherId", "-password")
+      .populate({ path: "courseId", populate: { path: "teacherId", select: "-password" } })
       .skip(skip)
       .limit(limit)
       .sort({ createdAt: -1 });
@@ -63,8 +61,7 @@ export class EnrollmentRepository {
   ): Promise<IEnrollment[]> {
     return await Enrollment.find({ courseId })
       .populate("studentId", "-password")
-      .populate("courseId")
-      .populate("courseId.teacherId", "-password")
+      .populate({ path: "courseId", populate: { path: "teacherId", select: "-password" } })
       .skip(skip)
       .limit(limit)
       .sort({ createdAt: -1 });
@@ -99,8 +96,7 @@ export class EnrollmentRepository {
       runValidators: true,
     })
       .populate("studentId", "-password")
-      .populate("courseId")
-      .populate("courseId.teacherId", "-password");
+      .populate({ path: "courseId", populate: { path: "teacherId", select: "-password" } });
   }
 
   /**
@@ -117,8 +113,7 @@ export class EnrollmentRepository {
   async findAll(): Promise<IEnrollment[]> {
     return await Enrollment.find()
       .populate("studentId", "-password")
-      .populate("courseId")
-      .populate("courseId.teacherId", "-password");
+      .populate({ path: "courseId", populate: { path: "teacherId", select: "-password" } });
   }
 
   /**
@@ -138,8 +133,7 @@ export class EnrollmentRepository {
   ): Promise<IEnrollment[]> {
     return await Enrollment.find({ status })
       .populate("studentId", "-password")
-      .populate("courseId")
-      .populate("courseId.teacherId", "-password")
+      .populate({ path: "courseId", populate: { path: "teacherId", select: "-password" } })
       .skip(skip)
       .limit(limit)
       .sort({ createdAt: -1 });
@@ -163,8 +157,7 @@ export class EnrollmentRepository {
   ): Promise<IEnrollment[]> {
     return await Enrollment.find({ courseId: { $in: courseIds }, status })
       .populate("studentId", "-password")
-      .populate("courseId")
-      .populate("courseId.teacherId", "-password")
+      .populate({ path: "courseId", populate: { path: "teacherId", select: "-password" } })
       .skip(skip)
       .limit(limit)
       .sort({ createdAt: -1 });

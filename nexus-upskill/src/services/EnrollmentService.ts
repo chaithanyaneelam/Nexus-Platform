@@ -95,6 +95,17 @@ export class EnrollmentService {
         const enrollmentObj = enrollment.toObject
           ? enrollment.toObject()
           : enrollment;
+
+        // PRESERVE DEEP POPULATED TEACHER ID DATA
+        if (
+          enrollment.courseId &&
+          enrollment.courseId.teacherId &&
+          enrollmentObj.courseId &&
+          typeof enrollmentObj.courseId === "object"
+        ) {
+          enrollmentObj.courseId.teacherId = enrollment.courseId.teacherId;
+        }
+
         if (
           enrollmentObj.courseId &&
           typeof enrollmentObj.courseId === "object"

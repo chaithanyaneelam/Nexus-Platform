@@ -1450,8 +1450,9 @@ class Router {
           <p style="color: #cbd5e1; margin: 0 0 2rem 0; font-size: 1rem;">
             Review and process all student payments
           </p>
+        </div>
 
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+        <div style="display: flex; flex-direction: column; gap: 1.5rem; margin-bottom: 2rem;">
             <div style="background: linear-gradient(135deg, #667eea, #764ba2); padding: 1.5rem; border-radius: 12px; color: white; box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);">
               <h3 style="margin: 0 0 0.5rem 0; font-size: 0.9rem; opacity: 0.9;">⏳ Pending Review</h3>
               <p style="margin: 0; font-size: 2rem; font-weight: bold;" id="pending-count">0</p>
@@ -1520,7 +1521,7 @@ class Router {
                    onmouseover="this.style.borderColor='rgba(102, 126, 234, 0.3)'; this.style.boxShadow='0 8px 20px rgba(102, 126, 234, 0.15)'"
                    onmouseout="this.style.borderColor='rgba(102, 126, 234, 0.1)'; this.style.boxShadow='none'">
                 
-                <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem;">
+                <div style="display: flex; flex-direction: column; gap: 2rem;">
                   
                   <!-- Left Section: Student & Course Details -->
                   <div>
@@ -3051,7 +3052,13 @@ async function rejectPaymentInRouter(paymentId) {
 // WhatsApp Integration Function
 function openWhatsApp(teacherPhone, courseName) {
   // Validate phone number
-  if (!teacherPhone || teacherPhone === "N/A" || teacherPhone.trim() === "") {
+  if (
+    !teacherPhone ||
+    teacherPhone === "N/A" ||
+    teacherPhone === "undefined" ||
+    teacherPhone === "null" ||
+    String(teacherPhone).trim() === ""
+  ) {
     showInfoPopup(
       "Teacher phone number not available. Please contact the admin.",
       "Contact Unavailable",
