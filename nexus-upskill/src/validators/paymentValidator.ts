@@ -1,6 +1,5 @@
 import { z } from "zod";
 
-// Initialize payment
 export const InitiatePaymentSchema = z.object({
   courseId: z.string().min(1, "Course ID is required"),
 
@@ -13,7 +12,6 @@ export const InitiatePaymentSchema = z.object({
 
 export type InitiatePaymentBody = z.infer<typeof InitiatePaymentSchema>;
 
-// Verify payment (admin only)
 export const VerifyPaymentSchema = z.object({
   status: z.enum(["paid_to_teacher", "rejected"]),
   rejectionReason: z.string().optional(),

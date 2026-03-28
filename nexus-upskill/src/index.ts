@@ -4,20 +4,16 @@ import dotenv from "dotenv";
 import connectDB from "./config/database";
 import { APP_CONFIG } from "./config/constants";
 
-// Import routes
 import authRoutes from "./routes/authRoutes";
 import courseRoutes from "./routes/courseRoutes";
 import enrollmentRoutes from "./routes/enrollmentRoutes";
 import paymentRoutes from "./routes/paymentRoutes";
 import adminRoutes from "./routes/adminRoutes";
 
-// Load environment variables
 dotenv.config();
 
-// Initialize Express app
 const app: Express = express();
 
-// Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(
@@ -31,7 +27,6 @@ app.use(
   }),
 );
 
-// Health check route
 app.get("/api/health", (req: Request, res: Response) => {
   res.json({
     status: "success",
@@ -40,14 +35,12 @@ app.get("/api/health", (req: Request, res: Response) => {
   });
 });
 
-// Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/courses", courseRoutes);
 app.use("/api/enrollments", enrollmentRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/admin", adminRoutes);
 
-// Friendly validation error messages
 const validationMessages: Record<string, string> = {
   password:
     "Password must contain at least one uppercase letter, one lowercase letter, and one number. Minimum 6 characters.",
@@ -61,9 +54,7 @@ const validationMessages: Record<string, string> = {
   githubUrl: "Please enter a valid GitHub URL",
 };
 
-// Error handling middleware
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
-  // Handle Zod validation errors
   if (err.name === "ZodError") {
     const fieldErrors: Record<string, string> = {};
     err.errors.forEach((error: any) => {
@@ -80,7 +71,7 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
     });
   }
 
-  console.error("❌ Error:", err.message);
+  console.error("Error:", err.message);
   res.status(err.status || err.statusCode || 500).json({
     success: false,
     message: err.message || "Internal Server Error",
@@ -96,31 +87,27 @@ app.use((req: Request, res: Response) => {
   });
 });
 
-// Start server and connect to database
 const startServer = async (): Promise<void> => {
   try {
-    // Connect to MongoDB
     await connectDB();
 
-    // Start Express server
+    if (process.env.VERCEL) { return; }
+
     app.listen(APP_CONFIG.PORT, () => {
       console.log(
         `\n🎓 Nexus Upskill Server started on http://localhost:${APP_CONFIG.PORT}`,
       );
-      console.log(`📊 Environment: ${APP_CONFIG.NODE_ENV}`);
-      console.log("✅ Ready to accept requests!\n");
     });
   } catch (error) {
     if (error instanceof Error) {
-      console.error("❌ Failed to start server:", error.message);
+      console.error("Failed to start server:", error.message);
     } else {
-      console.error("❌ Failed to start server: Unknown error");
+      console.error("Failed to start server: Unknown error");
     }
     process.exit(1);
   }
 };
 
-// Start the server
 startServer();
 
 export default app;
