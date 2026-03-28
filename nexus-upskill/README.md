@@ -73,13 +73,10 @@ cd nexus-upskill
 # Install dependencies
 npm install
 
-# Create .env file from template
-cp .env.example .env
 
-# Update .env with your credentials
-# - MONGODB_URI: Your MongoDB Atlas connection string
-# - JWT_SECRET: Your secret key for JWT signing
-# - ADMIN_UPI_ID: Admin's UPI ID for payment processing
+cp .env
+
+
 ```
 
 ### 3. Run the Server
