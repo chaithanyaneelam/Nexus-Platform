@@ -1452,18 +1452,18 @@ class Router {
           </p>
         </div>
 
-        <div style="display: flex; flex-direction: column; gap: 1.5rem; margin-bottom: 2rem;">
-            <div style="background: linear-gradient(135deg, #667eea, #764ba2); padding: 1.5rem; border-radius: 12px; color: white; box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);">
+        <div style="display: flex; flex-direction: row; gap: 1.5rem; margin-bottom: 2rem;">
+            <div style="flex: 1; background: linear-gradient(135deg, #667eea, #764ba2); padding: 1.5rem; border-radius: 12px; color: white; box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);">
               <h3 style="margin: 0 0 0.5rem 0; font-size: 0.9rem; opacity: 0.9;">⏳ Pending Review</h3>
               <p style="margin: 0; font-size: 2rem; font-weight: bold;" id="pending-count">0</p>
               <p style="margin: 0.5rem 0 0 0; font-size: 0.85rem; opacity: 0.8;">Awaiting confirmation</p>
             </div>
-            <div style="background: linear-gradient(135deg, #10b981, #059669); padding: 1.5rem; border-radius: 12px; color: white; box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);">
+            <div style="flex: 1; background: linear-gradient(135deg, #10b981, #059669); padding: 1.5rem; border-radius: 12px; color: white; box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);">
               <h3 style="margin: 0 0 0.5rem 0; font-size: 0.9rem; opacity: 0.9;">✅ Approved</h3>
               <p style="margin: 0; font-size: 2rem; font-weight: bold;" id="completed-count">0</p>
               <p style="margin: 0.5rem 0 0 0; font-size: 0.85rem; opacity: 0.8;">Successfully confirmed</p>
             </div>
-            <div style="background: linear-gradient(135deg, #f59e0b, #d97706); padding: 1.5rem; border-radius: 12px; color: white; box-shadow: 0 8px 20px rgba(245, 158, 11, 0.3);">
+            <div style="flex: 1; background: linear-gradient(135deg, #f59e0b, #d97706); padding: 1.5rem; border-radius: 12px; color: white; box-shadow: 0 8px 20px rgba(245, 158, 11, 0.3);">
               <h3 style="margin: 0 0 0.5rem 0; font-size: 0.9rem; opacity: 0.9;">💵 Total Revenue</h3>
               <p style="margin: 0; font-size: 2rem; font-weight: bold;" id="total-revenue">₹0</p>
               <p style="margin: 0.5rem 0 0 0; font-size: 0.85rem; opacity: 0.8;">Platform commission</p>

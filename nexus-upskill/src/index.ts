@@ -18,11 +18,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(
   cors({
-    origin: [
-      "http://localhost:3000",
-      "http://localhost:5500",
-      "http://127.0.0.1:5500",
-    ],
+    origin: true,
     credentials: true,
   }),
 );
@@ -91,7 +87,9 @@ const startServer = async (): Promise<void> => {
   try {
     await connectDB();
 
-    if (process.env.VERCEL) { return; }
+    if (process.env.VERCEL) {
+      return;
+    }
 
     app.listen(APP_CONFIG.PORT, () => {
       console.log(
