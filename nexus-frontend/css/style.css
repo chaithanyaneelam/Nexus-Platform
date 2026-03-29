@@ -24,6 +24,11 @@
   --transition: all 0.3s ease;
 }
 
+html,
+body {
+  overflow-x: hidden;
+}
+
 body {
   font-family:
     "Plus Jakarta Sans", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
@@ -44,6 +49,8 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  min-height: 100dvh;
+  overflow-x: hidden;
 }
 
 a {
@@ -756,7 +763,8 @@ a:hover {
   border-top: 1px solid var(--border-color);
   text-align: center;
   padding: 2rem;
-  margin-top: 4rem;
+  margin-top: auto;
+  width: 100%;
   color: #cbd5e1;
 }
 
@@ -765,7 +773,7 @@ a:hover {
   max-width: 1400px;
   margin: 0 auto;
   width: 100%;
-  flex: 1;
+  flex: 1 0 auto;
 }
 
 /* ===== Admin Hub ===== */
