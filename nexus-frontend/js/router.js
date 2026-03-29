@@ -566,12 +566,6 @@ class Router {
                     <p style="margin: 0.25rem 0; color: #666; font-size: 0.85rem;">
                       Role: ${teacher.profession || teacher.role || "Instructor"}
                     </p>
-                    ${
-                      teacher.mobileNumber
-                        ? `<p style="margin: 0.25rem 0; color: #666; font-size: 0.85rem;">📞 Contact: ${teacher.mobileNumber}</p>
-                    <a href="https://wa.me/${teacher.mobileNumber.replace(/[^\d+]/g, "")}" target="_blank" style="display: inline-block; margin-top: 5px; color: #25d366; font-weight: bold; text-decoration: none;">💬 WhatsApp</a>`
-                        : ""
-                    }
                     <div style="margin-top: 0.5rem; display: flex; gap: 0.75rem;">
                       ${teacher.linkedinUrl ? `<a href="${teacher.linkedinUrl}" target="_blank" style="color: #0077b5; text-decoration: none; font-size: 0.85rem; font-weight: bold;">🔗 LinkedIn</a>` : ""}
                       ${teacher.githubUrl ? `<a href="${teacher.githubUrl}" target="_blank" style="color: #333; text-decoration: none; font-size: 0.85rem; font-weight: bold;">🐙 GitHub</a>` : ""}
@@ -3070,7 +3064,11 @@ function openWhatsApp(teacherPhone, courseName) {
   const message = `Hey Sir/Ma'am, 👋\n\nI have registered your ${courseName} course and I need your teaching and guidance to master it!\n\nLooking forward to learning from you. 🙏`;
 
   // Clean phone number (remove special characters except +)
-  const cleanPhone = teacherPhone.replace(/[^\d+]/g, "");
+  let cleanPhone = teacherPhone.replace(/[^\d]/g, "");
+
+  if (cleanPhone.length === 10) {
+    cleanPhone = "91" + cleanPhone;
+  }
 
   // Validate phone number format
   if (!cleanPhone || cleanPhone.length < 10) {
@@ -3185,7 +3183,8 @@ function callStudent(phoneNumber) {
     showInfoPopup("Phone number not available", "Contact");
     return;
   }
-  const cleanPhone = phoneNumber.replace(/[^\d+]/g, "");
+  let cleanPhone = phoneNumber.replace(/[^\d]/g, "");
+  if (cleanPhone.length === 10) cleanPhone = "91" + cleanPhone;
   window.location.href = `tel:${cleanPhone}`;
 }
 
@@ -3195,7 +3194,8 @@ function whatsappStudent(phoneNumber) {
     showInfoPopup("Phone number not available", "Contact");
     return;
   }
-  const cleanPhone = phoneNumber.replace(/[^\d+]/g, "");
+  let cleanPhone = phoneNumber.replace(/[^\d]/g, "");
+  if (cleanPhone.length === 10) cleanPhone = "91" + cleanPhone;
   const whatsappURL = `https://wa.me/${cleanPhone}`;
   window.open(whatsappURL, "_blank");
 }
@@ -3245,13 +3245,20 @@ async function loadCourseStudents(courseId, courseTitle) {
     );
     let enrollments = response.data || [];
 
-    // Filter to show only active (approved) enrollments
-    enrollments = enrollments.filter((e) => e.status === "active");
+    // Only show active and pending enrollments
+    enrollments = enrollments.filter((e) =>
+      [
+        "active",
+        "awaiting_admin_approval",
+        "payment_requested",
+        "payment_submitted",
+      ].includes(e.status),
+    );
 
     if (enrollments.length === 0) {
       container.innerHTML = `
         <div style="margin-top: 2rem; padding: 2rem; background: rgba(102, 126, 234, 0.1); border-radius: 12px; border-left: 4px solid #667eea; color: #667eea;">
-          <p style="margin: 0;">ℹ️ No approved students in this course yet. Students will appear here once their enrollments are approved by admin.</p>
+          <p style="margin: 0;">ℹ️ No students in this course yet.</p>
         </div>
       `;
       return;
@@ -3265,21 +3272,28 @@ async function loadCourseStudents(courseId, courseTitle) {
 
     enrollments.forEach((enrollment) => {
       const student = enrollment.studentId;
+      const isActive = enrollment.status === "active";
+
       html += `
         <div style="background: white; border: 2px solid #ddd; border-radius: 12px; padding: 1.5rem;">
-          <h4 style="margin: 0 0 0.75rem 0; color: #333;">${student.name || "Unknown"}</h4>
+          <h4 style="margin: 0 0 0.5rem 0; color: #333;">${student.name || "Unknown"}</h4>
+          ${!isActive ? `<span style="display: inline-block; margin-bottom: 0.75rem; background: #fff3cd; color: #856404; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem; font-weight: bold;">Pending Admin Approval</span>` : `<span style="display: inline-block; margin-bottom: 0.75rem; background: #d1fae5; color: #065f46; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem; font-weight: bold;">Active</span>`}
           <div style="margin-bottom: 1rem; font-size: 0.9rem; color: #666;">
             <p style="margin: 0.25rem 0;">📧 ${student.email || "N/A"}</p>
-            <p style="margin: 0.25rem 0;">📱 ${student.mobileNumber || "N/A"}</p>
+            ${
+              isActive
+                ? `<p style="margin: 0.25rem 0;">📱 ${student.mobileNumber || "N/A"}</p>`
+                : `<p style="margin: 0.25rem 0; color: #ff9800; font-style: italic;">📱 Mobile hidden until approved</p>`
+            }
             <p style="margin: 0.25rem 0;">📊 Progress: ${enrollment.progress || 0}%</p>
           </div>
           <div style="display: flex; gap: 0.75rem;">
-            <button onclick="callStudent('${student.mobileNumber || ""}')"
-                    style="flex: 1; padding: 0.5rem; background: #3b82f6; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">
+            <button onclick="${isActive ? `callStudent('${student.mobileNumber || ""}')` : `showInfoPopup('Student phone hidden until admin approval')`}"
+                    style="flex: 1; padding: 0.5rem; background: ${isActive ? "#3b82f6" : "#ccc"}; color: white; border: none; border-radius: 6px; cursor: ${isActive ? "pointer" : "not-allowed"}; font-weight: 600;">
               📞 Call
             </button>
-            <button onclick="whatsappStudent('${student.mobileNumber || ""}')"
-                    style="flex: 1; padding: 0.5rem; background: #25d366; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">
+            <button onclick="${isActive ? `whatsappStudent('${student.mobileNumber || ""}')` : `showInfoPopup('Student chat hidden until admin approval')`}"
+                    style="flex: 1; padding: 0.5rem; background: ${isActive ? "#25d366" : "#ccc"}; color: white; border: none; border-radius: 6px; cursor: ${isActive ? "pointer" : "not-allowed"}; font-weight: 600;">
               💬 Chat
             </button>
           </div>
