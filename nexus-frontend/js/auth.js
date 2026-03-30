@@ -256,7 +256,11 @@ window.handleGoogleLogin = async function (response) {
         loginMessageDiv.textContent = "Google Sign-In successful!";
       }
       setTimeout(() => {
-        router.redirectToDashboard();
+        if (response.data.needsOnboarding) {
+          window.location.href = "onboarding.html";
+        } else {
+          router.redirectToDashboard();
+        }
       }, 1500);
     } else {
       if (loginMessageDiv) {

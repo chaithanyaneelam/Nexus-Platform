@@ -108,6 +108,7 @@ export class AuthController {
         data: {
           user: userObj,
           token,
+          needsOnboarding: !userObj.isProfileComplete,
         },
       });
     } catch (error: any) {

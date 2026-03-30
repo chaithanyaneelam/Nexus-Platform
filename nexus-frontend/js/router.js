@@ -607,6 +607,10 @@ class Router {
 
     try {
       const response = await api.getAllCourses();
+
+      // Prevent race conditions if user navigated away while fetching
+      if (this.currentRoute !== "courses") return;
+
       let courses = response.data || [];
 
       // Filter courses based on user role
@@ -766,6 +770,10 @@ class Router {
               <input type="text" value="${user.role.toUpperCase()}" disabled>
             </div>
             <div class="form-group">
+              <label for="mobileNumber">Mobile Number:</label>
+              <input type="tel" id="mobileNumber" name="mobileNumber" value="${user.mobileNumber || ""}" pattern="[0-9]{10}" placeholder="10-digit mobile number">
+            </div>
+            <div class="form-group">
               <label for="linkedinUrl">LinkedIn URL:</label>
               <input type="url" id="linkedinUrl" name="linkedinUrl" value="${user.linkedinUrl || ""}" placeholder="https://linkedin.com/in/yourprofile">
             </div>
@@ -801,10 +809,12 @@ class Router {
       .addEventListener("submit", async (e) => {
         e.preventDefault();
         const name = document.getElementById("name").value;
+        const mobileNumber = document.getElementById("mobileNumber").value;
         const linkedinUrl = document.getElementById("linkedinUrl").value;
         const githubUrl = document.getElementById("githubUrl").value;
         const result = await auth.updateProfile({
           name,
+          mobileNumber,
           linkedinUrl,
           githubUrl,
         });

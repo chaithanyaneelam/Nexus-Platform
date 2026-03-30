@@ -86,7 +86,8 @@ export const UpdateProfileSchema = z.object({
   mobileNumber: z
     .string()
     .regex(/^[0-9]{10}$/, "Mobile number must be 10 digits")
-    .optional(),
+    .optional()
+    .or(z.literal("")),
 
   company: z.string().optional(),
   linkedinUrl: z.string().url().optional().or(z.literal("")),

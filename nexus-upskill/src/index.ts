@@ -5,6 +5,7 @@ import connectDB from "./config/database";
 import { APP_CONFIG } from "./config/constants";
 
 import authRoutes from "./routes/authRoutes";
+import userRoutes from "./routes/userRoutes";
 import courseRoutes from "./routes/courseRoutes";
 import enrollmentRoutes from "./routes/enrollmentRoutes";
 import paymentRoutes from "./routes/paymentRoutes";
@@ -52,6 +53,7 @@ app.get("/api/health", (req: Request, res: Response) => {
 });
 
 app.use("/api/auth", authRoutes);
+app.use("/api/users", userRoutes);
 app.use("/api/courses", courseRoutes);
 app.use("/api/enrollments", enrollmentRoutes);
 app.use("/api/payments", paymentRoutes);

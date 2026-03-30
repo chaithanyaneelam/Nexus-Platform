@@ -5,8 +5,6 @@
 
 const API_BASE_URL = "https://nexus-platform-three.vercel.app/api";
 
-// const API_BASE_URL = "http://localhost:5001/api";
-
 class APIClient {
   constructor(baseURL = API_BASE_URL) {
     this.baseURL = baseURL;
@@ -81,6 +79,15 @@ class APIClient {
 
   async changePassword(passwordData) {
     return this.request("/auth/change-password", "POST", passwordData, true);
+  }
+
+  async completeOnboarding(onboardingData) {
+    return this.request(
+      "/users/complete-onboarding",
+      "PATCH",
+      onboardingData,
+      true,
+    );
   }
 
   // ===== Courses =====

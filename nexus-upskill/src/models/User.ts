@@ -19,6 +19,7 @@ export interface IUser extends Document {
   authProvider: "local" | "google";
   googleId?: string;
   sessionToken?: string;
+  isProfileComplete?: boolean;
   createdAt: Date;
   updatedAt: Date;
   comparePassword(password: string): Promise<boolean>;
@@ -61,6 +62,10 @@ const UserSchema = new Schema<IUser>(
     sessionToken: {
       type: String,
       default: null,
+    },
+    isProfileComplete: {
+      type: Boolean,
+      default: false,
     },
     mobileNumber: {
       type: String,
