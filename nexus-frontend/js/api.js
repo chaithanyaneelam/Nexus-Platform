@@ -3,9 +3,9 @@
  * Handles all communication with the backend server
  */
 
-// const API_BASE_URL = "https://nexus-platform-three.vercel.app/api";
+const API_BASE_URL = "https://nexus-platform-three.vercel.app/api";
 
-const API_BASE_URL = "http://localhost:5001/api";
+// const API_BASE_URL = "http://localhost:5001/api";
 
 class APIClient {
   constructor(baseURL = API_BASE_URL) {
