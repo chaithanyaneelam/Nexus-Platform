@@ -297,23 +297,23 @@ class Router {
 
       // Show menu items based on role
       if (user.role === "student") {
-        coursesMenuItem.style.display = "inline";
-        yourCoursesMenuItem.style.display = "inline";
-        myEnrollmentsMenuItem.style.display = "inline";
-        supportMenuItem.style.display = "inline";
-        documentationsMenuItem.style.display = "inline";
+        coursesMenuItem.style.display = "block";
+        yourCoursesMenuItem.style.display = "block";
+        myEnrollmentsMenuItem.style.display = "block";
+        supportMenuItem.style.display = "block";
+        documentationsMenuItem.style.display = "block";
       } else if (user.role === "teacher") {
-        myCoursesMenuItem.style.display = "inline";
-        studentsMenuItem.style.display = "inline";
-        supportMenuItem.style.display = "inline";
-        documentationsMenuItem.style.display = "inline";
+        myCoursesMenuItem.style.display = "block";
+        studentsMenuItem.style.display = "block";
+        supportMenuItem.style.display = "block";
+        documentationsMenuItem.style.display = "block";
       } else if (user.role === "admin") {
-        coursesMenuItem.style.display = "inline";
-        adminMenuItem.style.display = "inline";
-        documentationsMenuItem.style.display = "inline";
+        coursesMenuItem.style.display = "block";
+        adminMenuItem.style.display = "block";
+        documentationsMenuItem.style.display = "block";
       }
     } else {
-      loginLink.style.display = "inline";
+      loginLink.style.display = "block";
       settingsLink.style.display = "none";
       userInfo.style.display = "none";
 

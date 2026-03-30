@@ -110,6 +110,10 @@ a:hover {
   justify-content: center;
 }
 
+.navbar-menu li {
+  white-space: nowrap;
+}
+
 .navbar-menu a {
   color: var(--text-color);
   transition: var(--transition);

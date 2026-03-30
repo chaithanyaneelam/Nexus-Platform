@@ -39,6 +39,8 @@
     ); /* Premium gradient */
     flex-direction: column;
     align-items: flex-start;
+    justify-content: flex-start;
+    flex-wrap: nowrap;
     padding: 5rem 2rem 2rem 2rem;
     transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1); /* Smoother transition */
     z-index: 1000;
@@ -58,11 +60,13 @@
 
   .navbar-menu a {
     display: block;
-    font-size: 1.4rem; /* Larger text */
+    font-size: 1.25rem; /* Slightly smaller for better fit */
     padding: 1rem 1.5rem;
     color: #f8fafc;
     border-radius: 8px;
     transition: all 0.3s ease;
+    text-align: left;
+    width: 100%;
   }
 
   .navbar-menu a:hover {

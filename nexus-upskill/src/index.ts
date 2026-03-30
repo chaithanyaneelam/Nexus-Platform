@@ -23,6 +23,26 @@ app.use(
   }),
 );
 
+// Root route handler
+app.get("/", (req: Request, res: Response) => {
+  res.send(`
+    <html>
+      <head><title>Nexus Upskill API</title></head>
+      <body style="font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background-color: #0f172a; color: #f8fafc; margin: 0;">
+        <div style="text-align: center; max-width: 600px; padding: 2rem; background: #1e293b; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
+          <h1 style="color: #67e8f9; margin-bottom: 1rem;">🚀 Nexus Upskill API</h1>
+          <p style="font-size: 1.1rem; line-height: 1.6; margin-bottom: 1.5rem;">
+            The backend server is running successfully. This is the API endpoint.
+          </p>
+          <a href="https://nexus-platform-frontend.vercel.app" style="display: inline-block; padding: 0.75rem 1.5rem; background: #0f766e; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; transition: background 0.3s;" onmouseover="this.style.background='#134e4a'" onmouseout="this.style.background='#0f766e'">
+            Go to Frontend Application
+          </a>
+        </div>
+      </body>
+    </html>
+  `);
+});
+
 app.get("/api/health", (req: Request, res: Response) => {
   res.json({
     status: "success",
