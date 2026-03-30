@@ -209,3 +209,68 @@ class AuthManager {
 
 // Create global auth manager instance
 const auth = new AuthManager();
+
+// Global loading function
+window.toggleLoading = function (button, isLoading) {
+  if (!button) return;
+  if (isLoading) {
+    if (!button.dataset.originalText) {
+      button.dataset.originalText = button.innerHTML;
+    }
+    button.classList.add("btn-loading");
+    button.innerHTML = "";
+    button.disabled = true;
+  } else {
+    button.classList.remove("btn-loading");
+    if (button.dataset.originalText) {
+      button.innerHTML = button.dataset.originalText;
+    }
+    button.disabled = false;
+  }
+};
+
+// Global Google Login callback handler
+window.handleGoogleLogin = async function (response) {
+  const credential = response.credential;
+  if (!credential) return;
+
+  const loginMessageDiv =
+    document.getElementById("loginMessage") ||
+    document.getElementById("registerMessage");
+  if (loginMessageDiv) {
+    loginMessageDiv.className = "message";
+    loginMessageDiv.textContent = "Authenticating with Google...";
+  }
+
+  try {
+    // If there's a role dropdown on the register page, pass it along. Default to student.
+    const roleElem = document.getElementById("role");
+    const role = roleElem ? roleElem.value : "student";
+
+    const response = await api.googleLogin(credential, role);
+
+    if (response.success && response.data?.token) {
+      auth.setSession(response.data.token, response.data.user);
+      if (loginMessageDiv) {
+        loginMessageDiv.className = "message success";
+        loginMessageDiv.textContent = "Google Sign-In successful!";
+      }
+      setTimeout(() => {
+        router.redirectToDashboard();
+      }, 1500);
+    } else {
+      if (loginMessageDiv) {
+        loginMessageDiv.className = "message error";
+        loginMessageDiv.textContent =
+          response.message || "Google Sign-In failed";
+      }
+    }
+  } catch (error) {
+    console.error("Google Sign-In error:", error);
+    if (loginMessageDiv) {
+      loginMessageDiv.className = "message error";
+      loginMessageDiv.textContent =
+        "Failed to connect to Google Sign-In service.";
+    }
+  }
+};

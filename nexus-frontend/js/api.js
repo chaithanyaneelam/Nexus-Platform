@@ -3,7 +3,9 @@
  * Handles all communication with the backend server
  */
 
-const API_BASE_URL = "https://nexus-platform-three.vercel.app/api";
+// const API_BASE_URL = "https://nexus-platform-three.vercel.app/api";
+
+const API_BASE_URL = "http://localhost:5001/api";
 
 class APIClient {
   constructor(baseURL = API_BASE_URL) {
@@ -63,6 +65,10 @@ class APIClient {
 
   async login(email, password) {
     return this.request("/auth/login", "POST", { email, password });
+  }
+
+  async googleLogin(credential, role = "student") {
+    return this.request("/auth/google", "POST", { credential, role });
   }
 
   async getProfile() {

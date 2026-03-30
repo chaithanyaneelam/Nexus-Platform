@@ -26,7 +26,7 @@ app.use(
 app.get("/api/health", (req: Request, res: Response) => {
   res.json({
     status: "success",
-    message: "🚀 Nexus Upskill API is running!",
+    message: "Nexus Upskill API is running!",
     timestamp: new Date().toISOString(),
   });
 });

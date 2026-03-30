@@ -10,6 +10,11 @@
     justify-content: space-between;
     align-items: center;
     position: relative;
+    padding: 1rem;
+  }
+
+  .navbar-brand h1 {
+    font-size: 1.25rem;
   }
 
   .menu-toggle {

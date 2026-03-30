@@ -17,6 +17,11 @@ router.post("/register", (req, res, next) =>
 // Login user
 router.post("/login", (req, res, next) => authController.login(req, res, next));
 
+// Google Login
+router.post("/google", (req, res, next) =>
+  authController.googleLogin(req, res, next),
+);
+
 /**
  * Protected Routes (Authenticated users only)
  */

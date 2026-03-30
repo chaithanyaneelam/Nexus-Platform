@@ -36,9 +36,10 @@ export class AuthService {
     // Create user - password hashing is handled by User model's pre-save hook
     const userData = {
       ...data,
+      authProvider: "local",
     };
 
-    const user = await this.userRepository.create(userData as any);
+    let user = await this.userRepository.create(userData as any);
 
     // Generate JWT token
     const token = generateToken({
@@ -47,11 +48,23 @@ export class AuthService {
       role: user.role,
     });
 
+    const updatedUser = await this.userRepository.updateById(
+      user._id.toString(),
+      {
+        sessionToken: token,
+      },
+    );
+
+    if (!updatedUser) {
+      throw new ValidationError("Failed to update session token");
+    }
+
     // Return user data without password
-    const { password, ...userWithoutPassword } = user.toObject();
+    const { password, sessionToken, ...userWithoutPassword } =
+      updatedUser.toObject();
 
     return {
-      user: userWithoutPassword,
+      user: userWithoutPassword as any,
       token,
     };
   }
@@ -64,7 +77,7 @@ export class AuthService {
     password: string,
   ): Promise<{ user: Partial<IUser>; token: string }> {
     // Find user by email
-    const user = await this.userRepository.findByEmail(email);
+    let user = await this.userRepository.findByEmail(email);
     if (!user) {
       throw new ValidationError("Invalid email or password");
     }
@@ -82,11 +95,26 @@ export class AuthService {
       role: user.role,
     });
 
+    const updatedUser = await this.userRepository.updateById(
+      user._id.toString(),
+      {
+        sessionToken: token,
+      },
+    );
+
+    if (!updatedUser) {
+      throw new ValidationError("Failed to update session token");
+    }
+
     // Return user data without password
-    const { password: _, ...userWithoutPassword } = user.toObject();
+    const {
+      password: _,
+      sessionToken,
+      ...userWithoutPassword
+    } = updatedUser.toObject();
 
     return {
-      user: userWithoutPassword,
+      user: userWithoutPassword as any,
       token,
     };
   }
@@ -144,8 +172,8 @@ export class AuthService {
       throw new AppError("User not found", 404);
     }
 
-    const { password, ...userWithoutPassword } = user.toObject();
-    return userWithoutPassword;
+    const { password, sessionToken, ...userWithoutPassword } = user.toObject();
+    return userWithoutPassword as any;
   }
 
   /**
@@ -170,8 +198,9 @@ export class AuthService {
     }
 
     const updatedUser = await this.userRepository.updateById(userId, data);
-    const { password, ...userWithoutPassword } = updatedUser!.toObject();
+    const { password, sessionToken, ...userWithoutPassword } =
+      updatedUser!.toObject();
 
-    return userWithoutPassword;
+    return userWithoutPassword as any;
   }
 }

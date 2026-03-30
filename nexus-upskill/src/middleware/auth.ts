@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { verifyToken, ITokenPayload } from "../utils/jwt";
 import { createError } from "../utils/errors";
 import { ROLES } from "../config/constants";
+import User from "../models/User";
 
 /**
  * Extend Express Request to include user data
@@ -15,13 +16,13 @@ declare global {
 }
 
 /**
- * Authentication Middleware - Verifies JWT token
+ * Authentication Middleware - Verifies JWT token and checks if it matches DB session.
  */
-export const authenticate = (
+export const authenticate = async (
   req: Request,
   res: Response,
   next: NextFunction,
-): void => {
+): Promise<void> => {
   try {
     // Get token from Authorization header
     const authHeader = req.headers.authorization;
@@ -35,6 +36,15 @@ export const authenticate = (
 
     if (!decoded) {
       throw createError(401, "Invalid or expired token");
+    }
+
+    // Connect to DB to ensure this is the active session token
+    const user = await User.findById(decoded.userId);
+    if (!user || user.sessionToken !== token) {
+      throw createError(
+        401,
+        "Session expired or invalid token. Please log in again.",
+      );
     }
 
     // Attach user info to request object

@@ -16,6 +16,9 @@ export interface IUser extends Document {
   company?: string; // For employees
   adminEscrowBalance: number;
   teacherWalletBalance: number;
+  authProvider: "local" | "google";
+  googleId?: string;
+  sessionToken?: string;
   createdAt: Date;
   updatedAt: Date;
   comparePassword(password: string): Promise<boolean>;
@@ -44,6 +47,20 @@ const UserSchema = new Schema<IUser>(
       type: String as any,
       enum: [ROLES.ADMIN, ROLES.TEACHER, ROLES.STUDENT],
       default: ROLES.STUDENT,
+    },
+    authProvider: {
+      type: String,
+      enum: ["local", "google"],
+      default: "local",
+    },
+    googleId: {
+      type: String,
+      default: null,
+      sparse: true,
+    },
+    sessionToken: {
+      type: String,
+      default: null,
     },
     mobileNumber: {
       type: String,

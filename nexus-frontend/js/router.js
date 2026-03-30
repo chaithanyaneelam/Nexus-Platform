@@ -385,21 +385,65 @@ class Router {
               <label for="password">Password:</label>
               <input type="password" id="password" name="password" required>
             </div>
-            <button type="submit" class="btn btn-primary">Login</button>
+            <button type="submit" class="btn btn-primary" id="loginBtn" style="width: 100%;">Login</button>
           </form>
+
+          <div class="divider" style="text-align: center; margin: 20px 0; color: #cbd5e1; display:flex; align-items:center;">
+            <hr style="flex:1; border:none; border-top:1px solid #334155;">
+            <span style="padding: 0 10px; font-size: 0.875rem;">OR</span>
+            <hr style="flex:1; border:none; border-top:1px solid #334155;">
+          </div>
+          
+          <div class="google-login-container" id="googleBtnContainer" style="display: flex; justify-content: center; margin-bottom: 20px;">
+            <!-- Google button will be rendered here dynamically -->
+          </div>
+          
           <p class="auth-link">Don't have an account? <a href="#register">Register here</a></p>
           <div id="loginMessage" class="message"></div>
         </div>
       </div>
     `;
 
+    // Render Google Button via JavaScript API (works correctly for SPAs)
+    const renderGoogleBtn = setInterval(() => {
+      if (
+        window.google &&
+        window.google.accounts &&
+        document.getElementById("googleBtnContainer")
+      ) {
+        clearInterval(renderGoogleBtn);
+        window.google.accounts.id.initialize({
+          client_id:
+            "972878196372-rh96kcu502h3r0jucr4mcapa37ao3nud.apps.googleusercontent.com",
+          callback: window.handleGoogleLogin,
+        });
+        window.google.accounts.id.renderButton(
+          document.getElementById("googleBtnContainer"),
+          {
+            theme: "filled_blue", // Changed UI: Blue filled button
+            size: "large",
+            shape: "pill", // Changed UI: Pill shaped
+            text: "continue_with", // "Continue with Google"
+            width: "300",
+          },
+        );
+      }
+    }, 100);
+
+    // Stop checking after 5 seconds to avoid infinite loops if script blocked
+    setTimeout(() => clearInterval(renderGoogleBtn), 5000);
+
     const form = document.getElementById("loginForm");
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
       const email = document.getElementById("email").value;
       const password = document.getElementById("password").value;
+      const loginBtn = document.getElementById("loginBtn");
 
+      toggleLoading(loginBtn, true);
       const result = await auth.login(email, password);
+      toggleLoading(loginBtn, false);
+
       const messageDiv = document.getElementById("loginMessage");
 
       if (result.success) {
@@ -466,18 +510,63 @@ class Router {
               <label for="githubUrl">GitHub URL (Optional):</label>
               <input type="url" id="githubUrl" name="githubUrl" placeholder="https://github.com/yourprofile">
             </div>
-            <button type="submit" class="btn btn-primary">Register</button>
+            <button type="submit" class="btn btn-primary" style="width: 100%;" id="registerBtn">Register</button>
           </form>
+
+          <div class="divider" style="text-align: center; margin: 20px 0; color: #cbd5e1; display:flex; align-items:center;">
+            <hr style="flex:1; border:none; border-top:1px solid #334155;">
+            <span style="padding: 0 10px; font-size: 0.875rem;">OR</span>
+            <hr style="flex:1; border:none; border-top:1px solid #334155;">
+          </div>
+          
+          <div class="google-login-container" id="googleBtnContainer" style="display: flex; justify-content: center; margin-bottom: 20px;">
+            <!-- Google button will be rendered here dynamically -->
+          </div>
+
           <p class="auth-link">Already have an account? <a href="#login">Login here</a></p>
           <div id="registerMessage" class="message"></div>
         </div>
       </div>
     `;
 
+    // Render Google Button via JavaScript API (works correctly for SPAs)
+    const renderGoogleBtn = setInterval(() => {
+      if (
+        window.google &&
+        window.google.accounts &&
+        document.getElementById("googleBtnContainer")
+      ) {
+        clearInterval(renderGoogleBtn);
+        window.google.accounts.id.initialize({
+          client_id:
+            "972878196372-rh96kcu502h3r0jucr4mcapa37ao3nud.apps.googleusercontent.com",
+          callback: window.handleGoogleLogin,
+        });
+        window.google.accounts.id.renderButton(
+          document.getElementById("googleBtnContainer"),
+          {
+            theme: "filled_blue",
+            size: "large",
+            shape: "pill",
+            text: "signup_with", // "Sign up with Google"
+            width: "300",
+          },
+        );
+      }
+    }, 100);
+
+    // Stop checking after 5 seconds
+    setTimeout(() => clearInterval(renderGoogleBtn), 5000);
+
     const form = document.getElementById("registerForm");
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
+      const registerBtn = document.getElementById("registerBtn");
+
+      toggleLoading(registerBtn, true);
       const result = await auth.register(form);
+      toggleLoading(registerBtn, false);
+
       const messageDiv = document.getElementById("registerMessage");
 
       if (result.success) {

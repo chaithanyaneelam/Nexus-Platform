@@ -81,27 +81,39 @@ a:hover {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: nowrap;
+}
+
+.navbar-brand {
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .navbar-brand h1 {
-  font-size: 1.8rem;
+  font-size: 1.5rem;
   letter-spacing: 0.3px;
   background: linear-gradient(135deg, var(--primary-color), #67e8f9);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  margin: 0;
 }
 
 .navbar-menu {
   display: flex;
   list-style: none;
-  gap: 2rem;
+  gap: 1.5rem;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
 .navbar-menu a {
   color: var(--text-color);
   transition: var(--transition);
-  font-size: 1.15rem;
+  font-size: 1rem;
 }
 
 .navbar-menu a:hover {
@@ -112,6 +124,8 @@ a:hover {
   display: flex;
   align-items: center;
   gap: 1rem;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .role-badge {
@@ -180,6 +194,34 @@ a:hover {
 .btn-small {
   padding: 0.5rem 1rem;
   font-size: 0.875rem;
+}
+
+.btn-loading {
+  position: relative;
+  pointer-events: none;
+  opacity: 0.8;
+  color: transparent !important;
+}
+
+.btn-loading::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 1.5rem;
+  height: 1.5rem;
+  margin-top: -0.75rem;
+  margin-left: -0.75rem;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: button-loading-spinner 0.8s linear infinite;
+}
+
+@keyframes button-loading-spinner {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .button-group {
