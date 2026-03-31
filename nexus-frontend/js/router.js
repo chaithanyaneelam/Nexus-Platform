@@ -808,6 +808,9 @@ class Router {
       .getElementById("profileForm")
       .addEventListener("submit", async (e) => {
         e.preventDefault();
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+        if (window.toggleLoading) window.toggleLoading(submitBtn, true);
+
         const name = document.getElementById("name").value;
         const mobileNumber = document.getElementById("mobileNumber").value;
         const linkedinUrl = document.getElementById("linkedinUrl").value;
@@ -818,6 +821,9 @@ class Router {
           linkedinUrl,
           githubUrl,
         });
+
+        if (window.toggleLoading) window.toggleLoading(submitBtn, false);
+
         const messageDiv = document.getElementById("message");
         messageDiv.className = `message ${result.success ? "success" : "error"}`;
         messageDiv.textContent = result.message;
@@ -827,9 +833,15 @@ class Router {
       .getElementById("passwordForm")
       .addEventListener("submit", async (e) => {
         e.preventDefault();
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+        if (window.toggleLoading) window.toggleLoading(submitBtn, true);
+
         const oldPassword = document.getElementById("oldPassword").value;
         const newPassword = document.getElementById("newPassword").value;
         const result = await auth.changePassword(oldPassword, newPassword);
+
+        if (window.toggleLoading) window.toggleLoading(submitBtn, false);
+
         const messageDiv = document.getElementById("message");
         messageDiv.className = `message ${result.success ? "success" : "error"}`;
         messageDiv.textContent = result.message;
