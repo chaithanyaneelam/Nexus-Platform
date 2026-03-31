@@ -229,10 +229,36 @@ window.toggleLoading = function (button, isLoading) {
   }
 };
 
+// Global fullscreen overlay toggler
+window.toggleGlobalLoading = function (isLoading, text = "Loading...") {
+  let overlay = document.getElementById("global-loading-overlay");
+  if (!overlay) {
+    overlay = document.createElement("div");
+    overlay.id = "global-loading-overlay";
+    overlay.className = "global-loading-overlay";
+    overlay.innerHTML = `
+      <div class="loading-dots"></div>
+      <div class="loading-text" id="global-loading-text"></div>
+    `;
+    document.body.appendChild(overlay);
+  }
+
+  const textElem = document.getElementById("global-loading-text");
+  if (textElem) textElem.textContent = text;
+
+  if (isLoading) {
+    overlay.classList.add("active");
+  } else {
+    overlay.classList.remove("active");
+  }
+};
+
 // Global Google Login callback handler
 window.handleGoogleLogin = async function (response) {
   const credential = response.credential;
   if (!credential) return;
+
+  window.toggleGlobalLoading(true, "Authenticating with Google...");
 
   const loginMessageDiv =
     document.getElementById("loginMessage") ||
@@ -256,6 +282,7 @@ window.handleGoogleLogin = async function (response) {
         loginMessageDiv.textContent = "Google Sign-In successful!";
       }
       setTimeout(() => {
+        window.toggleGlobalLoading(false);
         if (response.data.needsOnboarding) {
           window.location.href = "onboarding.html";
         } else {
@@ -263,6 +290,7 @@ window.handleGoogleLogin = async function (response) {
         }
       }, 1500);
     } else {
+      window.toggleGlobalLoading(false);
       if (loginMessageDiv) {
         loginMessageDiv.className = "message error";
         loginMessageDiv.textContent =
@@ -270,6 +298,7 @@ window.handleGoogleLogin = async function (response) {
       }
     }
   } catch (error) {
+    window.toggleGlobalLoading(false);
     console.error("Google Sign-In error:", error);
     if (loginMessageDiv) {
       loginMessageDiv.className = "message error";

@@ -203,7 +203,7 @@ a:hover {
 .btn-loading {
   position: relative;
   pointer-events: none;
-  opacity: 0.8;
+  opacity: 0.9;
   color: transparent !important;
 }
 
@@ -212,18 +212,17 @@ a:hover {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 1.5rem;
-  height: 1.5rem;
-  margin-top: -0.75rem;
-  margin-left: -0.75rem;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-top-color: white;
-  border-radius: 50%;
-  animation: button-loading-spinner 0.8s linear infinite;
+  width: 20px;
+  height: 20px;
+  margin-top: -10px;
+  margin-left: -10px;
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg'%3E%3Cg stroke='%23ffffff' stroke-width='10' stroke-linecap='round'%3E%3Cline x1='60' y1='10' x2='60' y2='30' opacity='1'/%3E%3Cline x1='85' y1='16.7' x2='75' y2='34' opacity='0.9'/%3E%3Cline x1='103.3' y1='35' x2='86' y2='45' opacity='0.8'/%3E%3Cline x1='110' y1='60' x2='90' y2='60' opacity='0.7'/%3E%3Cline x1='103.3' y1='85' x2='86' y2='75' opacity='0.6'/%3E%3Cline x1='85' y1='103.3' x2='75' y2='86' opacity='0.5'/%3E%3Cline x1='60' y1='110' x2='60' y2='90' opacity='0.4'/%3E%3Cline x1='35' y1='103.3' x2='45' y2='86' opacity='0.3'/%3E%3Cline x1='16.7' y1='85' x2='34' y2='75' opacity='0.2'/%3E%3Cline x1='10' y1='60' x2='30' y2='60' opacity='0.1'/%3E%3Cline x1='16.7' y1='35' x2='34' y2='45' opacity='0.1'/%3E%3Cline x1='35' y1='16.7' x2='45' y2='34' opacity='0.1'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 100%;
+  animation: ios-spinner 1s steps(12, end) infinite;
 }
 
-@keyframes button-loading-spinner {
-  to {
+@keyframes ios-spinner {
+  100% {
     transform: rotate(360deg);
   }
 }
@@ -304,9 +303,73 @@ a:hover {
 /* ===== Loading & Errors ===== */
 .loading {
   text-align: center;
-  padding: 3rem;
-  font-size: 1.2rem;
+  padding: 4rem 0;
+  font-size: 1.1rem;
   color: var(--primary-color);
+  font-weight: 500;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.loading::before {
+  content: "";
+  display: block;
+  width: 32px;
+  height: 32px;
+  background-color: var(--primary-color);
+  -webkit-mask-image: url("data:image/svg+xml;charset=utf-8,%3Csvg viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg'%3E%3Cg stroke='%23fff' stroke-width='10' stroke-linecap='round'%3E%3Cline x1='60' y1='10' x2='60' y2='30' opacity='1'/%3E%3Cline x1='85' y1='16.7' x2='75' y2='34' opacity='0.9'/%3E%3Cline x1='103.3' y1='35' x2='86' y2='45' opacity='0.8'/%3E%3Cline x1='110' y1='60' x2='90' y2='60' opacity='0.7'/%3E%3Cline x1='103.3' y1='85' x2='86' y2='75' opacity='0.6'/%3E%3Cline x1='85' y1='103.3' x2='75' y2='86' opacity='0.5'/%3E%3Cline x1='60' y1='110' x2='60' y2='90' opacity='0.4'/%3E%3Cline x1='35' y1='103.3' x2='45' y2='86' opacity='0.3'/%3E%3Cline x1='16.7' y1='85' x2='34' y2='75' opacity='0.2'/%3E%3Cline x1='10' y1='60' x2='30' y2='60' opacity='0.1'/%3E%3Cline x1='16.7' y1='35' x2='34' y2='45' opacity='0.1'/%3E%3Cline x1='35' y1='16.7' x2='45' y2='34' opacity='0.1'/%3E%3C/g%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml;charset=utf-8,%3Csvg viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg'%3E%3Cg stroke='%23fff' stroke-width='10' stroke-linecap='round'%3E%3Cline x1='60' y1='10' x2='60' y2='30' opacity='1'/%3E%3Cline x1='85' y1='16.7' x2='75' y2='34' opacity='0.9'/%3E%3Cline x1='103.3' y1='35' x2='86' y2='45' opacity='0.8'/%3E%3Cline x1='110' y1='60' x2='90' y2='60' opacity='0.7'/%3E%3Cline x1='103.3' y1='85' x2='86' y2='75' opacity='0.6'/%3E%3Cline x1='85' y1='103.3' x2='75' y2='86' opacity='0.5'/%3E%3Cline x1='60' y1='110' x2='60' y2='90' opacity='0.4'/%3E%3Cline x1='35' y1='103.3' x2='45' y2='86' opacity='0.3'/%3E%3Cline x1='16.7' y1='85' x2='34' y2='75' opacity='0.2'/%3E%3Cline x1='10' y1='60' x2='30' y2='60' opacity='0.1'/%3E%3Cline x1='16.7' y1='35' x2='34' y2='45' opacity='0.1'/%3E%3Cline x1='35' y1='16.7' x2='45' y2='34' opacity='0.1'/%3E%3C/g%3E%3C/svg%3E");
+  -webkit-mask-size: 100%;
+  mask-size: 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  animation: ios-spinner 1s steps(12, end) infinite;
+}
+
+/* Global Fullscreen Loading Overlay */
+.global-loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(7, 17, 31, 0.9);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.global-loading-overlay.active {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.global-loading-overlay .loading-dots {
+  width: 48px;
+  height: 48px;
+  background-color: white;
+  -webkit-mask-image: url("data:image/svg+xml;charset=utf-8,%3Csvg viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg'%3E%3Cg stroke='%23fff' stroke-width='10' stroke-linecap='round'%3E%3Cline x1='60' y1='10' x2='60' y2='30' opacity='1'/%3E%3Cline x1='85' y1='16.7' x2='75' y2='34' opacity='0.9'/%3E%3Cline x1='103.3' y1='35' x2='86' y2='45' opacity='0.8'/%3E%3Cline x1='110' y1='60' x2='90' y2='60' opacity='0.7'/%3E%3Cline x1='103.3' y1='85' x2='86' y2='75' opacity='0.6'/%3E%3Cline x1='85' y1='103.3' x2='75' y2='86' opacity='0.5'/%3E%3Cline x1='60' y1='110' x2='60' y2='90' opacity='0.4'/%3E%3Cline x1='35' y1='103.3' x2='45' y2='86' opacity='0.3'/%3E%3Cline x1='16.7' y1='85' x2='34' y2='75' opacity='0.2'/%3E%3Cline x1='10' y1='60' x2='30' y2='60' opacity='0.1'/%3E%3Cline x1='16.7' y1='35' x2='34' y2='45' opacity='0.1'/%3E%3Cline x1='35' y1='16.7' x2='45' y2='34' opacity='0.1'/%3E%3C/g%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml;charset=utf-8,%3Csvg viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg'%3E%3Cg stroke='%23fff' stroke-width='10' stroke-linecap='round'%3E%3Cline x1='60' y1='10' x2='60' y2='30' opacity='1'/%3E%3Cline x1='85' y1='16.7' x2='75' y2='34' opacity='0.9'/%3E%3Cline x1='103.3' y1='35' x2='86' y2='45' opacity='0.8'/%3E%3Cline x1='110' y1='60' x2='90' y2='60' opacity='0.7'/%3E%3Cline x1='103.3' y1='85' x2='86' y2='75' opacity='0.6'/%3E%3Cline x1='85' y1='103.3' x2='75' y2='86' opacity='0.5'/%3E%3Cline x1='60' y1='110' x2='60' y2='90' opacity='0.4'/%3E%3Cline x1='35' y1='103.3' x2='45' y2='86' opacity='0.3'/%3E%3Cline x1='16.7' y1='85' x2='34' y2='75' opacity='0.2'/%3E%3Cline x1='10' y1='60' x2='30' y2='60' opacity='0.1'/%3E%3Cline x1='16.7' y1='35' x2='34' y2='45' opacity='0.1'/%3E%3Cline x1='35' y1='16.7' x2='45' y2='34' opacity='0.1'/%3E%3C/g%3E%3C/svg%3E");
+  -webkit-mask-size: 100%;
+  mask-size: 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  animation: ios-spinner 1s steps(12, end) infinite;
+  margin-bottom: 2rem;
+}
+
+.global-loading-overlay .loading-text {
+  font-size: 1.2rem;
+  color: var(--text-color);
+  font-weight: 500;
 }
 
 .error-message {
