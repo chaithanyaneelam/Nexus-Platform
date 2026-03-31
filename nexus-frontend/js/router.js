@@ -651,13 +651,13 @@ class Router {
                   <h3>${course.title}</h3>
                   <div style="background: rgba(102, 126, 234, 0.1); padding: 0.75rem; border-radius: 6px; margin-bottom: 0.75rem;">
                     <p style="margin: 0.25rem 0; color: #dbe7ff; font-weight: 600; font-size: 0.95rem;">
-                      Instructor: ${teacher.name || "Unknown Teacher"}
+                      Instructor: ${course.instructor || teacher.name || "Unknown Teacher"}
                     </p>
                     <p style="margin: 0.25rem 0; color: #cbd5e1; font-size: 0.85rem;">
-                      Company: ${teacher.company || "N/A"}
+                      Company: ${course.company || teacher.company || "N/A"}
                     </p>
                     <p style="margin: 0.25rem 0; color: #cbd5e1; font-size: 0.85rem;">
-                      Role: ${teacher.profession || teacher.role || "Instructor"}
+                      Role: ${course.role || teacher.profession || teacher.role || "Instructor"}
                     </p>
                     <div style="margin-top: 0.5rem; display: flex; gap: 0.75rem;">
                       ${teacher.linkedinUrl ? `<a href="${teacher.linkedinUrl}" target="_blank" style="color: #67e8f9; text-decoration: none; font-size: 0.85rem; font-weight: bold;">🔗 LinkedIn</a>` : ""}
@@ -723,11 +723,11 @@ class Router {
               <h1 style="color: white;">${course.title}</h1>
             </div>
             <div class="course-header-info">
-              <p class="instructor">Instructor: ${course.teacherId?.name || course.instructor || "Unknown"}</p>
+              <p class="instructor">Instructor: ${course.instructor || course.teacherId?.name || "Unknown"}</p>
               <p class="description">${course.description}</p>
               <div class="course-stats">
-                <span><strong>Company:</strong> ${course.teacherId?.company || course.company || "N/A"}</span>
-                <span><strong>Role:</strong> ${course.teacherId?.profession || course.role || "N/A"}</span>
+                <span><strong>Company:</strong> ${course.company || course.teacherId?.company || "N/A"}</span>
+                <span><strong>Role:</strong> ${course.role || course.teacherId?.profession || "N/A"}</span>
                 ${isEnrolled ? `<span><strong>Mobile:</strong> ${course.teacherId?.mobileNumber || "N/A"}</span>` : ""}
                 <span><strong>Duration:</strong> ${course.duration || "Self-paced"} months</span>
                 <span><strong>Students:</strong> ${course.enrolledCount || 0}</span>
@@ -1256,7 +1256,7 @@ class Router {
                 <p><strong>Email:</strong> ${student.email || "N/A"}</p>
                 <p><strong>Mobile:</strong> ${student.mobileNumber || "N/A"}</p>
                 <p><strong>Teacher:</strong> ${teacher.name || "Unknown"}</p>
-                <p><strong>Teacher Company:</strong> ${teacher.company || "N/A"}</p>
+                <p><strong>Teacher Company:</strong> ${course.company || teacher.company || "N/A"}</p>
                 <p><strong>Teacher Role:</strong> ${teacher.profession || teacher.role || "Instructor"}</p>
                 <p><strong>Course Price:</strong> ₹${course.price || 0}</p>
                 <p><strong>Requested On:</strong> ${new Date(enrollment.createdAt || enrollment.enrolledAt || Date.now()).toLocaleDateString()}</p>
@@ -2098,13 +2098,13 @@ class Router {
                       👨‍🏫 Teacher Information
                     </h4>
                     <p style="margin: 0.25rem 0; color: #333; font-weight: 600;">
-                      ${teacher.name || "Unknown Teacher"}
+                      ${course.instructor || teacher.name || "Unknown Teacher"}
                     </p>
                     <p style="margin: 0.25rem 0; color: #666; font-size: 0.9rem;">
-                      🏢 ${teacher.company || "N/A"}
+                      🏢 ${course.company || teacher.company || "N/A"}
                     </p>
                     <p style="margin: 0.25rem 0; color: #666; font-size: 0.9rem;">
-                      💼 ${teacher.profession || teacher.role || "Instructor"}
+                      💼 ${course.role || teacher.profession || teacher.role || "Instructor"}
                     </p>
                     ${
                       canAccessTeacher
@@ -2328,13 +2328,13 @@ class Router {
                     👨‍🏫 Your Instructor
                   </h4>
                   <p style="margin: 0.25rem 0; color: #e2e8f0; font-weight: 600;">
-                    ${teacher.name || "Unknown Teacher"}
+                    ${course.instructor || teacher.name || "Unknown Teacher"}
                   </p>
                   <p style="margin: 0.25rem 0; color: #cbd5e1; font-size: 0.9rem;">
-                    🏢 ${teacher.company || "N/A"}
+                    🏢 ${course.company || teacher.company || "N/A"}
                   </p>
                   <p style="margin: 0.25rem 0; color: #cbd5e1; font-size: 0.9rem;">
-                    💼 ${teacher.profession || teacher.role || "Expert Instructor"}
+                    💼 ${course.role || teacher.profession || teacher.role || "Expert Instructor"}
                   </p>
                   <p style="margin: 0.5rem 0 0 0; color: #10b981; font-size: 0.9rem; font-weight: 500;">
                     📱 Contact ready for learning support
