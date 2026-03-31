@@ -181,6 +181,13 @@ class Router {
       requiresAuth: true,
       render: () => this.renderDocumentations(),
     };
+
+    this.routes["create-meeting"] = {
+      path: "#create-meeting",
+      requiresAuth: true,
+      role: "teacher",
+      render: () => this.renderCreateMeeting(),
+    };
   }
 
   /**
@@ -188,13 +195,62 @@ class Router {
    */
   setupEventListeners() {
     window.addEventListener("hashchange", () => this.navigate());
-    document.addEventListener("click", (e) => {
+    document.addEventListener("click", async (e) => {
       if (e.target.classList.contains("nav-link")) {
         e.preventDefault();
         const hash = e.target.getAttribute("href");
         window.location.hash = hash;
       }
     });
+  }
+
+  async handleCreateInstantMeet(btn) {
+    const originalText = btn.innerHTML;
+    btn.innerHTML = "⏳ Creating...";
+    btn.style.pointerEvents = "none";
+    try {
+      const response = await fetch(`${API_BASE_URL}/classes/create-meet`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${auth.getToken()}`,
+        },
+        body: JSON.stringify({
+          courseName: "Instant Live Session",
+          teacherEmail: auth.getCurrentUser()?.email || "teacher",
+        }),
+      });
+      const data = await response.json();
+      if (data.success && data.meetingUri) {
+        // Create WhatsApp share link
+        const meetingUrl = data.meetingUri;
+        const text = encodeURIComponent(
+          `Join my live class now using this Google Meet link: ${meetingUrl}`,
+        );
+        const whatsappUrl = `https://api.whatsapp.com/send?text=${text}`;
+
+        // Show options to open meeting or share
+        const action = confirm(
+          `Instant Meet Created!\nURL: ${meetingUrl}\n\nClick OK to SHARE on WhatsApp, or Cancel to directly JOIN the meeting.`,
+        );
+
+        if (action) {
+          window.open(whatsappUrl, "_blank");
+          window.location.href = meetingUrl; // Optionally also join
+        } else {
+          window.location.href = meetingUrl;
+        }
+      } else {
+        const errorMsg = data.message || "Failed to create Google Meet link.";
+        alert(errorMsg);
+      }
+    } catch (error) {
+      console.error("Error creating live class from navbar:", error);
+      alert("Error creating live class.");
+    } finally {
+      btn.innerHTML = originalText;
+      btn.style.pointerEvents = "auto";
+    }
   }
 
   /**
@@ -271,6 +327,9 @@ class Router {
     const documentationsMenuItem = document.getElementById(
       "documentationsMenuItem",
     );
+    const createMeetingMenuItem = document.getElementById(
+      "createMeetingMenuItem",
+    );
     const userInfo = document.getElementById("userInfo");
     const userName = document.getElementById("userName");
     const userRole = document.getElementById("userRole");
@@ -294,6 +353,7 @@ class Router {
       adminMenuItem.style.display = "none";
       supportMenuItem.style.display = "none";
       documentationsMenuItem.style.display = "none";
+      if (createMeetingMenuItem) createMeetingMenuItem.style.display = "none";
 
       // Show menu items based on role
       if (user.role === "student") {
@@ -307,6 +367,8 @@ class Router {
         studentsMenuItem.style.display = "block";
         supportMenuItem.style.display = "block";
         documentationsMenuItem.style.display = "block";
+        if (createMeetingMenuItem)
+          createMeetingMenuItem.style.display = "block";
       } else if (user.role === "admin") {
         coursesMenuItem.style.display = "block";
         adminMenuItem.style.display = "block";
@@ -914,12 +976,69 @@ class Router {
     appDiv.innerHTML = `
       <div class="dashboard teacher-dashboard">
         <h2>Welcome, ${user.name || user.email}! 🎓</h2>
+        <div style="margin-bottom: 2rem;">
+          <button id="btn-start-live" class="btn btn-primary">Start Live Class</button>
+        </div>
         <div id="notification-badge" style="margin-bottom: 2rem;"></div>
         <div id="tab-buttons" style="display: flex; gap: 1rem; margin-bottom: 2rem;"></div>
         <div id="content-courses" style="display: grid; gap: 1.5rem; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));"></div>
         <div id="content-students" style="display: none;"></div>
       </div>
     `;
+    // Add event listener for start live class
+    const btnStartLive = document.getElementById("btn-start-live");
+    if (btnStartLive) {
+      btnStartLive.addEventListener("click", async () => {
+        btnStartLive.classList.add("btn-loading");
+        btnStartLive.textContent = "Starting...";
+        try {
+          // Create instant Google Meet with auto-recording
+          const response = await fetch(`${API_BASE_URL}/classes/create-meet`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${auth.getToken()}`,
+            },
+            body: JSON.stringify({
+              courseName: "Live Stream",
+              teacherEmail: user.email,
+            }),
+          });
+          const data = await response.json();
+          if (data.success && data.meetingUri) {
+            // Create WhatsApp share link
+            const meetingUrl = data.meetingUri;
+            const text = encodeURIComponent(
+              `Join my live class now using this Google Meet link: ${meetingUrl}`,
+            );
+            const whatsappUrl = `https://api.whatsapp.com/send?text=${text}`;
+
+            // Show options to open meeting or share
+            const action = confirm(
+              `Instant Meet Created!\nURL: ${meetingUrl}\n\nClick OK to SHARE on WhatsApp, or Cancel to directly JOIN the meeting.`,
+            );
+
+            if (action) {
+              window.open(whatsappUrl, "_blank");
+              window.location.href = meetingUrl;
+            } else {
+              window.location.href = meetingUrl;
+            }
+          } else {
+            const errorMsg =
+              data.message || "Failed to create Google Meet link.";
+            alert(errorMsg);
+            btnStartLive.classList.remove("btn-loading");
+            btnStartLive.textContent = "Start Live Class";
+          }
+        } catch (error) {
+          console.error("Error creating live class:", error);
+          alert("Error creating live class.");
+          btnStartLive.classList.remove("btn-loading");
+          btnStartLive.textContent = "Start Live Class";
+        }
+      });
+    }
 
     try {
       // Load student count and show notification
@@ -2815,6 +2934,116 @@ class Router {
       </div>
     `;
     this.updateNavbar();
+  }
+
+  async renderCreateMeeting() {
+    const appDiv = document.getElementById("app");
+    const user = auth.getCurrentUser() || {};
+
+    appDiv.innerHTML = `
+      <div class="page custom-meeting-page" style="display: flex; justify-content: center; align-items: center; min-height: 80vh;">
+        <div class="meeting-card" style="background: white; padding: 2.5rem; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); max-width: 500px; width: 100%; text-align: center;">
+          <h2 style="margin-bottom: 2rem; color: #333; font-size: 1.8rem;">🎥 Create Live Class</h2>
+          <p style="color: #666; margin-bottom: 2rem;">Generate a secure Google Meet link for your instant live session.</p>
+          
+          <button id="btnGenerateMeeting" style="background: #3b82f6; color: white; border: none; padding: 12px 24px; border-radius: 6px; font-size: 1.1rem; font-weight: bold; cursor: pointer; transition: all 0.3s; width: 100%;">
+            Create Meeting Link
+          </button>
+          
+          <div id="meetingResultContainer" style="display: none; margin-top: 2rem; opacity: 0; transition: opacity 0.4s ease-in-out;">
+            <p style="color: #10b981; font-weight: bold; margin-bottom: 1rem;">✅ Meeting created successfully!</p>
+            <div style="display: flex; align-items: center; margin-bottom: 1.5rem;">
+              <input type="text" id="meetingLinkInput" readonly style="flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 6px 0 0 6px; font-size: 0.95rem; background: #f8fafc; cursor: text; outline: none; border-right: none;">
+              <button id="btnCopyLink" style="background: #e2e8f0; color: #333; border: 1px solid #ddd; padding: 12.5px 15px; border-radius: 0 6px 6px 0; cursor: pointer; transition: all 0.2s; font-size: 1.1rem;" title="Copy to clipboard">
+                📋
+              </button>
+            </div>
+            <a id="btnJoinMeeting" href="#" target="_blank" style="display: block; background: #10b981; color: white; text-decoration: none; padding: 12px 24px; border-radius: 6px; font-size: 1.1rem; font-weight: bold; width: 100%; box-sizing: border-box;">
+              Join Meeting Now
+            </a>
+          </div>
+        </div>
+      </div>
+    `;
+
+    this.updateNavbar();
+
+    setTimeout(() => {
+      const btnGenerate = document.getElementById("btnGenerateMeeting");
+      const resultContainer = document.getElementById("meetingResultContainer");
+      const meetingInput = document.getElementById("meetingLinkInput");
+      const btnCopy = document.getElementById("btnCopyLink");
+      const btnJoin = document.getElementById("btnJoinMeeting");
+
+      if (btnGenerate) {
+        btnGenerate.addEventListener("click", async () => {
+          btnGenerate.innerHTML = "Creating... <span class='spinner'>⏳</span>";
+          btnGenerate.style.pointerEvents = "none";
+          btnGenerate.style.opacity = "0.7";
+
+          try {
+            const response = await fetch(
+              `${API_BASE_URL}/classes/create-meet`,
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
+                body: JSON.stringify({
+                  courseName: "Instant Live Session",
+                  teacherEmail: user.email || "teacher",
+                }),
+              },
+            );
+            const data = await response.json();
+
+            if (data.success && data.meetingUri) {
+              btnGenerate.style.display = "none";
+              resultContainer.style.display = "block";
+
+              // Trigger slight reflow to allow transition to register, then set opacity
+              setTimeout(() => {
+                resultContainer.style.opacity = "1";
+              }, 50);
+
+              meetingInput.value = data.meetingUri;
+              btnJoin.href = data.meetingUri;
+            } else {
+              alert(data.message || "Failed to create Google Meet link.");
+              btnGenerate.innerHTML = "Create Meeting Link";
+              btnGenerate.style.pointerEvents = "auto";
+              btnGenerate.style.opacity = "1";
+            }
+          } catch (error) {
+            console.error("Error creating live class:", error);
+            alert("Error creating live class.");
+            btnGenerate.innerHTML = "Create Meeting Link";
+            btnGenerate.style.pointerEvents = "auto";
+            btnGenerate.style.opacity = "1";
+          }
+        });
+      }
+
+      if (btnCopy) {
+        btnCopy.addEventListener("click", () => {
+          meetingInput.select();
+          meetingInput.setSelectionRange(0, 99999); // For mobile devices
+          navigator.clipboard
+            .writeText(meetingInput.value)
+            .then(() => {
+              const originalIcon = btnCopy.innerHTML;
+              btnCopy.innerHTML = "✅";
+              setTimeout(() => {
+                btnCopy.innerHTML = originalIcon;
+              }, 2000);
+            })
+            .catch((err) => {
+              console.error("Could not copy text: ", err);
+            });
+        });
+      }
+    }, 0);
   }
 }
 

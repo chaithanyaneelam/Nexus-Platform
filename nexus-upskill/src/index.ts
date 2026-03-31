@@ -1,3 +1,4 @@
+import "dotenv/config";
 import express, { Express, Request, Response, NextFunction } from "express";
 import cors from "cors";
 import dotenv from "dotenv";
@@ -10,6 +11,7 @@ import courseRoutes from "./routes/courseRoutes";
 import enrollmentRoutes from "./routes/enrollmentRoutes";
 import paymentRoutes from "./routes/paymentRoutes";
 import adminRoutes from "./routes/adminRoutes";
+import classRoutes from "./routes/classRoutes";
 
 dotenv.config();
 
@@ -58,6 +60,7 @@ app.use("/api/courses", courseRoutes);
 app.use("/api/enrollments", enrollmentRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/classes", classRoutes);
 
 const validationMessages: Record<string, string> = {
   password:
