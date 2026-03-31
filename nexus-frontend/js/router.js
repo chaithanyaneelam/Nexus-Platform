@@ -338,7 +338,7 @@ class Router {
     appDiv.innerHTML = `
       <div class="home-page">
         <div class="hero-section">
-          <h1>Welcome to Nexus Platform</h1>
+          <h1>Welcome to NexSkill Platform</h1>
           <p>Learn Directly from Industry Experts</p>
           <p class="subtitle">Experience a premium one-to-one platform where real-world job professionals will directly mentor and teach you.</p>
           <div class="button-group">
