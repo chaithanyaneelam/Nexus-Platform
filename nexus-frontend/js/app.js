@@ -1,18 +1,10 @@
-/**
- * Main Application File
- * Initializes the app and handles app-level logic
- */
-
 class NexusApp {
   constructor() {
     this.init();
   }
 
-  /**
-   * Initialize the application
-   */
   init() {
-    console.log("🚀 Nexus Platform Frontend Initialized");
+    console.log("NexSkill Platform Frontend Initialized");
 
     // Check if user is already logged in
     if (auth.isAuthenticated()) {
@@ -22,10 +14,8 @@ class NexusApp {
       console.log("No active session");
     }
 
-    // Navigate to initial page
     router.navigate();
 
-    // Handle hash change
     window.addEventListener("hashchange", () => {
       // Close mobile menu on navigate
       const navbarMenu = document.getElementById("navbarMenu");

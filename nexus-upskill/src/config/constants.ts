@@ -1,9 +1,9 @@
 export const APP_CONFIG = {
   PORT: process.env.PORT || 5001,
-  NODE_ENV: process.env.NODE_ENV || "development",
-  JWT_SECRET: process.env.JWT_SECRET || "your-secret-key",
-  JWT_EXPIRY: process.env.JWT_EXPIRY || "7d",
-  ADMIN_UPI_ID: process.env.ADMIN_UPI_ID || "admin@upi",
+  NODE_ENV: process.env.NODE_ENV,
+  JWT_SECRET: process.env.JWT_SECRET,
+  JWT_EXPIRY: process.env.JWT_EXPIRY,
+  ADMIN_UPI_ID: process.env.ADMIN_UPI_ID,
   PAYMENT_COMMISSION_PERCENTAGE: parseFloat(
     process.env.PAYMENT_COMMISSION_PERCENTAGE || "20",
   ),
