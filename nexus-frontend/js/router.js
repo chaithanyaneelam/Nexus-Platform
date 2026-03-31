@@ -649,19 +649,19 @@ class Router {
                 </div>
                   <div class="course-info">
                   <h3>${course.title}</h3>
-                  <div style="background: #f0f4ff; padding: 0.75rem; border-radius: 6px; margin-bottom: 0.75rem;">
-                    <p style="margin: 0.25rem 0; color: #333; font-weight: 600; font-size: 0.95rem;">
+                  <div style="background: rgba(102, 126, 234, 0.1); padding: 0.75rem; border-radius: 6px; margin-bottom: 0.75rem;">
+                    <p style="margin: 0.25rem 0; color: #dbe7ff; font-weight: 600; font-size: 0.95rem;">
                       Instructor: ${teacher.name || "Unknown Teacher"}
                     </p>
-                    <p style="margin: 0.25rem 0; color: #666; font-size: 0.85rem;">
+                    <p style="margin: 0.25rem 0; color: #cbd5e1; font-size: 0.85rem;">
                       Company: ${teacher.company || "N/A"}
                     </p>
-                    <p style="margin: 0.25rem 0; color: #666; font-size: 0.85rem;">
+                    <p style="margin: 0.25rem 0; color: #cbd5e1; font-size: 0.85rem;">
                       Role: ${teacher.profession || teacher.role || "Instructor"}
                     </p>
                     <div style="margin-top: 0.5rem; display: flex; gap: 0.75rem;">
-                      ${teacher.linkedinUrl ? `<a href="${teacher.linkedinUrl}" target="_blank" style="color: #0077b5; text-decoration: none; font-size: 0.85rem; font-weight: bold;">🔗 LinkedIn</a>` : ""}
-                      ${teacher.githubUrl ? `<a href="${teacher.githubUrl}" target="_blank" style="color: #333; text-decoration: none; font-size: 0.85rem; font-weight: bold;">🐙 GitHub</a>` : ""}
+                      ${teacher.linkedinUrl ? `<a href="${teacher.linkedinUrl}" target="_blank" style="color: #67e8f9; text-decoration: none; font-size: 0.85rem; font-weight: bold;">🔗 LinkedIn</a>` : ""}
+                      ${teacher.githubUrl ? `<a href="${teacher.githubUrl}" target="_blank" style="color: #9fb6d4; text-decoration: none; font-size: 0.85rem; font-weight: bold;">🐙 GitHub</a>` : ""}
                     </div>
                     <p style="margin: 0.25rem 0; color: #667eea; font-size: 0.85rem; font-weight: 600;">
                       👥 ${course.enrolledCount || 0} students registered
@@ -2631,7 +2631,7 @@ class Router {
           </div>
           
           <button type="submit" class="btn btn-primary" style="padding: 1rem; margin-top: 1rem;">
-            Send to Support (neelamchaithanya9@gmail.com)
+            Send to Support
           </button>
         </form>
       </div>
