@@ -698,6 +698,23 @@ class Router {
       const response = await api.getCourseById(courseId);
       const course = response.data;
 
+      let isEnrolled = false;
+      if (auth.isAuthenticated() && auth.isStudent()) {
+        try {
+          const enrollmentsResp = await api.getMyEnrollments(1, 100);
+          if (enrollmentsResp.success) {
+            const enrollments = enrollmentsResp.data.enrollments || [];
+            isEnrolled = enrollments.some(
+              (e) =>
+                (e.courseId === courseId || e.courseId?._id === courseId) &&
+                (e.status === "active" || e.status === "completed"),
+            );
+          }
+        } catch (e) {
+          console.error("Failed to fetch enrollments for course details", e);
+        }
+      }
+
       appDiv.innerHTML = `
         <div class="course-detail-page">
           <div class="course-header">
@@ -706,22 +723,26 @@ class Router {
               <h1 style="color: white;">${course.title}</h1>
             </div>
             <div class="course-header-info">
-              <p class="instructor">Instructor: ${course.instructor || "Unknown"}</p>
+              <p class="instructor">Instructor: ${course.teacherId?.name || course.instructor || "Unknown"}</p>
               <p class="description">${course.description}</p>
               <div class="course-stats">
-                <span><strong>Company:</strong> ${course.company || "N/A"}</span>
-                <span><strong>Role:</strong> ${course.role || "N/A"}</span>
+                <span><strong>Company:</strong> ${course.teacherId?.company || course.company || "N/A"}</span>
+                <span><strong>Role:</strong> ${course.teacherId?.profession || course.role || "N/A"}</span>
+                ${isEnrolled ? `<span><strong>Mobile:</strong> ${course.teacherId?.mobileNumber || "N/A"}</span>` : ""}
                 <span><strong>Duration:</strong> ${course.duration || "Self-paced"} months</span>
                 <span><strong>Students:</strong> ${course.enrolledCount || 0}</span>
               </div>
               ${
-                auth.isAuthenticated() && auth.isStudent()
+                auth.isAuthenticated() && auth.isStudent() && !isEnrolled
                   ? `<button class="btn btn-primary" onclick="enrollCourse('${courseId}')">Enroll Now - ₹${course.price || 0}</button>`
-                  : auth.isAuthenticated() &&
-                      auth.isTeacher() &&
-                      auth.getCurrentUser()._id === course.teacherId
-                    ? `<a href="#edit-course/${courseId}" class="btn btn-secondary">Edit Course</a>`
-                    : ""
+                  : auth.isAuthenticated() && auth.isStudent() && isEnrolled
+                    ? `<button class="btn btn-success" disabled>Already Enrolled</button>`
+                    : auth.isAuthenticated() &&
+                        auth.isTeacher() &&
+                        auth.getCurrentUser()._id ===
+                          (course.teacherId?._id || course.teacherId)
+                      ? `<a href="#edit-course/${courseId}" class="btn btn-secondary">Edit Course</a>`
+                      : ""
               }
             </div>
           </div>
