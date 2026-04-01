@@ -34,7 +34,12 @@ export const createInstantMeet = async (
         email: teacherEmail,
         responseStatus: "accepted",
       },
+      {
+        email: "add@fireflies.ai", // Fireflies bot will automatically join and record
+      },
     ],
+    // KEY WORKAROUND: Gives the teacher ability to manage the meet,
+    // admit the bot, and act with host-like permissions
     guestsCanModify: true,
     conferenceData: {
       createRequest: {
@@ -51,7 +56,27 @@ export const createInstantMeet = async (
     calendarId: "primary",
     conferenceDataVersion: 1,
     requestBody: event,
+    sendUpdates: "all",
   });
+
+  // Forcefully transfer event ownership to the teacher
+  // Google will email the teacher asking them to "Accept" the event transfer.
+  // Once they click accept, they magically become the ultimate "Host" of the Meet.
+  try {
+    if (response.data.id && teacherEmail) {
+      await calendar.events.move({
+        calendarId: "primary",
+        eventId: response.data.id,
+        destination: teacherEmail,
+        sendUpdates: "all",
+      });
+    }
+  } catch (error) {
+    console.log(
+      "Ownership transfer pending or failed (often due to calendar permissions), but teacher retains guest-modify privileges.",
+      error,
+    );
+  }
 
   return response.data.hangoutLink;
 };

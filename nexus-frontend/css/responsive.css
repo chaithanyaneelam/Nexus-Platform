@@ -186,6 +186,18 @@
   .stat-card {
     padding: 1.5rem 1rem;
   }
+
+  .admin-approve-courses-page {
+    padding: 1.5rem 1rem;
+  }
+
+  .courses-approval-list {
+    gap: 1rem;
+  }
+
+  .course-approval-card {
+    padding: 1.5rem 1rem;
+  }
 }
 
 @media (max-width: 600px) {
@@ -415,5 +427,33 @@
 
   .course-header h1 {
     font-size: 1.4rem;
+  }
+
+  .admin-approve-courses-page {
+    padding: 1rem 0.5rem;
+  }
+
+  .courses-list {
+    grid-template-columns: 1fr !important;
+  }
+
+  .page-header h2 {
+    font-size: 1.5rem;
+  }
+
+  .page-header p {
+    font-size: 0.85rem;
+  }
+
+  .course-approval-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .course-approval-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
   }
 }

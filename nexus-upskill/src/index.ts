@@ -118,7 +118,7 @@ const startServer = async (): Promise<void> => {
 
     app.listen(APP_CONFIG.PORT, () => {
       console.log(
-        `\n🎓 Nexus Upskill Server started on http://localhost:${APP_CONFIG.PORT}`,
+        `\n Nexus Upskill Server started on http://localhost:${APP_CONFIG.PORT}`,
       );
     });
   } catch (error) {

@@ -136,6 +136,13 @@ class Router {
       render: () => this.renderCreateCourse(),
     };
 
+    this.routes["edit-course"] = {
+      path: "#edit-course",
+      requiresAuth: true,
+      role: "teacher",
+      render: (courseId) => this.renderEditCourse(courseId),
+    };
+
     this.routes["my-enrollments"] = {
       path: "#my-enrollments",
       requiresAuth: true,
@@ -205,52 +212,7 @@ class Router {
   }
 
   async handleCreateInstantMeet(btn) {
-    const originalText = btn.innerHTML;
-    btn.innerHTML = "⏳ Creating...";
-    btn.style.pointerEvents = "none";
-    try {
-      const response = await fetch(`${API_BASE_URL}/classes/create-meet`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${auth.getToken()}`,
-        },
-        body: JSON.stringify({
-          courseName: "Instant Live Session",
-          teacherEmail: auth.getCurrentUser()?.email || "teacher",
-        }),
-      });
-      const data = await response.json();
-      if (data.success && data.meetingUri) {
-        // Create WhatsApp share link
-        const meetingUrl = data.meetingUri;
-        const text = encodeURIComponent(
-          `Join my live class now using this Google Meet link: ${meetingUrl}`,
-        );
-        const whatsappUrl = `https://api.whatsapp.com/send?text=${text}`;
-
-        // Show options to open meeting or share
-        const action = confirm(
-          `Instant Meet Created!\nURL: ${meetingUrl}\n\nClick OK to SHARE on WhatsApp, or Cancel to directly JOIN the meeting.`,
-        );
-
-        if (action) {
-          window.open(whatsappUrl, "_blank");
-          window.location.href = meetingUrl; // Optionally also join
-        } else {
-          window.location.href = meetingUrl;
-        }
-      } else {
-        const errorMsg = data.message || "Failed to create Google Meet link.";
-        alert(errorMsg);
-      }
-    } catch (error) {
-      console.error("Error creating live class from navbar:", error);
-      alert("Error creating live class.");
-    } finally {
-      btn.innerHTML = originalText;
-      btn.style.pointerEvents = "auto";
-    }
+    window.location.hash = "#create-meeting";
   }
 
   /**
@@ -455,18 +417,18 @@ class Router {
             <span style="padding: 0 10px; font-size: 0.875rem;">OR</span>
             <hr style="flex:1; border:none; border-top:1px solid #334155;">
           </div>
-          
-          <div class="google-login-container" id="googleBtnContainer" style="display: flex; justify-content: center; margin-bottom: 20px;">
-            <!-- Google button will be rendered here dynamically -->
+
+          <div id="googleBtnContainer" style="display: flex; justify-content: center; margin-bottom: 20px; min-height: 40px;">
+            <!-- Google button rendered here -->
           </div>
-          
+
           <p class="auth-link">Don't have an account? <a href="#register">Register here</a></p>
           <div id="loginMessage" class="message"></div>
         </div>
       </div>
     `;
 
-    // Render Google Button via JavaScript API (works correctly for SPAs)
+    // Render Google Button via JavaScript API (SPA compat)
     const renderGoogleBtn = setInterval(() => {
       if (
         window.google &&
@@ -482,17 +444,18 @@ class Router {
         window.google.accounts.id.renderButton(
           document.getElementById("googleBtnContainer"),
           {
-            theme: "filled_blue", // Changed UI: Blue filled button
+            theme: "filled_blue",
             size: "large",
-            shape: "pill", // Changed UI: Pill shaped
-            text: "continue_with", // "Continue with Google"
-            width: "300",
+            shape: "pill",
+            width:
+              window.innerWidth < 400
+                ? Math.min(window.innerWidth - 60, 280)
+                : 330,
+            text: "continue_with",
           },
         );
       }
     }, 100);
-
-    // Stop checking after 5 seconds to avoid infinite loops if script blocked
     setTimeout(() => clearInterval(renderGoogleBtn), 5000);
 
     const form = document.getElementById("loginForm");
@@ -581,8 +544,8 @@ class Router {
             <hr style="flex:1; border:none; border-top:1px solid #334155;">
           </div>
           
-          <div class="google-login-container" id="googleBtnContainer" style="display: flex; justify-content: center; margin-bottom: 20px;">
-            <!-- Google button will be rendered here dynamically -->
+          <div id="googleBtnContainerReg" style="display: flex; justify-content: center; margin-bottom: 20px; min-height: 40px;">
+            <!-- Google button rendered here dynamically -->
           </div>
 
           <p class="auth-link">Already have an account? <a href="#login">Login here</a></p>
@@ -592,33 +555,34 @@ class Router {
     `;
 
     // Render Google Button via JavaScript API (works correctly for SPAs)
-    const renderGoogleBtn = setInterval(() => {
+    const renderGoogleBtnReg = setInterval(() => {
       if (
         window.google &&
         window.google.accounts &&
-        document.getElementById("googleBtnContainer")
+        document.getElementById("googleBtnContainerReg")
       ) {
-        clearInterval(renderGoogleBtn);
+        clearInterval(renderGoogleBtnReg);
         window.google.accounts.id.initialize({
           client_id:
             "972878196372-rh96kcu502h3r0jucr4mcapa37ao3nud.apps.googleusercontent.com",
           callback: window.handleGoogleLogin,
         });
         window.google.accounts.id.renderButton(
-          document.getElementById("googleBtnContainer"),
+          document.getElementById("googleBtnContainerReg"),
           {
             theme: "filled_blue",
             size: "large",
             shape: "pill",
-            text: "signup_with", // "Sign up with Google"
-            width: "300",
+            width:
+              window.innerWidth < 400
+                ? Math.min(window.innerWidth - 60, 280)
+                : 330,
+            text: "signup_with",
           },
         );
       }
     }, 100);
-
-    // Stop checking after 5 seconds
-    setTimeout(() => clearInterval(renderGoogleBtn), 5000);
+    setTimeout(() => clearInterval(renderGoogleBtnReg), 5000);
 
     const form = document.getElementById("registerForm");
     form.addEventListener("submit", async (e) => {
@@ -694,9 +658,15 @@ class Router {
 
       appDiv.innerHTML = `
         <div class="courses-page">
-          <div class="page-header">
-            <h2>${pageTitle}</h2>
-            ${showCreateButton ? `<a href="#create-course" class="btn btn-primary">Create Course</a>` : ""}
+          <div class="page-header" style="display: flex; gap: 1rem; align-items: center; justify-content: space-between; flex-wrap: wrap;">
+            <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; flex: 1;">
+              <h2 style="margin:0">${pageTitle}</h2>
+              <div class="search-bar" style="display:flex; align-items:center; background: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 0.1rem 0.5rem; flex: 1; max-width: 500px; min-width: 250px;">
+                <span style="color: #94a3b8; padding: 0 0.5rem; font-size: 1.1rem;">&#128269;</span>
+                <input type="text" id="courseSearchInput" placeholder="Search courses..." style="background: transparent; border: none; color: white; padding: 0.5rem; outline: none; width: 100%;">
+              </div>
+            </div>
+            ${showCreateButton ? `<a href="#create-course" class="btn btn-primary" style="margin-left:auto">Create Course</a>` : ""}
           </div>
           <div class="courses-grid" id="coursesGrid">
             ${
@@ -745,6 +715,27 @@ class Router {
           </div>
         </div>
       `;
+
+      // Search functionality
+      const searchInput = document.getElementById("courseSearchInput");
+      if (searchInput) {
+        searchInput.addEventListener("input", (e) => {
+          const searchTerm = e.target.value.toLowerCase();
+          const courseCards = document.querySelectorAll(".course-card");
+          courseCards.forEach((card) => {
+            const title =
+              card.querySelector("h3")?.textContent.toLowerCase() || "";
+            const instructor =
+              card.querySelector(".course-info p")?.textContent.toLowerCase() ||
+              "";
+            if (title.includes(searchTerm) || instructor.includes(searchTerm)) {
+              card.style.display = "block"; // showing the card div
+            } else {
+              card.style.display = "none";
+            }
+          });
+        });
+      }
     } catch (error) {
       appDiv.innerHTML = `<div class="error-message">Error loading courses: ${error.message}</div>`;
     }
@@ -988,55 +979,8 @@ class Router {
     // Add event listener for start live class
     const btnStartLive = document.getElementById("btn-start-live");
     if (btnStartLive) {
-      btnStartLive.addEventListener("click", async () => {
-        btnStartLive.classList.add("btn-loading");
-        btnStartLive.textContent = "Starting...";
-        try {
-          // Create instant Google Meet with auto-recording
-          const response = await fetch(`${API_BASE_URL}/classes/create-meet`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${auth.getToken()}`,
-            },
-            body: JSON.stringify({
-              courseName: "Live Stream",
-              teacherEmail: user.email,
-            }),
-          });
-          const data = await response.json();
-          if (data.success && data.meetingUri) {
-            // Create WhatsApp share link
-            const meetingUrl = data.meetingUri;
-            const text = encodeURIComponent(
-              `Join my live class now using this Google Meet link: ${meetingUrl}`,
-            );
-            const whatsappUrl = `https://api.whatsapp.com/send?text=${text}`;
-
-            // Show options to open meeting or share
-            const action = confirm(
-              `Instant Meet Created!\nURL: ${meetingUrl}\n\nClick OK to SHARE on WhatsApp, or Cancel to directly JOIN the meeting.`,
-            );
-
-            if (action) {
-              window.open(whatsappUrl, "_blank");
-              window.location.href = meetingUrl;
-            } else {
-              window.location.href = meetingUrl;
-            }
-          } else {
-            const errorMsg =
-              data.message || "Failed to create Google Meet link.";
-            alert(errorMsg);
-            btnStartLive.classList.remove("btn-loading");
-            btnStartLive.textContent = "Start Live Class";
-          }
-        } catch (error) {
-          console.error("Error creating live class:", error);
-          alert("Error creating live class.");
-          btnStartLive.classList.remove("btn-loading");
-          btnStartLive.textContent = "Start Live Class";
-        }
+      btnStartLive.addEventListener("click", () => {
+        window.location.hash = "#create-meeting";
       });
     }
 
@@ -1480,31 +1424,37 @@ class Router {
 
       let html = `
         <div class="admin-teachers-page">
-          <div class="page-header">
-            <h2>👨‍🏫 Teachers Overview</h2>
-            <p>View all teachers and their course statistics</p>
+          <div class="page-header" style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem;">
+            <div>
+              <h2 style="margin:0">👨‍🏫 Teachers Overview</h2>
+              <p style="margin:0">View all teachers and their course statistics</p>
+            </div>
+            <div class="search-bar" style="display:flex; align-items:center; background: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 0.1rem 0.5rem; flex: 1; max-width: 400px; min-width: 250px;">
+              <span style="color: #94a3b8; padding: 0 0.5rem; font-size: 1.1rem;">&#128269;</span>
+              <input type="text" id="teacherSearchInput" placeholder="Search teachers by name or email..." style="background: transparent; border: none; color: white; padding: 0.5rem; outline: none; width: 100%;">
+            </div>
           </div>
-          <div class="table-container">
-            <table class="data-table">
+          <div class="table-container courses-table" style="overflow-x: auto;">
+            <table class="data-table" style="width: 100%; border-collapse: collapse; min-width: 600px;">
               <thead>
                 <tr>
-                  <th>Name</th>
-                  <th>Email</th>
-                  <th>Actions</th>
+                  <th style="padding: 1rem; text-align: left; background: rgba(102, 126, 234, 0.1); border-bottom: 1px solid var(--border-color); font-weight: 600;">Name</th>
+                  <th style="padding: 1rem; text-align: left; background: rgba(102, 126, 234, 0.1); border-bottom: 1px solid var(--border-color); font-weight: 600;">Email</th>
+                  <th style="padding: 1rem; text-align: left; background: rgba(102, 126, 234, 0.1); border-bottom: 1px solid var(--border-color); font-weight: 600;">Actions</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody id="teachersTableBody">
       `;
 
       if (teachers.length === 0) {
-        html += `<tr><td colspan="3">No teachers found.</td></tr>`;
+        html += `<tr><td colspan="3" style="padding: 1rem; border-bottom: 1px solid var(--border-color);">No teachers found.</td></tr>`;
       } else {
         teachers.forEach((t) => {
           html += `
-            <tr>
-              <td>${t.name}</td>
-              <td>${t.email}</td>
-              <td>
+            <tr class="teacher-row" style="transition: background-color 0.2s;">
+              <td style="padding: 1rem; border-bottom: 1px solid var(--border-color);">${t.name}</td>
+              <td style="padding: 1rem; border-bottom: 1px solid var(--border-color);">${t.email}</td>
+              <td style="padding: 1rem; border-bottom: 1px solid var(--border-color);">
                 <button class="btn btn-secondary btn-small" onclick="window.location.hash='#admin-teacher-details?id=${t._id}&name=${encodeURIComponent(t.name)}'">View Courses & Students</button>
               </td>
             </tr>
@@ -1519,6 +1469,20 @@ class Router {
         </div>
       `;
       appDiv.innerHTML = html;
+
+      // Make search functional
+      const searchInput = document.getElementById("teacherSearchInput");
+      if (searchInput) {
+        searchInput.addEventListener("input", (e) => {
+          const searchTerm = e.target.value.toLowerCase();
+          const rows = document.querySelectorAll(".teacher-row");
+          rows.forEach((row) => {
+            const text = row.textContent.toLowerCase();
+            row.style.display = text.includes(searchTerm) ? "" : "none";
+          });
+        });
+      }
+
       this.updateNavbar();
     } catch (error) {
       appDiv.innerHTML = `<div class="error">Failed to load teachers: ${error.message}</div>`;
@@ -1921,11 +1885,17 @@ class Router {
 
       appDiv.innerHTML = `
         <div class="my-courses-page">
-          <div class="page-header">
-            <h2>My Courses</h2>
-            <a href="#create-course" class="btn btn-primary">Create New Course</a>
+          <div class="page-header" style="display: flex; gap: 1rem; align-items: center; justify-content: space-between; flex-wrap: wrap;">
+            <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; flex: 1;">
+              <h2 style="margin:0">My Courses</h2>
+              <div class="search-bar" style="display:flex; align-items:center; background: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 0.1rem 0.5rem; flex: 1; max-width: 500px; min-width: 250px;">
+                <span style="color: #94a3b8; padding: 0 0.5rem; font-size: 1.1rem;">&#128269;</span>
+                <input type="text" id="myCourseSearchInput" placeholder="Search my courses..." style="background: transparent; border: none; color: white; padding: 0.5rem; outline: none; width: 100%;">
+              </div>
+            </div>
+            <a href="#create-course" class="btn btn-primary" style="margin-left:auto">Create New Course</a>
           </div>
-          <div class="courses-table">
+          <div class="courses-table" style="overflow-x: auto;">
             <table>
               <thead>
                 <tr>
@@ -1968,11 +1938,27 @@ class Router {
           </div>
         </div>
       `;
-    } catch (error) {
-      appDiv.innerHTML = `<div class="error-message">Error loading courses: ${error.message}</div>`;
-    }
 
-    this.updateNavbar();
+      // Search functionality
+      const searchInput = document.getElementById("myCourseSearchInput");
+      if (searchInput) {
+        searchInput.addEventListener("input", (e) => {
+          const searchTerm = e.target.value.toLowerCase();
+          const rows = appDiv.querySelectorAll("tbody tr");
+          rows.forEach((row) => {
+            if (row.cells.length > 1) {
+              // Ignore 'no courses' row
+              const text = row.textContent.toLowerCase();
+              row.style.display = text.includes(searchTerm) ? "" : "none";
+            }
+          });
+        });
+      }
+    } catch (e) {
+      console.error(e);
+      appDiv.innerHTML =
+        "<div class='error'>Failed to load your courses.</div>";
+    }
   }
 
   renderCreateCourse() {
@@ -2119,6 +2105,179 @@ class Router {
     this.updateNavbar();
   }
 
+  async renderEditCourse(courseId) {
+    const appDiv = document.getElementById("app");
+    appDiv.innerHTML = "<div class='loading'>Loading course details...</div>";
+
+    try {
+      const response = await api.getCourseById(courseId);
+      const course = response.data;
+      if (!course) throw new Error("Course not found");
+
+      appDiv.innerHTML = `
+        <div class="create-course-page">
+          <h2>Edit Course</h2>
+          <form id="editCourseForm" class="form-large">
+            <div class="form-group">
+              <label for="title">Course Title:</label>
+              <input type="text" id="title" name="title" value="${course.title || ""}" required>
+            </div>
+            <div class="form-group">
+              <label for="description">Description:</label>
+              <textarea id="description" name="description" rows="4" required>${course.description || ""}</textarea>
+            </div>
+            <div class="form-group">
+              <label for="price">Price (₹):</label>
+              <input type="number" id="price" name="price" step="0.01" value="${course.price || ""}" required>
+            </div>
+            <div class="form-group">
+              <label for="duration">Duration (months):</label>
+              <input type="number" id="duration" name="duration" min="1" max="60" value="${course.duration || ""}" required>
+            </div>
+            <div class="form-group">
+              <label for="company">Company Name:</label>
+              <input type="text" id="company" name="company" value="${course.company || ""}" required>
+            </div>
+            <div class="form-group">
+              <label for="role">Job Role/Position:</label>
+              <input type="text" id="role" name="role" value="${course.role || ""}" required>
+            </div>
+            <div class="form-group">
+              <label for="highlights">Course Highlights & Specifications:</label>
+              <div id="highlightsContainer">
+                ${(course.highlights && course.highlights.length > 0
+                  ? course.highlights
+                  : [""]
+                )
+                  .map(
+                    (h) => `
+                  <div class="highlight-input-group">
+                    <input type="text" class="highlight-input" value="${h.replace(/"/g, "&quot;")}" placeholder="Add a highlight" maxlength="500">
+                    <button type="button" class="btn btn-small btn-danger remove-highlight">Remove</button>
+                  </div>
+                `,
+                  )
+                  .join("")}
+              </div>
+              <button type="button" id="addHighlightBtn" class="btn btn-secondary btn-small">+ Add Highlight</button>
+            </div>
+            <button type="submit" class="btn btn-primary">Update Course</button>
+          </form>
+          <div id="editMessage" class="message"></div>
+        </div>
+      `;
+
+      const highlightsContainer = document.getElementById(
+        "highlightsContainer",
+      );
+      const addHighlightBtn = document.getElementById("addHighlightBtn");
+
+      function updateRemoveButtons() {
+        const highlightInputs = highlightsContainer.querySelectorAll(
+          ".highlight-input-group",
+        );
+        highlightInputs.forEach((group) => {
+          const removeBtn = group.querySelector(".remove-highlight");
+          removeBtn.style.display =
+            highlightInputs.length > 1 ? "block" : "none";
+        });
+      }
+
+      addHighlightBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        const highlightInputs = highlightsContainer.querySelectorAll(
+          ".highlight-input-group",
+        );
+        if (highlightInputs.length >= 10) {
+          showInfoPopup("Maximum 10 highlights allowed", "Limit Reached");
+          return;
+        }
+
+        const newHighlightGroup = document.createElement("div");
+        newHighlightGroup.className = "highlight-input-group";
+        newHighlightGroup.innerHTML = `
+          <input type="text" class="highlight-input" placeholder="Add a highlight or specification" maxlength="500">
+          <button type="button" class="btn btn-small btn-danger remove-highlight">Remove</button>
+        `;
+
+        newHighlightGroup
+          .querySelector(".remove-highlight")
+          .addEventListener("click", (e) => {
+            e.preventDefault();
+            newHighlightGroup.remove();
+            updateRemoveButtons();
+          });
+
+        highlightsContainer.appendChild(newHighlightGroup);
+        updateRemoveButtons();
+      });
+
+      highlightsContainer
+        .querySelectorAll(".remove-highlight")
+        .forEach((btn) => {
+          btn.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.target.closest(".highlight-input-group").remove();
+            updateRemoveButtons();
+          });
+        });
+
+      updateRemoveButtons();
+
+      document
+        .getElementById("editCourseForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const form = e.target;
+          const msgDiv = document.getElementById("editMessage");
+
+          const highlightInputs =
+            highlightsContainer.querySelectorAll(".highlight-input");
+          const highlights = Array.from(highlightInputs)
+            .map((input) => input.value.trim())
+            .filter((value) => value.length > 0);
+
+          if (highlights.length === 0) {
+            msgDiv.className = "message error";
+            msgDiv.textContent = "Please add at least one highlight";
+            return;
+          }
+
+          const courseData = {
+            title: form.title.value,
+            description: form.description.value,
+            price: parseFloat(form.price.value),
+            duration: parseInt(form.duration.value),
+            company: form.company.value,
+            role: form.role.value,
+            highlights: highlights,
+          };
+
+          try {
+            msgDiv.className = "message";
+            msgDiv.textContent = "Updating course...";
+            const res = await api.updateCourse(courseId, courseData);
+            if (res.success || res.data) {
+              msgDiv.className = "message success";
+              msgDiv.textContent =
+                "Course updated successfully! Redirecting...";
+              setTimeout(() => {
+                window.location.hash = "#my-courses";
+              }, 1000);
+            } else {
+              msgDiv.className = "message error";
+              msgDiv.textContent = res.message || "Update failed";
+            }
+          } catch (error) {
+            msgDiv.className = "message error";
+            msgDiv.textContent = error.message;
+          }
+        });
+    } catch (err) {
+      appDiv.innerHTML = `<div class="error-message">Error loading course: ${err.message}</div>`;
+    }
+  }
+
   async renderMyEnrollments() {
     const appDiv = document.getElementById("app");
     appDiv.innerHTML = "<div class='loading'>Loading your enrollments...</div>";
@@ -2151,7 +2310,7 @@ class Router {
         `;
       }
 
-      html += `<div class="enrollments-list" style="display: grid; gap: 1.5rem; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));">`;
+      html += `<div class="enrollments-list" style="display: grid; gap: 1.5rem; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));">`;
 
       if (enrollments.length > 0) {
         html += enrollments
@@ -2412,7 +2571,7 @@ class Router {
       `;
 
       if (approvedEnrollments.length > 0) {
-        html += `<div class="courses-list" style="display: grid; gap: 1.5rem; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); margin-bottom: 3rem;">`;
+        html += `<div class="courses-list" style="display: grid; gap: 1.5rem; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); margin-bottom: 3rem;">`;
 
         html += approvedEnrollments
           .map((enrollment) => {
@@ -2536,7 +2695,7 @@ class Router {
       `;
 
       if (pendingEnrollments.length > 0) {
-        html += `<div class="courses-list" style="display: grid; gap: 1.5rem; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); margin-bottom: 2rem;">`;
+        html += `<div class="courses-list" style="display: grid; gap: 1.5rem; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); margin-bottom: 2rem;">`;
 
         html += pendingEnrollments
           .map((enrollment) => {
@@ -2666,7 +2825,7 @@ class Router {
           </div>
         `;
       } else {
-        html += `<div style="display: grid; gap: 1.5rem; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); margin-bottom: 2rem;">`;
+        html += `<div style="display: grid; gap: 1.5rem; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); margin-bottom: 2rem;">`;
 
         for (const course of teacherCourses) {
           const studentCount = course.enrolledCount || 0;
@@ -2859,7 +3018,7 @@ class Router {
           </div>
         `;
       } else {
-        html += `<div class="courses-list" style="display: grid; gap: 1.5rem; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); padding: 0 2rem; margin-bottom: 2rem;">`;
+        html += `<div class="courses-list" style="display: grid; gap: 1.5rem; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); margin-bottom: 2rem; overflow-x: hidden;">`;
 
         dues.forEach((due) => {
           const teacher = due.teacherId || {};
@@ -2867,14 +3026,13 @@ class Router {
           const course = due.courseId || {};
 
           html += `
-            <div style="background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.5rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); position: relative;">
-              <div style="position: absolute; top: 1rem; right: 1rem;">
-                <span style="background: #fef08a; color: #b45309; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600;">Awaiting Settlement</span>
+            <div style="background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.5rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); display: flex; flex-direction: column; overflow: hidden;">
+              <div style="display: flex; justify-content: space-between; align-items:flex-start; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem;">
+                <h3 style="margin: 0; color: #0f172a; flex: 1; min-width: 200px;">👨‍🏫 Teacher: ${teacher.name || "Unknown"}</h3>
+                <span style="background: #fef08a; color: #b45309; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; white-space: nowrap;">Awaiting Settlement</span>
               </div>
               
-              <h3 style="margin: 0 0 1rem 0; color: #0f172a; padding-right: 6rem;">👨‍🏫 Teacher: ${teacher.name || "Unknown"}</h3>
-              
-              <div style="background: #f8fafc; border-radius: 8px; padding: 1rem; margin-bottom: 1rem;">
+              <div style="background: #f8fafc; color: #334155; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; word-break: break-all;">
                 <p style="margin: 0 0 0.5rem 0; font-size: 0.9rem;"><strong>Bank/UPI:</strong> ${teacher.upiId || "Not provided"}</p>
                 <p style="margin: 0 0 0.5rem 0; font-size: 0.9rem;"><strong>Mobile:</strong> ${teacher.mobileNumber || "Not provided"}</p>
               </div>
@@ -2943,107 +3101,21 @@ class Router {
     appDiv.innerHTML = `
       <div class="page custom-meeting-page" style="display: flex; justify-content: center; align-items: center; min-height: 80vh;">
         <div class="meeting-card" style="background: white; padding: 2.5rem; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); max-width: 500px; width: 100%; text-align: center;">
-          <h2 style="margin-bottom: 2rem; color: #333; font-size: 1.8rem;">🎥 Create Live Class</h2>
-          <p style="color: #666; margin-bottom: 2rem;">Generate a secure Google Meet link for your instant live session.</p>
+          <h2 style="margin-bottom: 1rem; color: #333; font-size: 1.8rem;">🎥 Create Live Class</h2>
+          <p style="color: #666; margin-bottom: 2rem;">Please create a secure Google Meet link using your own Google account to get full host and recording controls.</p>
           
-          <button id="btnGenerateMeeting" style="background: #3b82f6; color: white; border: none; padding: 12px 24px; border-radius: 6px; font-size: 1.1rem; font-weight: bold; cursor: pointer; transition: all 0.3s; width: 100%;">
-            Create Meeting Link
-          </button>
+          <a href="https://meet.google.com/new" target="_blank" id="btnGenerateMeeting" style="display: block; text-decoration: none; background: #3b82f6; color: white; border: none; padding: 12px 24px; border-radius: 6px; font-size: 1.1rem; font-weight: bold; cursor: pointer; transition: all 0.3s; width: 100%; box-sizing: border-box;">
+            Create Meeting (via Google Meet)
+          </a>
           
-          <div id="meetingResultContainer" style="display: none; margin-top: 2rem; opacity: 0; transition: opacity 0.4s ease-in-out;">
-            <p style="color: #10b981; font-weight: bold; margin-bottom: 1rem;">✅ Meeting created successfully!</p>
-            <div style="display: flex; align-items: center; margin-bottom: 1.5rem;">
-              <input type="text" id="meetingLinkInput" readonly style="flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 6px 0 0 6px; font-size: 0.95rem; background: #f8fafc; cursor: text; outline: none; border-right: none;">
-              <button id="btnCopyLink" style="background: #e2e8f0; color: #333; border: 1px solid #ddd; padding: 12.5px 15px; border-radius: 0 6px 6px 0; cursor: pointer; transition: all 0.2s; font-size: 1.1rem;" title="Copy to clipboard">
-                📋
-              </button>
-            </div>
-            <a id="btnJoinMeeting" href="#" target="_blank" style="display: block; background: #10b981; color: white; text-decoration: none; padding: 12px 24px; border-radius: 6px; font-size: 1.1rem; font-weight: bold; width: 100%; box-sizing: border-box;">
-              Join Meeting Now
-            </a>
+          <div style="margin-top: 2rem;">
+            <p style="color: #666; font-size: 0.9rem; margin-bottom: 0.5rem;">After generating, share your link with students via WhatsApp or post it in the course.</p>
           </div>
         </div>
       </div>
     `;
 
     this.updateNavbar();
-
-    setTimeout(() => {
-      const btnGenerate = document.getElementById("btnGenerateMeeting");
-      const resultContainer = document.getElementById("meetingResultContainer");
-      const meetingInput = document.getElementById("meetingLinkInput");
-      const btnCopy = document.getElementById("btnCopyLink");
-      const btnJoin = document.getElementById("btnJoinMeeting");
-
-      if (btnGenerate) {
-        btnGenerate.addEventListener("click", async () => {
-          btnGenerate.innerHTML = "Creating... <span class='spinner'>⏳</span>";
-          btnGenerate.style.pointerEvents = "none";
-          btnGenerate.style.opacity = "0.7";
-
-          try {
-            const response = await fetch(
-              `${API_BASE_URL}/classes/create-meet`,
-              {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                  Authorization: `Bearer ${localStorage.getItem("token")}`,
-                },
-                body: JSON.stringify({
-                  courseName: "Instant Live Session",
-                  teacherEmail: user.email || "teacher",
-                }),
-              },
-            );
-            const data = await response.json();
-
-            if (data.success && data.meetingUri) {
-              btnGenerate.style.display = "none";
-              resultContainer.style.display = "block";
-
-              // Trigger slight reflow to allow transition to register, then set opacity
-              setTimeout(() => {
-                resultContainer.style.opacity = "1";
-              }, 50);
-
-              meetingInput.value = data.meetingUri;
-              btnJoin.href = data.meetingUri;
-            } else {
-              alert(data.message || "Failed to create Google Meet link.");
-              btnGenerate.innerHTML = "Create Meeting Link";
-              btnGenerate.style.pointerEvents = "auto";
-              btnGenerate.style.opacity = "1";
-            }
-          } catch (error) {
-            console.error("Error creating live class:", error);
-            alert("Error creating live class.");
-            btnGenerate.innerHTML = "Create Meeting Link";
-            btnGenerate.style.pointerEvents = "auto";
-            btnGenerate.style.opacity = "1";
-          }
-        });
-      }
-
-      if (btnCopy) {
-        btnCopy.addEventListener("click", () => {
-          meetingInput.select();
-          meetingInput.setSelectionRange(0, 99999); // For mobile devices
-          navigator.clipboard
-            .writeText(meetingInput.value)
-            .then(() => {
-              const originalIcon = btnCopy.innerHTML;
-              btnCopy.innerHTML = "✅";
-              setTimeout(() => {
-                btnCopy.innerHTML = originalIcon;
-              }, 2000);
-            })
-            .catch((err) => {
-              console.error("Could not copy text: ", err);
-            });
-        });
-      }
-    }, 0);
   }
 }
 
