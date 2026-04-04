@@ -249,6 +249,7 @@ class Router {
     this.currentRoute = routeName;
     const appDiv = document.getElementById("app");
     appDiv.innerHTML = "";
+    window.scrollTo({ top: 0, behavior: "smooth" });
     route.render(...params);
   }
 
@@ -350,6 +351,7 @@ class Router {
       adminMenuItem.style.display = "none";
       if (supportMenuItem) supportMenuItem.style.display = "none";
       if (documentationsMenuItem) documentationsMenuItem.style.display = "none";
+      if (createMeetingMenuItem) createMeetingMenuItem.style.display = "none";
     }
   }
 
@@ -362,7 +364,7 @@ class Router {
     appDiv.innerHTML = `
       <div class="home-page">
         <div class="hero-section">
-          <h1>Welcome to StudBridge Platform</h1>
+          <h1>Welcome to <span class="brand-stud">Stud</span><span class="brand-bridge">Bridge</span> Platform</h1>
           <p>Learn Directly from Industry Experts</p>
           <p class="subtitle">Experience a premium one-to-one platform where real-world job professionals will directly mentor and teach you.</p>
           <div class="button-group">
@@ -399,7 +401,7 @@ class Router {
     appDiv.innerHTML = `
       <div class="auth-page">
         <div class="auth-card">
-          <h2>Login to StudBridge Platform</h2>
+          <h2>Login to <span class="brand-stud">Stud</span><span class="brand-bridge">Bridge</span> Platform</h2>
           <form id="loginForm" class="auth-form">
             <div class="form-group">
               <label for="email">Email:</label>
@@ -502,7 +504,7 @@ class Router {
     appDiv.innerHTML = `
       <div class="auth-page">
         <div class="auth-card">
-          <h2>Register to StudBridge Platform</h2>
+          <h2>Register to <span class="brand-stud">Stud</span><span class="brand-bridge">Bridge</span> Platform</h2>
           <form id="registerForm" class="auth-form">
             <div class="form-group">
               <label for="name">Full Name:</label>
@@ -2334,7 +2336,7 @@ class Router {
               statusBadge =
                 '<span style="background: #ede9fe; color: #5b21b6; padding: 0.25rem 0.75rem; border-radius: 4px; font-size: 0.85rem; font-weight: 600;">🧾 Payment Submitted</span>';
               infoMessage =
-                '<div style="margin-top: 10px; font-size: 0.85rem; color: #5b21b6; background: #ede9fe; padding: 8px; border-radius: 4px;">Thank you! Following the payment submission, the admin or StudBridge Platform will reach out to you within 24 hours.</div>';
+                '<div style="margin-top: 10px; font-size: 0.85rem; color: #5b21b6; background: #ede9fe; padding: 8px; border-radius: 4px;">Thank you! Following the payment submission, the admin or <span class="brand-stud">Stud</span><span class="brand-bridge">Bridge</span> Platform will reach out to you within 24 hours.</div>';
             } else if (status === "active") {
               statusBadge =
                 '<span style="background: #d1fae5; color: #065f46; padding: 0.25rem 0.75rem; border-radius: 4px; font-size: 0.85rem; font-weight: 600;">✅ Active</span>';
