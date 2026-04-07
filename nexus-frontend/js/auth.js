@@ -1,27 +1,18 @@
-/**
- * Authentication Module
- * Handles user authentication and session management
- */
-
 class AuthManager {
   constructor() {
     this.user = this.loadUser();
     this.token = localStorage.getItem("token");
   }
 
-  /**
-   * Register a new user
-   */
   async register(form) {
     try {
-      // Create FormData from form element
       const formData = new FormData(form);
 
       const userData = {
         name: formData.get("name"),
         email: formData.get("email"),
         password: formData.get("password"),
-        role: formData.get("role") || "student", // Default role is student
+        role: formData.get("role") || "student",
         mobileNumber: formData.get("mobileNumber") || undefined,
         linkedinUrl: formData.get("linkedinUrl") || undefined,
         githubUrl: formData.get("githubUrl") || undefined,
@@ -38,6 +29,7 @@ class AuthManager {
 
       if (response.success && response.data?.token) {
         this.setSession(response.data.token, response.data.user);
+        router.updateNavbar(); // Update navbar immediately after login
         console.log("✓ Registration successful for:", userData.email);
         return { success: true, message: "Registration successful!" };
       }
@@ -69,7 +61,7 @@ class AuthManager {
 
       if (response.success && response.data?.token) {
         this.setSession(response.data.token, response.data.user);
-        console.log("✓ Login successful for:", email);
+        router.updateNavbar(); // Update navbar immediately after login        console.log("✓ Login successful for:", email);
         return { success: true, message: "Login successful!" };
       }
       console.warn("✗ Login failed:", response.message);
@@ -277,6 +269,7 @@ window.handleGoogleLogin = async function (response) {
 
     if (response.success && response.data?.token) {
       auth.setSession(response.data.token, response.data.user);
+      router.updateNavbar(); // Update navbar immediately after Google login
       if (loginMessageDiv) {
         loginMessageDiv.className = "message success";
         loginMessageDiv.textContent = "Google Sign-In successful!";
