@@ -2,6 +2,7 @@ import { AppError, ValidationError } from "../utils/errors";
 import { CourseRepository } from "../repositories/CourseRepository";
 import { EnrollmentRepository } from "../repositories/EnrollmentRepository";
 import type { ICourse } from "../models/Course";
+import mongoose from "mongoose";
 
 export class CourseService {
   private courseRepository: CourseRepository;
@@ -10,6 +11,34 @@ export class CourseService {
   constructor() {
     this.courseRepository = new CourseRepository();
     this.enrollmentRepository = new EnrollmentRepository();
+  }
+
+  /**
+   * Helper to safely extract string ID from an object or string
+   */
+  private extractId(id: any): string {
+    if (!id) return "";
+    if (typeof id === "object") {
+      return (id._id || id.id || id).toString();
+    }
+    return String(id).trim();
+  }
+
+  /**
+   * Validate and extract ObjectId safely
+   */
+  private validateObjectId(id: any, label: string): string {
+    const idString = this.extractId(id);
+
+    if (!idString) {
+      throw new ValidationError(`${label} is required`);
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(idString)) {
+      throw new ValidationError(`Invalid ${label} format`);
+    }
+
+    return idString;
   }
 
   /**
@@ -27,9 +56,10 @@ export class CourseService {
       status?: "pending_admin_approval" | "published" | "rejected";
     },
   ): Promise<ICourse> {
+    const validTeacherId = this.extractId(teacherId);
     const courseData = {
       ...data,
-      teacherId,
+      teacherId: validTeacherId,
       isTrending: data.isTrending ?? false,
       // Teacher submissions always require admin approval before publication.
       status: "pending_admin_approval",
@@ -63,7 +93,7 @@ export class CourseService {
       query.isTrending = filter.isTrending;
     }
     if (filter?.teacherId) {
-      query.teacherId = filter.teacherId;
+      query.teacherId = this.extractId(filter.teacherId);
     }
 
     const courses = await this.courseRepository.findAll(query, skip, limit);
@@ -96,7 +126,9 @@ export class CourseService {
    * Get course by ID
    */
   async getCourseById(courseId: string): Promise<any> {
-    const course = await this.courseRepository.findById(courseId);
+    const validatedCourseId = this.validateObjectId(courseId, "Course ID");
+
+    const course = await this.courseRepository.findById(validatedCourseId);
     if (!course) {
       throw new AppError("Course not found", 404);
     }
@@ -104,7 +136,7 @@ export class CourseService {
     // Add enrollment count
     const enrollmentCount =
       await this.enrollmentRepository.countByCourseAndStatus(
-        courseId,
+        validatedCourseId,
         "active",
       );
 
@@ -131,7 +163,8 @@ export class CourseService {
     const skip = (page - 1) * limit;
 
     // Convert teacherId string to ObjectId for proper comparison
-    const teacherObjectId = new ObjectId(teacherId);
+    const validTeacherIdStr = this.extractId(teacherId);
+    const teacherObjectId = new ObjectId(validTeacherIdStr);
 
     const courses = await this.courseRepository.findAll(
       { teacherId: teacherObjectId },
@@ -184,18 +217,22 @@ export class CourseService {
       status?: "pending_admin_approval" | "published" | "rejected";
     },
   ): Promise<ICourse> {
-    const course = await this.courseRepository.findById(courseId);
+    const validCourseId = this.validateObjectId(courseId, "Course ID");
+    const validTeacherId = this.extractId(teacherId);
+
+    const course = await this.courseRepository.findById(validCourseId);
     if (!course) {
       throw new AppError("Course not found", 404);
     }
 
-    // Verify teacher owns this course
-    if (course.teacherId.toString() !== teacherId) {
+    // Verify teacher owns this course (Extract both IDs robustly to prevent mismatch)
+    const ownerId = this.extractId(course.teacherId);
+    if (ownerId !== validTeacherId) {
       throw new AppError("Unauthorized to update this course", 403);
     }
 
     const updatedCourse = await this.courseRepository.updateById(
-      courseId,
+      validCourseId,
       data,
     );
     if (!updatedCourse) {
@@ -209,17 +246,21 @@ export class CourseService {
    * Delete course
    */
   async deleteCourse(courseId: string, teacherId: string): Promise<void> {
-    const course = await this.courseRepository.findById(courseId);
+    const validCourseId = this.validateObjectId(courseId, "Course ID");
+    const validTeacherId = this.extractId(teacherId);
+
+    const course = await this.courseRepository.findById(validCourseId);
     if (!course) {
       throw new AppError("Course not found", 404);
     }
 
     // Verify teacher owns this course
-    if (course.teacherId.toString() !== teacherId) {
+    const ownerId = this.extractId(course.teacherId);
+    if (ownerId !== validTeacherId) {
       throw new AppError("Unauthorized to delete this course", 403);
     }
 
-    await this.courseRepository.deleteById(courseId);
+    await this.courseRepository.deleteById(validCourseId);
   }
 
   /**
@@ -230,13 +271,17 @@ export class CourseService {
     teacherId: string,
     status: "pending_admin_approval",
   ): Promise<ICourse> {
-    const course = await this.courseRepository.findById(courseId);
+    const validCourseId = this.validateObjectId(courseId, "Course ID");
+    const validTeacherId = this.extractId(teacherId);
+
+    const course = await this.courseRepository.findById(validCourseId);
     if (!course) {
       throw new AppError("Course not found", 404);
     }
 
     // Verify teacher owns this course
-    if (course.teacherId.toString() !== teacherId) {
+    const ownerId = this.extractId(course.teacherId);
+    if (ownerId !== validTeacherId) {
       throw new AppError("Unauthorized to modify this course", 403);
     }
 
@@ -247,9 +292,12 @@ export class CourseService {
       );
     }
 
-    const updatedCourse = await this.courseRepository.updateById(courseId, {
-      status,
-    });
+    const updatedCourse = await this.courseRepository.updateById(
+      validCourseId,
+      {
+        status,
+      },
+    );
     if (!updatedCourse) {
       throw new AppError("Failed to update course status", 500);
     }
@@ -264,14 +312,19 @@ export class CourseService {
     courseId: string,
     isTrending: boolean,
   ): Promise<ICourse> {
-    const course = await this.courseRepository.findById(courseId);
+    const validCourseId = this.validateObjectId(courseId, "Course ID");
+
+    const course = await this.courseRepository.findById(validCourseId);
     if (!course) {
       throw new AppError("Course not found", 404);
     }
 
-    const updatedCourse = await this.courseRepository.updateById(courseId, {
-      isTrending,
-    });
+    const updatedCourse = await this.courseRepository.updateById(
+      validCourseId,
+      {
+        isTrending,
+      },
+    );
     if (!updatedCourse) {
       throw new AppError("Failed to update course", 500);
     }
@@ -324,7 +377,9 @@ export class CourseService {
    * Approve course (Admin only) - Change status from pending_admin_approval to published
    */
   async approveCourse(courseId: string): Promise<ICourse> {
-    const course = await this.courseRepository.findById(courseId);
+    const validCourseId = this.validateObjectId(courseId, "Course ID");
+
+    const course = await this.courseRepository.findById(validCourseId);
     if (!course) {
       throw new AppError("Course not found", 404);
     }
@@ -336,9 +391,12 @@ export class CourseService {
       );
     }
 
-    const updatedCourse = await this.courseRepository.updateById(courseId, {
-      status: "published",
-    });
+    const updatedCourse = await this.courseRepository.updateById(
+      validCourseId,
+      {
+        status: "published",
+      },
+    );
     if (!updatedCourse) {
       throw new AppError("Failed to approve course", 500);
     }
@@ -350,7 +408,9 @@ export class CourseService {
    * Reject course (Admin only) - Keep course but mark rejected
    */
   async rejectCourse(courseId: string): Promise<void> {
-    const course = await this.courseRepository.findById(courseId);
+    const validCourseId = this.validateObjectId(courseId, "Course ID");
+
+    const course = await this.courseRepository.findById(validCourseId);
     if (!course) {
       throw new AppError("Course not found", 404);
     }
@@ -362,9 +422,12 @@ export class CourseService {
       );
     }
 
-    const updatedCourse = await this.courseRepository.updateById(courseId, {
-      status: "rejected",
-    });
+    const updatedCourse = await this.courseRepository.updateById(
+      validCourseId,
+      {
+        status: "rejected",
+      },
+    );
 
     if (!updatedCourse) {
       throw new AppError("Failed to reject course", 500);
