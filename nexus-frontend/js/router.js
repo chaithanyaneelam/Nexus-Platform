@@ -2352,6 +2352,10 @@ class Router {
             const showWaitingPaymentConfirm = status === "payment_submitted";
             const canAccessTeacher = status === "active";
             const amount = enrollment.payableAmount || course.price || 0;
+            const courseIdStr =
+              course._id ||
+              (enrollment.courseId && enrollment.courseId._id) ||
+              enrollment.courseId;
 
             return `
                 <div style="background: white; border: 2px solid #ddd; border-radius: 12px; 
@@ -2453,7 +2457,8 @@ class Router {
                           ${!canAccessTeacher ? "disabled" : ""}>
                       💬 WhatsApp
                     </button>
-                            <button onclick="${canAccessTeacher ? `router.navigate('#course-detail/${course._id || enrollment.courseId}')` : showPayNow ? `submitPaymentPrompt('${enrollment.paymentId || enrollment._id}', '${course.title || "Course"}', '${amount}')` : showWaitingPaymentConfirm ? `showInfoPopup('Your payment is submitted. Please wait for admin confirmation.')` : `showInfoPopup('Please wait for admin approval')`}"
+                    
+                    <button onclick="${canAccessTeacher ? `window.location.hash='#course-detail/${courseIdStr}'` : showPayNow ? `submitPaymentPrompt('${enrollment.paymentId || enrollment._id}', '${course.title || "Course"}', '${amount}')` : showWaitingPaymentConfirm ? `showInfoPopup('Your payment is submitted. Please wait for admin confirmation.')` : `showInfoPopup('Please wait for admin approval')`}"
                               style="flex: 1; padding: 0.75rem; background: ${canAccessTeacher ? "#667eea" : showPayNow ? "#0ea5e9" : "#ccc"}; color: white; 
                                 border: none; border-radius: 6px; font-weight: 600; cursor: ${canAccessTeacher || showPayNow ? "pointer" : "not-allowed"};
                                     transition: background 0.3s;"
@@ -2579,6 +2584,13 @@ class Router {
           .map((enrollment) => {
             const course = enrollment.courseId || {};
             const teacher = course.teacherId || {};
+            const courseIdStr =
+              course._id ||
+              course.id ||
+              (typeof enrollment.courseId === "string"
+                ? enrollment.courseId
+                : enrollment.courseId?._id) ||
+              "";
 
             return `
               <div style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
@@ -2663,7 +2675,9 @@ class Router {
                           onmouseout="this.style.background='#25d366'; this.style.transform='translateY(0)'">
                     💬 Contact Teacher
                   </button>
-                  <button onclick="router.navigate('#course-detail/${enrollment.courseId}')"
+                 
+
+                  <button onclick="window.location.hash='#course-detail/${courseIdStr}'"
                           style="flex: 1; padding: 0.75rem; background: #667eea; color: white; 
                                   border: none; border-radius: 6px; font-weight: 600; cursor: pointer;
                                   transition: all 0.3s; font-size: 0.9rem;"
