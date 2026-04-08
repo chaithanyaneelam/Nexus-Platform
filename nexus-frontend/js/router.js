@@ -2232,6 +2232,9 @@ class Router {
           e.preventDefault();
           const form = e.target;
           const msgDiv = document.getElementById("editMessage");
+          const submitBtn = form.querySelector('button[type="submit"]');
+
+          if (window.toggleLoading) window.toggleLoading(submitBtn, true);
 
           const highlightInputs =
             highlightsContainer.querySelectorAll(".highlight-input");
@@ -2242,6 +2245,7 @@ class Router {
           if (highlights.length === 0) {
             msgDiv.className = "message error";
             msgDiv.textContent = "Please add at least one highlight";
+            if (window.toggleLoading) window.toggleLoading(submitBtn, false);
             return;
           }
 
@@ -2273,6 +2277,8 @@ class Router {
           } catch (error) {
             msgDiv.className = "message error";
             msgDiv.textContent = error.message;
+          } finally {
+            if (window.toggleLoading) window.toggleLoading(submitBtn, false);
           }
         });
     } catch (err) {
@@ -3332,6 +3338,14 @@ window.addEventListener("load", () => {
 
 // Enroll in course function
 async function enrollCourse(courseId) {
+  // Find the button that was clicked to show loading state
+  const enrollBtn = document.querySelector(
+    `button[onclick="enrollCourse('${courseId}')"]`,
+  );
+  if (enrollBtn && window.toggleLoading) {
+    window.toggleLoading(enrollBtn, true);
+  }
+
   try {
     const response = await api.enrollInCourse({ courseId });
     if (response.success) {
@@ -3344,7 +3358,19 @@ async function enrollCourse(courseId) {
       showInfoPopup(response.message || "Enrollment failed", "Enrollment");
     }
   } catch (error) {
-    showInfoPopup(`Error: ${error.message}`, "Enrollment Error");
+    // We don't want to show raw log errors in popups, parse it nicely or just show a generic error
+    let errorMsg = "An error occurred during enrollment.";
+    if (error && error.message) {
+      // Don't show raw object string
+      if (!error.message.includes("[object Object]")) {
+        errorMsg = error.message;
+      }
+    }
+    showInfoPopup(`Error: ${errorMsg}`, "Enrollment Error");
+  } finally {
+    if (enrollBtn && window.toggleLoading) {
+      window.toggleLoading(enrollBtn, false);
+    }
   }
 }
 
