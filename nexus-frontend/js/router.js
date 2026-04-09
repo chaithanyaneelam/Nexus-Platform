@@ -363,34 +363,39 @@ class Router {
     const appDiv = document.getElementById("app");
     appDiv.innerHTML = `
       <div class="home-page">
-        <div class="hero-section">
-          <h1>Welcome to <span class="brand-stud">Stud</span><span class="brand-bridge">Bridge</span> Platform</h1>
-          <p>Learn Directly from Industry Experts</p>
-          <p class="subtitle">Experience a premium one-to-one platform where real-world job professionals will directly mentor and teach you.</p>
+        <header class="hero-section">
+          <h1><span class="brand-stud">Stud</span><span class="brand-bridge">Bridge</span>: Industry-Led Mentorship & Career Guidance</h1>
+          <h2>Learn Directly from Top Tech Professionals</h2>
+          <p class="subtitle">Experience a premium one-to-one platform where real-world professionals mentor you, guide your resume, and provide tech market insights.</p>
           <div class="button-group">
-            <a href="#courses" class="btn btn-primary">Explore Courses</a>
-            ${!auth.isAuthenticated() ? `<a href="#register" class="btn btn-secondary">Get Started</a>` : ""}
+            <a href="#courses" class="btn btn-primary" aria-label="Explore industry-led courses">Explore Courses</a>
+            ${!auth.isAuthenticated() ? `<a href="#register" class="btn btn-secondary" aria-label="Get started with StudBridge">Get Started</a>` : ""}
           </div>
-        </div>
+        </header>
 
-        <div class="features-section">
-          <div class="feature">
+        <main class="features-section" aria-label="StudBridge Features">
+          <section class="feature">
+            <!-- Using semantic structure and alt-text concepts -->
+            <img src="./assets/mentorship-icon.png" alt="1-on-1 Mentorship Icon" style="width: 48px; display: block; margin: 0 auto 10px; display: none;" />
             <h3>🤝 1-on-1 Mentorship</h3>
-            <p>Get personalized attention and learn directly from real-world working professionals.</p>
-          </div>
-          <div class="feature">
-            <h3>💼 Project-Based Learning</h3>
-            <p>Build real projects and add them to your portfolio</p>
-          </div>
-          <div class="feature">
-            <h3>📈 Career Growth</h3>
-            <p>Advance your career with industry-recognized skills</p>
-          </div>
-          <div class="feature">
-            <h3>🚀 Latest Technologies</h3>
-            <p>Master the latest and greatest in tech industry</p>
-          </div>
-        </div>
+            <p>Get personalized career guidance and learn directly from real-world working professionals.</p>
+          </section>
+          <section class="feature">
+            <img src="./assets/portfolio-icon.png" alt="Resume and Portfolio Building Icon" style="width: 48px; display: block; margin: 0 auto 10px; display: none;" />
+            <h3>💼 Resume & Portfolio Building</h3>
+            <p>Build real projects, refine your resume, and add them to your portfolio.</p>
+          </section>
+          <section class="feature">
+            <img src="./assets/insights-icon.png" alt="Tech Market Insights Icon" style="width: 48px; display: block; margin: 0 auto 10px; display: none;" />
+            <h3>📈 Tech Market Insights</h3>
+            <p>Advance your career with industry-recognized skills and insider knowledge.</p>
+          </section>
+          <section class="feature">
+            <img src="./assets/courses-icon.png" alt="Industry-led Courses Icon" style="width: 48px; display: block; margin: 0 auto 10px; display: none;" />
+            <h3>🚀 Industry-Led Courses</h3>
+            <p>Master the latest and greatest in the tech industry through expert-led curriculum.</p>
+          </section>
+        </main>
       </div>
     `;
     this.updateNavbar();
