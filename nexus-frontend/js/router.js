@@ -195,6 +195,12 @@ class Router {
       role: "teacher",
       render: () => this.renderCreateMeeting(),
     };
+
+    this.routes["teacher-reviews"] = {
+      path: "#teacher-reviews",
+      requiresAuth: false,
+      render: (teacherId) => this.renderTeacherReviews(teacherId),
+    };
   }
 
   /**
@@ -783,14 +789,15 @@ class Router {
               <h1 style="color: white;">${course.title}</h1>
             </div>
             <div class="course-header-info">
-              <p class="instructor">Instructor: ${course.instructor || course.teacherId?.name || "Unknown"}</p>
-              <p class="description">${course.description}</p>
-              <div class="course-stats">
-                <span><strong>Company:</strong> ${course.company || course.teacherId?.company || "N/A"}</span>
-                <span><strong>Role:</strong> ${course.role || course.teacherId?.profession || "N/A"}</span>
-                ${isEnrolled ? `<span><strong>Mobile:</strong> ${course.teacherId?.mobileNumber || "N/A"}</span>` : ""}
-                <span><strong>Duration:</strong> ${course.duration || "Self-paced"} months</span>
-                <span><strong>Students:</strong> ${course.enrolledCount || 0}</span>
+              <p class="instructor" style="margin: 0 0 1rem 0; color: #60a5fa; font-size: 1rem; font-weight: 600;">Instructor: ${course.instructor || course.teacherId?.name || "Unknown"}</p>
+              <p class="description" style="margin: 0 0 1.5rem 0; color: #e2e8f0; font-size: 1.15rem; line-height: 1.9; word-spacing: 0.1rem; letter-spacing: 0.3px;">${course.description}</p>
+              <div class="course-stats" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem; padding: 1.5rem; background: rgba(15, 23, 42, 0.4); border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.05);">
+                <span style="color: #cbd5e1; font-size: 0.95rem;"><strong style="color: #e2e8f0;">Company:</strong> ${course.company || course.teacherId?.company || "N/A"}</span>
+                <span style="color: #cbd5e1; font-size: 0.95rem;"><strong style="color: #e2e8f0;">Role:</strong> ${course.role || course.teacherId?.profession || "N/A"}</span>
+                ${isEnrolled ? `<span style="color: #cbd5e1; font-size: 0.95rem;"><strong style="color: #e2e8f0;">Mobile:</strong> ${course.teacherId?.mobileNumber || "N/A"}</span>` : ""}
+                <span style="color: #cbd5e1; font-size: 0.95rem;"><strong style="color: #e2e8f0;">Duration:</strong> ${course.duration || "Self-paced"} months</span>
+                <span style="color: #cbd5e1; font-size: 0.95rem;"><strong style="color: #e2e8f0;">Students:</strong> ${course.enrolledCount || 0}</span>
+                <span style="color: #cbd5e1; font-size: 0.95rem;"><strong style="color: #e2e8f0;">Rating:</strong> <span style="color:#fbbf24; margin: 0 0.5rem;">${"⭐".repeat(Math.round(course.teacherId?.averageRating || 0))}</span> <span style="color:#94a3b8;">(${(course.teacherId?.averageRating || 0).toFixed(1)})</span> <button onclick="window.viewCourseReviews('${courseId}')" style="background:#667eea;border:none;color:white;cursor:pointer;padding:0.6rem 1.2rem;margin-left:8px;display:inline-flex;align-items:center;font-weight:600;font-size:0.95rem;transition:all 0.3s;border-radius:4px;" onmouseover="this.style.background='#5568d3'; this.style.transform='translateY(-1px)'" onmouseout="this.style.background='#667eea'; this.style.transform='translateY(0)'">View Reviews</button></span>
               </div>
               ${
                 auth.isAuthenticated() && auth.isStudent() && !isEnrolled
@@ -2697,6 +2704,38 @@ class Router {
                     📖 View Course
                   </button>
                 </div>
+
+                <!-- Course Review Section -->
+                <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.1);" onclick="event.stopPropagation();">
+                  <h4 style="margin: 0 0 0.5rem 0; color: #e2e8f0; font-size: 1rem;">Rate this Course</h4>
+                  <div class="star-rating" data-course="${courseIdStr}" style="display: flex; gap: 0.25rem; margin-bottom: 0.75rem; font-size: 1.5rem; color: #475569;">
+                    <span id="star-${courseIdStr}-1" onclick="window.setRating('${courseIdStr}', 1)" style="cursor: pointer;">★</span>
+                    <span id="star-${courseIdStr}-2" onclick="window.setRating('${courseIdStr}', 2)" style="cursor: pointer;">★</span>
+                    <span id="star-${courseIdStr}-3" onclick="window.setRating('${courseIdStr}', 3)" style="cursor: pointer;">★</span>
+                    <span id="star-${courseIdStr}-4" onclick="window.setRating('${courseIdStr}', 4)" style="cursor: pointer;">★</span>
+                    <span id="star-${courseIdStr}-5" onclick="window.setRating('${courseIdStr}', 5)" style="cursor: pointer;">★</span>
+                  </div>
+                  <input type="hidden" id="rating-val-${courseIdStr}" value="0">
+                  <label for="exp-${courseIdStr}" style="display:block; margin-bottom:0.25rem; font-size:0.85rem; color:#cbd5e1;">Experience</label>
+                  <textarea id="exp-${courseIdStr}" class="custom-scrollbar" rows="2" style="width: 100%; border-radius: 8px; border: 1px solid #475569; background: rgba(15, 23, 42, 0.6); color: white; padding: 0.75rem; margin-bottom: 0.75rem; resize: vertical; max-height: 150px; outline: none; transition: border-color 0.3s; font-family: inherit;" placeholder="Write your experience..." onfocus="this.style.borderColor='#60a5fa'" onblur="this.style.borderColor='#475569'"></textarea>
+                  <button onclick="window.submitReview('${courseIdStr}', '${typeof teacher === "string" ? teacher : teacher._id || teacher.id || ""}')"
+                          style="width: 100%; padding: 0.5rem; background: #f59e0b; color: white;
+                                 border: none; border-radius: 6px; font-weight: 600; cursor: pointer;
+                                 transition: all 0.3s; font-size: 0.9rem;"
+                          onmouseover="this.style.background='#d97706'"
+                          onmouseout="this.style.background='#f59e0b'">
+                    Submit Review
+                  </button>
+                  <div id="review-msg-${courseIdStr}" style="margin-top: 0.5rem; font-size: 0.85rem;"></div>
+<script>
+                    (async () => {
+                      window.currentTeacherId = '${typeof teacher === "string" ? teacher : teacher._id || teacher.id || ""}';
+                      await window.loadReviews('${courseIdStr}');
+                    })();
+                    </script>
+                    
+                </div>
+
               </div>
             `;
           })
@@ -3143,6 +3182,112 @@ class Router {
     `;
 
     this.updateNavbar();
+  }
+
+  async renderTeacherReviews(teacherId) {
+    const appDiv = document.getElementById("app");
+    appDiv.innerHTML = `<div style="padding:4rem; text-align:center; color:white;">Loading reviews...</div>`;
+
+    try {
+      const res = await api.getTeacherReviews(teacherId);
+      if (res && res.success) {
+        const reviews = res.data || [];
+
+        let average = 0;
+        if (reviews.length > 0) {
+          const totalRating = reviews.reduce((sum, r) => sum + r.rating, 0);
+          average = (totalRating / reviews.length).toFixed(1);
+        }
+
+        let html = `
+        <div class="page" style="padding: 2rem; max-width: 900px; margin: 0 auto;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+            <h2 style="color: white; margin: 0; font-size: 2rem; font-weight: bold;">Teacher Ratings & Reviews</h2>
+            <button onclick="window.history.back()" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; transition: all 0.3s;" onmouseover="this.style.background='rgba(255,255,255,0.2)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">
+              ← Back
+            </button>
+          </div>
+          
+          <div style="background: #1e293b; padding: 2rem; border-radius: 12px; margin-bottom: 2rem; text-align: center; border: 1px solid #334155; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.5);">
+            <div style="font-size: 4rem; font-weight: bold; color: white; line-height: 1;">${average}</div>
+            <div style="color: #fbbf24; font-size: 2rem; margin: 0.5rem 0; letter-spacing: 4px;">
+              ${(() => {
+                let starsHTML = "";
+                let avgNum = Math.round(Number(average));
+                for (let i = 0; i < 5; i++) {
+                  starsHTML +=
+                    i < avgNum ? "⭐" : '<span style="opacity:0.2">⭐</span>';
+                }
+                return starsHTML;
+              })()}
+            </div>
+            <div style="color: #94a3b8;">Based on ${reviews.length} review${reviews.length !== 1 ? "s" : ""}</div>
+          </div>
+          
+          <div class="reviews-list">`;
+
+        if (reviews.length === 0) {
+          html += `<p style="text-align: center; color: #94a3b8; padding: 3rem; background: #0f172a; border-radius: 8px; border: 1px dashed #334155;">No reviews yet.</p>`;
+        } else {
+          reviews.forEach((review) => {
+            const studentName = review.studentId?.name || "Anonymous";
+            const initial = studentName.charAt(0).toUpperCase();
+            const d = new Date(review.createdAt || new Date());
+            const dateStr = d.toLocaleDateString("en-US", {
+              year: "numeric",
+              month: "short",
+              day: "numeric",
+            });
+
+            // Helper to escape potentially harmful HTML
+            const escapeH = (str) =>
+              String(str || "").replace(
+                /[&<>'"]/g,
+                (tag) =>
+                  ({
+                    "&": "&amp;",
+                    "<": "&lt;",
+                    ">": "&gt;",
+                    "'": "&#39;",
+                    '"': "&quot;",
+                  })[tag] || tag,
+              );
+
+            html += `
+                <div style="background: #0f172a; border: 1px solid #1e293b; padding: 1.5rem; border-radius: 12px; margin-bottom: 1.25rem; transition: transform 0.2s; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+                    <div style="display: flex; align-items: flex-start; gap: 1rem; margin-bottom: 1rem;">
+                        <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #3b82f6, #8b5cf6); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 1.2rem; flex-shrink: 0;">
+                            ${escapeH(initial)}
+                        </div>
+                        <div style="flex: 1;">
+                            <h4 style="margin: 0 0 0.25rem 0; color: #f8fafc; font-size: 1.1rem;">${escapeH(studentName)}</h4>
+                            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                <div style="color: #fbbf24; font-size: 1rem; letter-spacing: 2px;">
+                                    ${"⭐".repeat(review.rating)}
+                                </div>
+                                <span style="color: #64748b; font-size: 0.85rem;">${escapeH(dateStr)}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <p style="margin: 0; color: #cbd5e1; line-height: 1.6; font-size: 0.95rem; white-space: pre-wrap; padding-left: 1rem; border-left: 2px solid #334155;">${escapeH(review.experience)}</p>
+                </div>
+                `;
+          });
+        }
+
+        html += `
+          </div>
+        </div>
+        `;
+        appDiv.innerHTML = html;
+        this.updateNavbar();
+      } else {
+        appDiv.innerHTML = `<div style="padding:4rem; text-align:center; color:#ef4444;">Failed to load reviews.</div>`;
+      }
+    } catch (e) {
+      console.error(e);
+      appDiv.innerHTML = `<div style="padding:4rem; text-align:center; color:#ef4444;">Error loading reviews.</div>`;
+    }
   }
 }
 

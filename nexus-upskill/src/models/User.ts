@@ -16,6 +16,8 @@ export interface IUser extends Document {
   company?: string; // For employees
   adminEscrowBalance: number;
   teacherWalletBalance: number;
+  averageRating?: number;
+  totalReviews?: number;
   authProvider: "local" | "google";
   googleId?: string;
   sessionToken?: string;
@@ -108,6 +110,17 @@ const UserSchema = new Schema<IUser>(
       default: 0,
       min: 0,
     },
+    averageRating: {
+      type: Number,
+      default: 0,
+      min: 0,
+      max: 5,
+    },
+    totalReviews: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
   },
   {
     timestamps: true,
@@ -135,5 +148,11 @@ UserSchema.methods.comparePassword = async function (
 ): Promise<boolean> {
   return bcrypt.compare(password, this.password);
 };
+
+// Performance Indexes
+UserSchema.index({ role: 1 }); // For finding teachers/students
+UserSchema.index({ createdAt: -1 }); // For sorting by creation time
+UserSchema.index({ email: 1 }); // Already exists but explicit
+UserSchema.index({ role: 1, createdAt: -1 }); // Composite for filtering teachers by date
 
 export default mongoose.model<IUser>("User", UserSchema);

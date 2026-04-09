@@ -1,4 +1,4 @@
-const API_BASE_URL = "https://nexus-platform-three.vercel.app/api";
+const API_BASE_URL = "http://localhost:5001/api";
 
 class APIClient {
   constructor(baseURL = API_BASE_URL) {
@@ -356,6 +356,19 @@ class APIClient {
 
   async getAdminDashboardStats() {
     return this.request("/admin/dashboard/stats", "GET", null, true);
+  }
+
+  // ===== Reviews =====
+  async submitReview(reviewData) {
+    return this.request("/reviews/submit", "POST", reviewData, true);
+  }
+
+  async getTeacherReviews(teacherId) {
+    return this.request(`/reviews/teacher/${teacherId}`, "GET", null, false);
+  }
+
+  async getCourseReviews(courseId) {
+    return this.request(`/reviews/course/${courseId}`, "GET", null, false);
   }
 }
 

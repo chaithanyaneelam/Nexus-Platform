@@ -75,4 +75,8 @@ const CourseSchema = new Schema<ICourse>(
   },
 );
 
+// Indexes
+CourseSchema.index({ status: 1, isTrending: 1 });
+CourseSchema.index({ teacherId: 1 });
+
 export default mongoose.model<ICourse>("Course", CourseSchema);

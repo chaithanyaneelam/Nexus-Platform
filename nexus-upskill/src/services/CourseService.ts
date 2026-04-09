@@ -99,20 +99,24 @@ export class CourseService {
     const courses = await this.courseRepository.findAll(query, skip, limit);
     const total = await this.courseRepository.countAll(query);
 
+    // Optimize: Get enrollment counts in a single aggregation query instead of N+1 queries
+    const courseIds = courses.map((c: any) => c._id);
+    const enrollmentCounts =
+      await this.enrollmentRepository.countMultipleByCourseAndStatus(
+        courseIds,
+        "active",
+      );
+
+    const enrollmentMap = enrollmentCounts.reduce((acc: any, item: any) => {
+      acc[item._id.toString()] = item.count;
+      return acc;
+    }, {});
+
     // Add enrollment counts to each course
-    const coursesWithCounts = await Promise.all(
-      courses.map(async (course: any) => {
-        const enrollmentCount =
-          await this.enrollmentRepository.countByCourseAndStatus(
-            course._id.toString(),
-            "active",
-          );
-        return {
-          ...(course.toObject ? course.toObject() : course),
-          enrolledCount: enrollmentCount,
-        };
-      }),
-    );
+    const coursesWithCounts = courses.map((course: any) => ({
+      ...(course.toObject ? course.toObject() : course),
+      enrolledCount: enrollmentMap[course._id.toString()] || 0,
+    }));
 
     return {
       courses: coursesWithCounts,

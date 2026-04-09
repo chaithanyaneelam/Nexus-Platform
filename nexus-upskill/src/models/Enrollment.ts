@@ -129,10 +129,16 @@ const EnrollmentSchema = new Schema<IEnrollment>(
   },
 );
 
-// Ensure a student can't enroll in the same course twice
+// Performance Indexes for faster queries
 EnrollmentSchema.index(
   { studentId: 1, courseId: 1 },
   { unique: true, sparse: true },
 );
+EnrollmentSchema.index({ studentId: 1, status: 1 }); // For finding student enrollments by status
+EnrollmentSchema.index({ courseId: 1, status: 1 }); // For finding course enrollments by status
+EnrollmentSchema.index({ status: 1 }); // For filtering by status
+EnrollmentSchema.index({ createdAt: -1 }); // For sorting by creation time
+EnrollmentSchema.index({ studentId: 1, createdAt: -1 }); // For student enrollments sorted by date
+EnrollmentSchema.index({ paymentStatus: 1 }); // For finding enrollments by payment status
 
 export default mongoose.model<IEnrollment>("Enrollment", EnrollmentSchema);

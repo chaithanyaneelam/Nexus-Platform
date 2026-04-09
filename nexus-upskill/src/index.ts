@@ -12,6 +12,7 @@ import enrollmentRoutes from "./routes/enrollmentRoutes";
 import paymentRoutes from "./routes/paymentRoutes";
 import adminRoutes from "./routes/adminRoutes";
 import classRoutes from "./routes/classRoutes";
+import reviewRoutes from "./routes/reviewRoutes";
 
 dotenv.config();
 
@@ -61,6 +62,7 @@ app.use("/api/enrollments", enrollmentRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/classes", classRoutes);
+app.use("/api/reviews", reviewRoutes);
 
 const validationMessages: Record<string, string> = {
   password:

@@ -14,7 +14,10 @@ export class CourseRepository {
    * Find course by ID
    */
   async findById(id: string): Promise<ICourse | null> {
-    return await Course.findById(id).populate("teacherId", "-password");
+    return await Course.findById(id).populate(
+      "teacherId",
+      "name email company profession role averageRating totalReviews mobileNumber linkedinUrl githubUrl",
+    );
   }
 
   /**
@@ -26,10 +29,14 @@ export class CourseRepository {
     limit: number = 10,
   ): Promise<ICourse[]> {
     return await Course.find(filter)
-      .populate("teacherId", "-password")
+      .populate(
+        "teacherId",
+        "name email company profession role averageRating totalReviews",
+      )
       .skip(skip)
       .limit(limit)
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .lean(); // Use lean() for read-only queries to improve performance
   }
 
   /**
@@ -43,17 +50,24 @@ export class CourseRepository {
    * Find courses by teacher ID
    */
   async findByTeacherId(teacherId: string): Promise<ICourse[]> {
-    return await Course.find({ teacherId }).populate("teacherId", "-password");
+    return await Course.find({ teacherId })
+      .populate(
+        "teacherId",
+        "name email company profession role averageRating totalReviews",
+      )
+      .lean();
   }
 
   /**
    * Find published courses
    */
   async findPublished(): Promise<ICourse[]> {
-    return await Course.find({ status: "published" }).populate(
-      "teacherId",
-      "-password",
-    );
+    return await Course.find({ status: "published" })
+      .populate(
+        "teacherId",
+        "name email company profession role averageRating totalReviews",
+      )
+      .lean();
   }
 
   /**
@@ -63,7 +77,12 @@ export class CourseRepository {
     return await Course.find({
       isTrending: true,
       status: "published",
-    }).populate("teacherId", "-password");
+    })
+      .populate(
+        "teacherId",
+        "name email company profession role averageRating totalReviews",
+      )
+      .lean();
   }
 
   /**
@@ -76,7 +95,10 @@ export class CourseRepository {
     return await Course.findByIdAndUpdate(id, updateData, {
       new: true,
       runValidators: true,
-    }).populate("teacherId", "-password");
+    }).populate(
+      "teacherId",
+      "name email company profession role averageRating totalReviews",
+    );
   }
 
   /**
@@ -114,10 +136,14 @@ export class CourseRepository {
     limit: number = 10,
   ): Promise<ICourse[]> {
     return await Course.find({ teacherId })
-      .populate("teacherId", "-password")
+      .populate(
+        "teacherId",
+        "name email company profession role averageRating totalReviews",
+      )
       .skip(skip)
       .limit(limit)
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .lean();
   }
 
   /**

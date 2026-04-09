@@ -154,4 +154,14 @@ PaymentSchema.index(
   },
 );
 
+// Additional Performance Indexes for faster queries
+PaymentSchema.index({ studentId: 1 }); // For finding student payments
+PaymentSchema.index({ teacherId: 1 }); // For finding teacher payments
+PaymentSchema.index({ courseId: 1 }); // For finding course payments
+PaymentSchema.index({ status: 1 }); // For filtering by payment status
+PaymentSchema.index({ enrollmentId: 1 }); // For finding payment by enrollment
+PaymentSchema.index({ studentId: 1, status: 1 }); // For student payments with status
+PaymentSchema.index({ teacherId: 1, status: 1 }); // For teacher payments with status
+PaymentSchema.index({ createdAt: -1 }); // For sorting by creation time
+
 export default mongoose.model<IPayment>("Payment", PaymentSchema);
