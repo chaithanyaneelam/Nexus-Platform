@@ -3056,6 +3056,8 @@ class Router {
             <button class="btn btn-secondary" onclick="router.navigate('#profile')">Edit Profile</button>
           </section>
 
+          
+
           <section class="settings-card settings-security-card">
             <h3>🔐 Security</h3>
             <p class="settings-muted">Keep your account protected and end sessions securely.</p>
@@ -3065,6 +3067,11 @@ class Router {
         </div>
       </div>
     `;
+
+    // Update theme button styling after render
+    setTimeout(() => {
+      window.themeManager.updateThemeButton();
+    }, 0);
 
     this.updateNavbar();
   }

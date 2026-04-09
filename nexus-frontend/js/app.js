@@ -68,6 +68,85 @@ class NexusApp {
   }
 }
 
+// ===== THEME MANAGEMENT =====
+class ThemeManager {
+  constructor() {
+    this.THEME_KEY = "studbridge-theme";
+    this.DARK_THEME = "dark";
+    this.LIGHT_THEME = "light";
+    this.init();
+  }
+
+  init() {
+    // Load saved theme or use system preference
+    const savedTheme = localStorage.getItem(this.THEME_KEY);
+
+    if (savedTheme) {
+      this.setTheme(savedTheme);
+    } else {
+      // Check system preference
+      const prefersDark = window.matchMedia(
+        "(prefers-color-scheme: dark)",
+      ).matches;
+      this.setTheme(prefersDark ? this.DARK_THEME : this.LIGHT_THEME);
+    }
+  }
+
+  setTheme(theme) {
+    const htmlElement = document.documentElement;
+
+    if (theme === this.LIGHT_THEME) {
+      htmlElement.setAttribute("data-theme", "light");
+    } else {
+      htmlElement.removeAttribute("data-theme");
+    }
+
+    localStorage.setItem(this.THEME_KEY, theme);
+    this.updateThemeButton();
+  }
+
+  toggleTheme() {
+    const currentTheme =
+      localStorage.getItem(this.THEME_KEY) || this.DARK_THEME;
+    const newTheme =
+      currentTheme === this.DARK_THEME ? this.LIGHT_THEME : this.DARK_THEME;
+    this.setTheme(newTheme);
+    return newTheme;
+  }
+
+  getCurrentTheme() {
+    return localStorage.getItem(this.THEME_KEY) || this.DARK_THEME;
+  }
+
+  updateThemeButton() {
+    const themeBtn = document.getElementById("theme-toggle-btn");
+    if (themeBtn) {
+      const currentTheme = this.getCurrentTheme();
+      if (currentTheme === this.LIGHT_THEME) {
+        themeBtn.textContent = "🌙 Dark Mode";
+        themeBtn.style.background = "#0a0a0a";
+        themeBtn.style.color = "white";
+      } else {
+        themeBtn.textContent = "☀️ Light Mode";
+        themeBtn.style.background = "#f97316";
+        themeBtn.style.color = "white";
+      }
+    }
+  }
+}
+
+// Initialize theme manager globally
+window.themeManager = new ThemeManager();
+
+// Global toggle function for settings page
+window.toggleTheme = function () {
+  const newTheme = window.themeManager.toggleTheme();
+  NexusApp.notify(
+    `Switched to ${newTheme === "light" ? "Light" : "Dark"} Mode`,
+    "success",
+  );
+};
+
 // Initialize app when DOM is ready
 document.addEventListener("DOMContentLoaded", () => {
   window.app = new NexusApp();
