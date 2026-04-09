@@ -2311,22 +2311,69 @@ class Router {
           <h2>My Enrollments</h2>
       `;
 
-      const approvedEnrollments = enrollments.filter(
-        (e) => e.status === "active",
-      );
-      if (approvedEnrollments.length > 0) {
+      // Find recently approved enrollments (approved within last 5 minutes)
+      const approvedEnrollments = enrollments.filter((e) => {
+        if (e.status !== "active") return false;
+
+        // Check if approval was recent (within 5 minutes)
+        const enrollmentDate = new Date(e.updatedAt || e.createdAt);
+        const currentDate = new Date();
+        const minutesDiff = (currentDate - enrollmentDate) / (1000 * 60);
+
+        return minutesDiff <= 5; // Only show for approvals within last 5 minutes
+      });
+
+      // Check if we've already dismissed this notification in current session
+      const shownNotificationKey = "approval_notification_shown";
+      const notificationAlreadyShown =
+        sessionStorage.getItem(shownNotificationKey);
+
+      if (approvedEnrollments.length > 0 && !notificationAlreadyShown) {
         html += `
-          <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+          <div id="approval-notification" 
+               style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);
                       color: white; padding: 1.5rem; border-radius: 12px; margin-bottom: 2rem;
-                      box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);">
-            <h3 style="margin: 0 0 0.5rem 0; font-size: 1.1rem;">
-              ✅ Course Approval Notification
-            </h3>
-            <p style="margin: 0; font-size: 0.95rem;">
-              Great! Your enrollment in ${approvedEnrollments[0].courseId?.title || "a course"}
-              has been approved by the admin. You can now access the course and learn from your teacher!
-            </p>
+                      box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+                      transition: opacity 0.3s ease;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+              <div style="flex: 1;">
+                <h3 style="margin: 0 0 0.5rem 0; font-size: 1.1rem;">
+                  ✅ Course Approval Notification
+                </h3>
+                <p style="margin: 0; font-size: 0.95rem;">
+                  Great! Your enrollment in ${approvedEnrollments[0].courseId?.title || "a course"}
+                  has been approved by the admin. You can now access the course and learn from your teacher!
+                </p>
+              </div>
+              <button onclick="document.getElementById('approval-notification').style.display='none'; sessionStorage.setItem('${shownNotificationKey}', 'true');"
+                      style="background: rgba(255,255,255,0.2); border: none; color: white; font-size: 1.5rem; cursor: pointer; padding: 0; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-left: 1rem; flex-shrink: 0;">
+                ✕
+              </button>
+            </div>
           </div>
+        `;
+
+        // Auto-hide notification after 5 minutes (300000 ms)
+        html += `
+          <script>
+            (function() {
+              const notificationEl = document.getElementById('approval-notification');
+              if (notificationEl) {
+                // Auto-hide after 5 minutes
+                setTimeout(function() {
+                  if (notificationEl) {
+                    notificationEl.style.opacity = '0';
+                    setTimeout(() => {
+                      if (notificationEl && notificationEl.parentNode) {
+                        notificationEl.style.display = 'none';
+                      }
+                    }, 300);
+                  }
+                }, 300000); // 5 minutes in milliseconds
+              }
+              sessionStorage.setItem('${shownNotificationKey}', 'true');
+            })();
+          </script>
         `;
       }
 
