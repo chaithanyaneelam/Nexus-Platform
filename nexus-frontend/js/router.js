@@ -666,20 +666,46 @@ class Router {
       // Admin sees all courses
 
       const pageTitle =
-        user && user.role === "teacher" ? "My Courses" : "All Courses";
+        user && user.role === "teacher" ? "My Courses" : "Explore All Courses";
       const showCreateButton = auth.isTeacher();
 
       appDiv.innerHTML = `
+        <style>
+          #courseSearchInput {
+            border: none !important;
+            box-shadow: none !important;
+            outline: none !important;
+          }
+          .search-container {
+            border-color: #E8702A !important;
+          }
+          .search-container:focus-within {
+            border-color: #E8702A !important;
+            box-shadow: 0 0 0 2px rgba(232, 112, 42, 0.2) !important;
+          }
+          html:not([data-theme="light"]) .enroll-btn {
+            border: 1px solid #0f766e !important;
+            color: #0f766e !important;
+            transition: all 0.3s ease;
+            background: transparent;
+          }
+          html:not([data-theme="light"]) .enroll-btn:hover {
+            background-color: #0f766e !important;
+            color: #ffffff !important;
+          }
+        </style>
         <div class="courses-page">
-          <div class="page-header" style="display: flex; gap: 1rem; align-items: center; justify-content: space-between; flex-wrap: wrap;">
-            <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; flex: 1;">
-              <h2 style="margin:0">${pageTitle}</h2>
-              <div class="search-bar" style="display:flex; align-items:center; background: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 0.1rem 0.5rem; flex: 1; max-width: 500px; min-width: 250px;">
-                <span style="color: #94a3b8; padding: 0 0.5rem; font-size: 1.1rem;">&#128269;</span>
-                <input type="text" id="courseSearchInput" placeholder="Search courses..." style="background: transparent; border: none; color: white; padding: 0.5rem; outline: none; width: 100%;">
+          <div class="page-header" style="display: flex; gap: 1rem; align-items: center; justify-content: space-between; flex-wrap: wrap; margin-bottom: 2rem;">
+            <h2 style="margin:0">${pageTitle}</h2>
+            <div class="search-actions" style="display: flex; gap: 1rem; align-items: center; flex: 1; justify-content: flex-end;">
+              <div class="search-container" style="display:flex; align-items:center; background: #fff; border: 1px solid #E8702A; border-radius: 8px; padding: 0.3rem 0.8rem; flex: 1; max-width: 500px; min-width: 250px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+                <svg focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#000000" width="24" height="24" stroke="#000000" stroke-width="0.5">
+                  <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path>
+                </svg>
+                <input type="text" id="courseSearchInput" placeholder="Find your next career path..." style="background: transparent; color: #334155; padding: 0.4rem; width: 100%; font-size: 15px; margin-left: 8px;">
               </div>
+              ${showCreateButton ? `<a href="#create-course" class="btn btn-primary">Create Course</a>` : ""}
             </div>
-            ${showCreateButton ? `<a href="#create-course" class="btn btn-primary" style="margin-left:auto">Create Course</a>` : ""}
           </div>
           <div class="courses-grid" id="coursesGrid">
             ${
@@ -687,37 +713,114 @@ class Router {
                 ? courses
                     .map((course) => {
                       const teacher = course.teacherId || {};
+
+                      const t = (course.title || "").toLowerCase();
+
+                      const iconMap = [
+                        {
+                          keywords: ["java", "spring"],
+                          icons: [
+                            "devicon-java-plain colored",
+                            "devicon-spring-plain colored",
+                          ],
+                        },
+                        {
+                          keywords: ["python", "django"],
+                          icons: [
+                            "devicon-python-plain colored",
+                            "devicon-django-plain colored",
+                          ],
+                        },
+                        {
+                          keywords: ["azure", "microsoft", ".net"],
+                          icons: [
+                            "devicon-azure-plain colored",
+                            "devicon-dot-net-plain colored",
+                          ],
+                        },
+                        {
+                          keywords: ["react", "frontend"],
+                          icons: ["devicon-react-original colored"],
+                        },
+                        {
+                          keywords: ["mobile", "android", "ios", "flutter"],
+                          icons: [
+                            "devicon-android-plain colored",
+                            "devicon-apple-original",
+                          ],
+                        },
+                        {
+                          keywords: ["go", "golang"],
+                          icons: ["devicon-go-plain colored"],
+                        },
+                        {
+                          keywords: ["node", "javascript", "web"],
+                          icons: [
+                            "devicon-nodejs-plain colored",
+                            "devicon-react-original colored",
+                          ],
+                        },
+                      ];
+
+                      const matched = iconMap.find((entry) =>
+                        entry.keywords.some((k) => t.includes(k)),
+                      );
+                      const icons = matched
+                        ? matched.icons
+                        : [
+                            "devicon-nodejs-plain colored",
+                            "devicon-react-original colored",
+                          ];
+
+                      let iconHtml = `<div style="font-size: 60px; display: flex; gap: 10px; align-items: center; justify-content: center;">
+                        ${icons.map((cls) => `<i class="${cls}" ${cls.includes("apple") ? 'style="color: #fff;"' : ""}></i>`).join("")}
+                      </div>`;
+
+                      let displayDesc =
+                        course.description ||
+                        "No description available for this course.";
+
                       return `
               <div class="course-card">
-                <div class="course-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center; border-radius: 8px 8px 0 0;">
-                  <div style="font-size: 48px; color: white;">💼</div>
+                <div class="course-icon" style="background: #1e2a3a; height: 140px; display: flex; align-items: center; justify-content: center;">
+                  ${iconHtml}
                 </div>
-                  <div class="course-info">
-                  <h3>${course.title}</h3>
-                  <div style="background: rgba(102, 126, 234, 0.1); padding: 0.75rem; border-radius: 6px; margin-bottom: 0.75rem;">
-                    <p style="margin: 0.25rem 0; color: #dbe7ff; font-weight: 600; font-size: 0.95rem;">
-                      Instructor: ${course.instructor || teacher.name || "Unknown Teacher"}
+                  <div class="course-info" style="padding: 1.5rem; display: flex; flex-direction: column; flex: 1;">
+                  <h3 style="margin: 0 0 1rem 0;">${course.title}</h3>
+                  <div style="margin-bottom: 1rem;">
+                    <p class="info-row" style="margin: 0.35rem 0; font-size: 0.85rem; display: flex; align-items: center; gap: 0.4rem;">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                      Instructor: <strong style="font-weight: 600; margin-left: 4px;">${course.instructor || teacher.name || "Unknown Teacher"}</strong>
                     </p>
-                    <p style="margin: 0.25rem 0; color: #cbd5e1; font-size: 0.85rem;">
-                      Company: ${course.company || teacher.company || "N/A"}
+                    <p class="info-row" style="margin: 0.35rem 0; font-size: 0.85rem; display: flex; align-items: center; gap: 0.4rem;">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><path d="M9 22v-4h6v4"></path><path d="M8 6h.01"></path><path d="M16 6h.01"></path><path d="M12 6h.01"></path><path d="M12 10h.01"></path><path d="M12 14h.01"></path><path d="M16 10h.01"></path><path d="M16 14h.01"></path><path d="M8 10h.01"></path><path d="M8 14h.01"></path></svg>
+                      Company: <strong style="font-weight: 600; margin-left: 4px;">${course.company || teacher.company || "N/A"}</strong>
                     </p>
-                    <p style="margin: 0.25rem 0; color: #cbd5e1; font-size: 0.85rem;">
-                      Role: ${course.role || teacher.profession || teacher.role || "Instructor"}
-                    </p>
-                    <div style="margin-top: 0.5rem; display: flex; gap: 0.75rem;">
-                      ${teacher.linkedinUrl ? `<a href="${teacher.linkedinUrl}" target="_blank" style="color: #67e8f9; text-decoration: none; font-size: 0.85rem; font-weight: bold;">🔗 LinkedIn</a>` : ""}
-                      ${teacher.githubUrl ? `<a href="${teacher.githubUrl}" target="_blank" style="color: #9fb6d4; text-decoration: none; font-size: 0.85rem; font-weight: bold;">🐙 GitHub</a>` : ""}
-                    </div>
-                    <p style="margin: 0.25rem 0; color: #667eea; font-size: 0.85rem; font-weight: 600;">
-                      👥 ${course.enrolledCount || 0} students registered
+                    <p class="info-row" style="margin: 0.35rem 0; font-size: 0.85rem; display: flex; align-items: center; gap: 0.4rem;">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline></svg>
+                      Role: <strong style="font-weight: 600; margin-left: 4px;">${course.role || teacher.profession || teacher.role || "Instructor"}</strong>
                     </p>
                   </div>
-                  <p class="description">${course.description || "No description"}</p>
-                  <div class="course-meta">
-                    <span class="price">₹${course.price || 0}</span>
-                    <span class="duration">⏱️ ${course.duration || 0} months</span>
+                  
+                  <hr style="border: 0; border-top: 1px solid #334155; margin: 0 0 1rem 0;" />
+
+                  <p class="course-desc" style="margin: 0 0 1rem 0; font-size: 0.9rem; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis;">
+                    ${displayDesc}
+                  </p>
+
+                  <p class="students-count" style="margin: 0 0 1.5rem 0; font-size: 0.85rem; display: flex; align-items: center; gap: 0.4rem; margin-top: auto;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                    ${course.enrolledCount || 0} students registered
+                  </p>
+
+                  <div class="course-meta" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <span class="price" style="font-size: 22px; font-weight: bold;">₹${course.price || 0}</span>
+                    <span class="duration" style="font-size: 0.9rem; display: flex; align-items: center; gap: 0.2rem;">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                      ${course.duration || 0} months
+                    </span>
                   </div>
-                  <a href="#course-detail/${course._id}" class="btn btn-secondary">View Course</a>
+                  <a href="#course-detail/${course._id}" class="btn enroll-btn">Enroll Now</a>
                 </div>
               </div>
             `;
@@ -730,22 +833,17 @@ class Router {
       `;
 
       // Search functionality
-      const searchInput = document.getElementById("courseSearchInput");
-      if (searchInput) {
-        searchInput.addEventListener("input", (e) => {
-          const searchTerm = e.target.value.toLowerCase();
-          const courseCards = document.querySelectorAll(".course-card");
+      const searchInputField = document.getElementById("courseSearchInput");
+      const courseCards = document.querySelectorAll(
+        "#coursesGrid .course-card",
+      );
+
+      if (searchInputField) {
+        searchInputField.addEventListener("input", function (e) {
+          const query = e.target.value.toLowerCase().trim();
           courseCards.forEach((card) => {
-            const title =
-              card.querySelector("h3")?.textContent.toLowerCase() || "";
-            const instructor =
-              card.querySelector(".course-info p")?.textContent.toLowerCase() ||
-              "";
-            if (title.includes(searchTerm) || instructor.includes(searchTerm)) {
-              card.style.display = "block"; // showing the card div
-            } else {
-              card.style.display = "none";
-            }
+            const text = card.textContent.toLowerCase();
+            card.style.display = text.includes(query) ? "flex" : "none";
           });
         });
       }
@@ -781,52 +879,287 @@ class Router {
         }
       }
 
+      // Define icons logic based on title identical to courses list
+      const t = (course.title || "").toLowerCase();
+
+      const iconMap = [
+        {
+          keywords: ["java", "spring"],
+          icons: ["devicon-java-plain colored", "devicon-spring-plain colored"],
+        },
+        {
+          keywords: ["python", "django"],
+          icons: [
+            "devicon-python-plain colored",
+            "devicon-django-plain colored",
+          ],
+        },
+        {
+          keywords: ["azure", "microsoft", ".net"],
+          icons: [
+            "devicon-azure-plain colored",
+            "devicon-dot-net-plain colored",
+          ],
+        },
+        {
+          keywords: ["react", "frontend"],
+          icons: ["devicon-react-original colored"],
+        },
+        {
+          keywords: ["mobile", "android", "ios", "flutter"],
+          icons: ["devicon-android-plain colored", "devicon-apple-original"],
+        },
+        { keywords: ["go", "golang"], icons: ["devicon-go-plain colored"] },
+        {
+          keywords: ["node", "javascript", "web"],
+          icons: [
+            "devicon-nodejs-plain colored",
+            "devicon-react-original colored",
+          ],
+        },
+      ];
+
+      const matched = iconMap.find((entry) =>
+        entry.keywords.some((k) => t.includes(k)),
+      );
+      const icons = matched
+        ? matched.icons
+        : ["devicon-nodejs-plain colored", "devicon-react-original colored"];
+
+      let iconHtml = `<div style="font-size: 80px; display: flex; gap: 15px; align-items: center; justify-content: center;">
+        ${icons.map((cls) => `<i class="${cls}" ${cls.includes("apple") ? 'style="color: #333;"' : ""}></i>`).join("")}
+      </div>`;
+
       appDiv.innerHTML = `
-        <div class="course-detail-page">
-          <div class="course-header">
-            <div class="course-banner" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 60px 20px; text-align: center; border-radius: 8px; margin-bottom: 20px;">
-              <div style="font-size: 80px; margin-bottom: 20px;">💼</div>
-              <h1 style="color: white;">${course.title}</h1>
-            </div>
-            <div class="course-header-info">
-              <p class="instructor" style="margin: 0 0 1rem 0; color: #60a5fa; font-size: 1rem; font-weight: 600;">Instructor: ${course.instructor || course.teacherId?.name || "Unknown"}</p>
-              <p class="description" style="margin: 0 0 1.5rem 0; color: #e2e8f0; font-size: 1.15rem; line-height: 1.9; word-spacing: 0.1rem; letter-spacing: 0.3px;">${course.description}</p>
-              <div class="course-stats" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem; padding: 1.5rem; background: rgba(15, 23, 42, 0.4); border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.05);">
-                <span style="color: #cbd5e1; font-size: 0.95rem;"><strong style="color: #e2e8f0;">Company:</strong> ${course.company || course.teacherId?.company || "N/A"}</span>
-                <span style="color: #cbd5e1; font-size: 0.95rem;"><strong style="color: #e2e8f0;">Role:</strong> ${course.role || course.teacherId?.profession || "N/A"}</span>
-                ${isEnrolled ? `<span style="color: #cbd5e1; font-size: 0.95rem;"><strong style="color: #e2e8f0;">Mobile:</strong> ${course.teacherId?.mobileNumber || "N/A"}</span>` : ""}
-                <span style="color: #cbd5e1; font-size: 0.95rem;"><strong style="color: #e2e8f0;">Duration:</strong> ${course.duration || "Self-paced"} months</span>
-                <span style="color: #cbd5e1; font-size: 0.95rem;"><strong style="color: #e2e8f0;">Students:</strong> ${course.enrolledCount || 0}</span>
-                <span style="color: #cbd5e1; font-size: 0.95rem;"><strong style="color: #e2e8f0;">Rating:</strong> <span style="color:#fbbf24; margin: 0 0.5rem;">${"⭐".repeat(Math.round(course.teacherId?.averageRating || 0))}</span> <span style="color:#94a3b8;">(${(course.teacherId?.averageRating || 0).toFixed(1)})</span> <button onclick="window.viewCourseReviews('${courseId}')" style="background:#667eea;border:none;color:white;cursor:pointer;padding:0.6rem 1.2rem;margin-left:8px;display:inline-flex;align-items:center;font-weight:600;font-size:0.95rem;transition:all 0.3s;border-radius:4px;" onmouseover="this.style.background='#5568d3'; this.style.transform='translateY(-1px)'" onmouseout="this.style.background='#667eea'; this.style.transform='translateY(0)'">View Reviews</button></span>
+        <style>
+          /* Make background light orange only outside dark mode */
+          html[data-theme="light"] .course-detail-wrapper {
+            background-color: #faf0e6 !important;
+          }
+          html:not([data-theme="light"]) .course-detail-wrapper {
+            background-color: var(--bg-color);
+          }
+          
+          /* Details card background */
+          html[data-theme="light"] .details-info-card {
+            background: #ffffff !important;
+          }
+          html[data-theme="light"] .course-content-card {
+            background: #ffffff !important;
+          }
+          
+          /* Border and backgrounds for light mode */
+          html[data-theme="light"] .icon-card,
+          html[data-theme="light"] .details-info-card,
+          html[data-theme="light"] .course-content-card {
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05) !important;
+            border: 1px solid #d1d5db !important;
+            background-color: #ffffff !important;
+            border-radius: 12px !important;
+          }
+
+          /* Enroll button theming */
+          html[data-theme="light"] .course-detail-enroll-btn {
+            background-color: #E8702A !important;
+            transition: all 0.3s ease;
+          }
+          html[data-theme="light"] .course-detail-enroll-btn:hover {
+            background-color: #d65c1c !important;
+            box-shadow: 0 4px 12px rgba(232, 112, 42, 0.4) !important;
+          }
+          html:not([data-theme="light"]) .course-detail-enroll-btn {
+            background-color: var(--primary-color) !important;
+            transition: all 0.3s ease;
+          }
+          html:not([data-theme="light"]) .course-detail-enroll-btn:hover {
+            opacity: 0.9 !important;
+            box-shadow: 0 4px 12px rgba(15, 118, 110, 0.4) !important;
+          }
+
+          /* Text colors for light vs dark mode */
+          html:not([data-theme="light"]) .icon-card h1,
+          html:not([data-theme="light"]) .course-content-card h3,
+          html:not([data-theme="light"]) .details-info-card div {
+            color: var(--text-color) !important;
+          }
+          html:not([data-theme="light"]) .details-info-card span {
+             color: var(--text-color) !important;
+          }
+
+          /* DARK MODE SPECIFIC STYLES TO MATCH IMAGE */
+          html:not([data-theme="light"]) .icon-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+            border: none !important;
+          }
+          html:not([data-theme="light"]) .icon-card h1 {
+            color: #ffffff !important;
+          }
+          html:not([data-theme="light"]) .details-info-card,
+          html:not([data-theme="light"]) .course-content-card {
+            background: var(--card-bg) !important;
+            border: 1px solid var(--border-color) !important;
+            box-shadow: none !important;
+          }
+          html:not([data-theme="light"]) .course-detail-card p,
+          html:not([data-theme="light"]) .course-detail-card span,
+          html:not([data-theme="light"]) .course-detail-card a,
+          html:not([data-theme="light"]) .course-content-card p,
+          html:not([data-theme="light"]) .course-content-card li {
+            color: var(--text-color) !important;
+          }
+          
+          /* Special teal/primary colors for headers and specific links */
+          html:not([data-theme="light"]) .course-content-card h3 {
+            color: var(--primary-color) !important;
+          }
+          html:not([data-theme="light"]) .instructor-name {
+            color: #60a5fa !important;
+          }
+          html:not([data-theme="light"]) .details-info-card .rating-box {
+            color: #818cf8 !important;
+          }
+          
+          /* Light mode read reviews button */
+          html[data-theme="light"] .read-reviews-btn {
+            background: none !important;
+            border: none !important;
+            color: #0f766e !important;
+            text-decoration: underline !important;
+            padding: 0 !important;
+          }
+          
+          /* Dark mode read reviews button */
+          html:not([data-theme="light"]) .read-reviews-btn {
+            background: var(--card-bg, #1e293b) !important;
+            border: 1px solid var(--border-color, #334155) !important;
+            color: #818cf8 !important;
+            text-decoration: none !important;
+            padding: 0.5rem 1.2rem !important;
+            border-radius: 20px !important;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+          }
+          html:not([data-theme="light"]) .read-reviews-btn:hover {
+            background: var(--primary-color, #0f766e) !important;
+            color: #ffffff !important;
+            border-color: var(--primary-color, #0f766e) !important;
+          }
+          
+          /* Bullet points for highlights */
+          html:not([data-theme="light"]) .course-content-card .highlight-item {
+             background: transparent !important;
+             padding: 0 !important;
+             border-radius: 0 !important;
+          }
+          html:not([data-theme="light"]) .course-content-card .highlight-item-hash {
+             width: 6px;
+             height: 6px;
+             display: inline-block !important;
+             background-color: var(--text-color) !important;
+             border-radius: 50% !important;
+             color: transparent !important;
+             overflow: hidden !important;
+             margin-right: 8px;
+          }
+        </style>
+        <div class="course-detail-wrapper" style="min-height: calc(100vh - 70px); padding: 40px 0;">
+        <div class="course-detail-page" style="max-width: 1000px; margin: 0 auto; padding: 0 20px;">
+          <!-- Top Card -->
+          <div class="course-detail-card" style="display: flex; flex-wrap: wrap; gap: 2rem; margin-bottom: 2rem;">
+            
+            <!-- Left Side / Icon -->
+            <div class="icon-card" style="flex: 1; min-width: 250px; border-radius: 12px; padding: 3rem 1rem; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 15px 35px rgba(0,0,0,0.1); border: 2px solid #d1d5db; background: var(--light-card-bg, #fff);">
+              <div style="margin-bottom: 1.5rem; display: flex; justify-content: center; align-items: center;">
+                ${iconHtml}
               </div>
-              ${
-                auth.isAuthenticated() && auth.isStudent() && !isEnrolled
-                  ? `<button class="btn btn-primary" onclick="enrollCourse('${courseId}')">Enroll Now - ₹${course.price || 0}</button>`
-                  : auth.isAuthenticated() && auth.isStudent() && isEnrolled
-                    ? `<button class="btn btn-success" disabled>Already Enrolled</button>`
-                    : auth.isAuthenticated() &&
-                        auth.isTeacher() &&
-                        auth.getCurrentUser()._id ===
-                          (course.teacherId?._id || course.teacherId)
-                      ? `<a href="#edit-course/${courseId}" class="btn btn-secondary">Edit Course</a>`
-                      : ""
-              }
+              <h1 style="font-size: 1.8rem; text-align: center; margin: 0; font-family: 'Playfair Display', serif; font-weight: 700;">${course.title}</h1>
+            </div>
+
+            <!-- Right Side / Details -->
+            <div style="flex: 2; min-width: 300px; display: flex; flex-direction: column;">
+              <div style="margin-bottom: 1.5rem;">
+                <p style="margin: 0 0 0.5rem 0; color: #475569; display: flex; align-items: center; gap: 8px; font-weight: 500;">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg> 
+                  Instructor: <span class="instructor-name" style="font-weight: 600;">${course.instructor || course.teacherId?.name || "Unknown"}</span>
+                </p>
+                <p style="margin: 0 0 0.5rem 0; color: #64748b; display: flex; align-items: center; gap: 8px; font-size: 0.95rem;">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>
+                  <a href="${course.teacherId?.linkedinUrl || "#"}" target="_blank" style="color: #0284c7; text-decoration: none;">LinkedIn Profile</a>
+                </p>
+                <p style="margin: 0 0 0.5rem 0; color: #64748b; display: flex; align-items: center; gap: 8px; font-size: 0.95rem;">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>
+                  <a href="${course.teacherId?.githubUrl || "#"}" target="_blank" style="color: #0284c7; text-decoration: none;">GitHub Profile</a>
+                </p>
+                <p style="margin: 1rem 0 0 0; color: #334155; font-size: 1.05rem;">${course.description}</p>
+              </div>
+
+              <div class="details-info-card" style="border: 2px solid #d1d5db; border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; background: var(--light-card-bg, #fff);">
+                <div style="font-weight: 500; font-size: 0.95rem;">Company: <span style="font-weight: 600; color: #E8702A !important;">${course.company || course.teacherId?.company || "N/A"}</span></div>
+                <div style="font-weight: 500; font-size: 0.95rem;">Role: <span style="font-weight: 600;">${course.role || course.teacherId?.profession || "N/A"}</span></div>
+                ${isEnrolled ? `<div style="font-weight: 500; font-size: 0.95rem;">Mobile: <span style="font-weight: 400;">${course.teacherId?.mobileNumber || "N/A"}</span></div>` : ""}
+                <div style="font-weight: 500; font-size: 0.95rem;">Duration: <span style="font-weight: 400;">${course.duration || "Self-paced"} months</span></div>
+                <div style="font-weight: 500; font-size: 0.95rem;">Students: <span style="font-weight: 400;">${course.enrolledCount || 0}</span></div>
+              </div>
+
+              <div style="margin-bottom: 1.5rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 1.5rem; display: flex; align-items: center; gap: 1.5rem;">
+                <div>
+                  <div style="font-size: 0.85rem; font-weight: 600; color: #64748b; letter-spacing: 0.5px; margin-bottom: 0.25rem;">RATING</div>
+                  <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <span style="font-size: 1.5rem; font-weight: 700; color: #0f172a;">(${(course.teacherId?.averageRating || 0).toFixed(1)})</span>
+                    <div style="display: flex; align-items: center; gap: 4px; margin-top: 2px;">
+                      ${Array(Math.round(course.teacherId?.averageRating || 0))
+                        .fill(
+                          '<svg width="22" height="22" viewBox="0 0 24 24" fill="#fbbf24" stroke="#fbbf24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>',
+                        )
+                        .join("")}${Array(
+                        5 - Math.round(course.teacherId?.averageRating || 0),
+                      )
+                        .fill(
+                          '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>',
+                        )
+                        .join("")}
+                    </div>
+                  </div>
+                </div>
+                <button class="read-reviews-btn" onclick="window.viewCourseReviews('${courseId}')" style="background: none; border: none; color: #0f766e; text-decoration: underline; cursor: pointer; font-weight: 500; font-size: 0.95rem; padding: 0; margin-top: 15px;">Read all reviews</button>
+              </div>
+
+              <div>
+                ${
+                  auth.isAuthenticated() && auth.isStudent() && !isEnrolled
+                    ? `<button class="btn btn-primary course-detail-enroll-btn" onclick="enrollCourse('${courseId}')" style="padding: 0.8rem 2rem; font-size: 1.1rem; border-radius: 30px; border: none; width: max-content; color: white;">Enroll Now - ₹${course.price || 0}</button>`
+                    : auth.isAuthenticated() && auth.isStudent() && isEnrolled
+                      ? `<button class="btn btn-success" disabled style="padding: 0.8rem 2rem; font-size: 1.1rem; border-radius: 30px; border: none; width: max-content; background: #10b981; color: white;">Already Enrolled</button>`
+                      : auth.isAuthenticated() &&
+                          auth.isTeacher() &&
+                          auth.getCurrentUser()._id ===
+                            (course.teacherId?._id || course.teacherId)
+                        ? `<a href="#edit-course/${courseId}" class="btn btn-secondary" style="padding: 0.8rem 2rem; font-size: 1.1rem; border-radius: 30px; width: max-content; display: inline-block;">Edit Course</a>`
+                        : ""
+                }
+              </div>
             </div>
           </div>
-          <div class="course-content">
-            <h3>Course Overview</h3>
-            <p>${course.description}</p>
-            
-            <h3>Key Highlights</h3>
-            <ul>
+
+          <!-- Bottom Card -->
+          <div class="course-content-card" style="border-radius: 12px; padding: 2rem; border: 2px solid #d1d5db;">
+            <h3 style="font-size: 1.4rem; margin: 0 0 1rem 0; font-family: 'Playfair Display', serif;">Description</h3>
+            <p style="line-height: 1.7; margin-bottom: 2rem; font-family: 'Inter', sans-serif;">${course.fullDescription || course.description}</p>
+
+            <h3 style="font-size: 1.4rem; margin: 0 0 1rem 0; font-family: 'Playfair Display', serif;">Highlights</h3>
+            <ul style="list-style-type: none; padding: 0; margin: 0; color: #334155; line-height: 1.7; display: flex; flex-wrap: wrap; gap: 1.5rem; font-family: 'Inter', sans-serif;">
               ${(course.highlights || [])
-                .map((highlight) => `<li>${highlight}</li>`)
+                .map(
+                  (
+                    highlight,
+                  ) => `<li class="highlight-item" style="display: flex; align-items: center; gap: 10px; background: #f8fafc; padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.95rem; font-weight: 500;">
+                  <span class="highlight-item-hash" style="color: #E8702A;">#</span>
+                  <span>${highlight}</span>
+                </li>`,
+                )
                 .join("")}
             </ul>
-
-            <h3>Course Details</h3>
-            <p>${course.fullDescription || course.description}</p>
           </div>
+        </div>
         </div>
       `;
     } catch (error) {
@@ -1903,8 +2236,8 @@ class Router {
             <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; flex: 1;">
               <h2 style="margin:0">My Courses</h2>
               <div class="search-bar" style="display:flex; align-items:center; background: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 0.1rem 0.5rem; flex: 1; max-width: 500px; min-width: 250px;">
-                <span style="color: #94a3b8; padding: 0 0.5rem; font-size: 1.1rem;">&#128269;</span>
-                <input type="text" id="myCourseSearchInput" placeholder="Search my courses..." style="background: transparent; border: none; color: white; padding: 0.5rem; outline: none; width: 100%;">
+                <span class="material-icons" style="color: #94a3b8; padding: 0 0.5rem; font-size: 1.3rem;">search</span>
+                <input type="text" id="myCourseSearchInput" placeholder="Search my courses..." style="background: transparent; border: none; color: var(--text-color); padding: 0.5rem; outline: none; width: 100%;">
               </div>
             </div>
             <a href="#create-course" class="btn btn-primary" style="margin-left:auto">Create New Course</a>
@@ -1957,11 +2290,10 @@ class Router {
       const searchInput = document.getElementById("myCourseSearchInput");
       if (searchInput) {
         searchInput.addEventListener("input", (e) => {
-          const searchTerm = e.target.value.toLowerCase();
+          const searchTerm = e.target.value.toLowerCase().trim();
           const rows = appDiv.querySelectorAll("tbody tr");
           rows.forEach((row) => {
             if (row.cells.length > 1) {
-              // Ignore 'no courses' row
               const text = row.textContent.toLowerCase();
               row.style.display = text.includes(searchTerm) ? "" : "none";
             }
@@ -2390,24 +2722,24 @@ class Router {
             let infoMessage = "";
             if (status === "awaiting_admin_approval") {
               statusBadge =
-                '<span style="background: #fef3c7; color: #92400e; padding: 0.25rem 0.75rem; border-radius: 4px; font-size: 0.85rem; font-weight: 600;">⏳ Awaiting Admin Approval</span>';
+                '<span style="background: #fef3c7; color: #92400e; padding: 0.25rem 0.75rem; border-radius: 4px; font-size: 0.85rem; font-weight: 600;"><span style="margin-right: 4px;">⏳</span> Awaiting Admin Approval</span>';
             } else if (status === "payment_requested") {
               statusBadge =
-                '<span style="background: #e0f2fe; color: #075985; padding: 0.25rem 0.75rem; border-radius: 4px; font-size: 0.85rem; font-weight: 600;">💳 Pay Now</span>';
+                '<span style="background: #e0f2fe; color: #075985; padding: 0.25rem 0.75rem; border-radius: 4px; font-size: 0.85rem; font-weight: 600;"><span style="margin-right: 4px;">💳</span> Pay Now</span>';
             } else if (
               status === "payment_submitted" ||
               status === "transaction_submitted"
             ) {
               statusBadge =
-                '<span style="background: #ede9fe; color: #5b21b6; padding: 0.25rem 0.75rem; border-radius: 4px; font-size: 0.85rem; font-weight: 600;">🧾 Payment Submitted</span>';
+                '<span style="background: #ede9fe; color: #5b21b6; padding: 0.25rem 0.75rem; border-radius: 4px; font-size: 0.85rem; font-weight: 600;"><span style="margin-right: 4px;">🧾</span> Payment Submitted</span>';
               infoMessage =
                 '<div style="margin-top: 10px; font-size: 0.85rem; color: #5b21b6; background: #ede9fe; padding: 8px; border-radius: 4px;">Thank you! Following the payment submission, the admin or <span class="brand-stud">Stud</span><span class="brand-bridge">Bridge</span> Platform will reach out to you within 24 hours.</div>';
             } else if (status === "active") {
               statusBadge =
-                '<span style="background: #d1fae5; color: #065f46; padding: 0.25rem 0.75rem; border-radius: 4px; font-size: 0.85rem; font-weight: 600;">✅ Active</span>';
+                '<span style="background: #d1fae5; color: #065f46; padding: 0.25rem 0.75rem; border-radius: 4px; font-size: 0.85rem; font-weight: 600;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 4px; margin-bottom: 2px;"><polyline points="20 6 9 17 4 12"></polyline></svg> Active</span>';
             } else if (status === "rejected") {
               statusBadge =
-                '<span style="background: #fee2e2; color: #991b1b; padding: 0.25rem 0.75rem; border-radius: 4px; font-size: 0.85rem; font-weight: 600;">❌ Rejected</span>';
+                '<span style="background: #fee2e2; color: #991b1b; padding: 0.25rem 0.75rem; border-radius: 4px; font-size: 0.85rem; font-weight: 600;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 4px; margin-bottom: 2px;"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg> Rejected</span>';
             } else {
               statusBadge =
                 '<span style="background: #dbeafe; color: #082f49; padding: 0.25rem 0.75rem; border-radius: 4px; font-size: 0.85rem; font-weight: 600;">📚 In Progress</span>';
@@ -2441,54 +2773,62 @@ class Router {
                   ${infoMessage}
 
                   <!-- Teacher Information Box -->
-                  <div style="background: ${status === "active" ? "#f0f4ff" : "#fff3cd"}; border-left: 4px solid ${status === "active" ? "#667eea" : "#ff9800"}; padding: 1rem; 
-                              border-radius: 8px; margin-bottom: 1rem;">
-                    <h4 style="margin: 0 0 0.5rem 0; color: ${status === "active" ? "#667eea" : "#856404"}; font-size: 0.9rem;">
-                      👨‍🏫 Teacher Information
+                  <div style="background: ${status === "active" ? "#f0f4ff" : "#fff3cd"}; border-left: 4px solid ${status === "active" ? "#667eea" : "#ff9800"}; padding: 1.25rem 1.5rem; 
+                              border-radius: 8px; margin-bottom: 1.5rem;">
+                    <h4 style="margin: 0 0 1rem 0; color: ${status === "active" ? "#667eea" : "#856404"}; font-size: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                      Teacher Information
                     </h4>
-                    <p style="margin: 0.25rem 0; color: #333; font-weight: 600;">
+                    <p style="margin: 0.5rem 0; color: #333; font-weight: 600; font-size: 1.05rem;">
                       ${course.instructor || teacher.name || "Unknown Teacher"}
                     </p>
-                    <p style="margin: 0.25rem 0; color: #666; font-size: 0.9rem;">
-                      🏢 ${course.company || teacher.company || "N/A"}
+                    <p style="margin: 0.35rem 0; color: #64748b; font-size: 0.95rem; display: flex; align-items: center; gap: 0.5rem;">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><line x1="9" y1="22" x2="9" y2="2"></line><line x1="15" y1="22" x2="15" y2="2"></line><line x1="4" y1="12" x2="20" y2="12"></line><line x1="4" y1="7" x2="9" y2="7"></line><line x1="4" y1="17" x2="9" y2="17"></line><line x1="15" y1="7" x2="20" y2="7"></line><line x1="15" y1="17" x2="20" y2="17"></line></svg>
+                      ${course.company || teacher.company || "N/A"}
                     </p>
-                    <p style="margin: 0.25rem 0; color: #666; font-size: 0.9rem;">
-                      💼 ${course.role || teacher.profession || teacher.role || "Instructor"}
+                    <p style="margin: 0.35rem 0; color: #64748b; font-size: 0.95rem; display: flex; align-items: center; gap: 0.5rem;">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
+                      ${course.role || teacher.profession || teacher.role || "Instructor"}
                     </p>
                     ${
                       canAccessTeacher
                         ? `
-                      <hr style="margin: 0.75rem 0; border: none; border-top: 1px solid #ddd;">
-                      <p style="margin: 0.25rem 0; color: #666; font-size: 0.9rem;">
-                        📧 ${teacher.email || "N/A"}
+                      <hr style="margin: 1rem 0; border: none; border-top: 1px solid rgba(0,0,0,0.08);">
+                      <p style="margin: 0.4rem 0; color: #475569; font-size: 0.95rem; display: flex; align-items: center; gap: 0.5rem;">
+                        <svg width="20" height="20" style="flex-shrink: 0;" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                        ${teacher.email || "N/A"}
                       </p>
-                      <p style="margin: 0.25rem 0; color: #666; font-size: 0.9rem;">
-                        📱 ${teacher.mobileNumber || "N/A"}
+                      <p style="margin: 0.4rem 0; color: #475569; font-size: 0.95rem; display: flex; align-items: center; gap: 0.5rem;">
+                        <svg width="20" height="20" style="flex-shrink: 0;" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
+                        ${teacher.mobileNumber || "N/A"}
                       </p>
                     `
                         : `
-                      <p style="margin: 0.75rem 0 0 0; color: #ff9800; font-size: 0.85rem; font-weight: 600;">
-                        ⏳ Full teacher details will be visible after admin approval
+                      <p style="margin: 1rem 0 0 0; color: #d97706; font-size: 0.9rem; font-weight: 600; display: flex; align-items: flex-start; gap: 0.5rem; line-height: 1.4;">
+                        <svg width="18" height="18" style="flex-shrink: 0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.92-10.24l-3.26-1.5M12 12v5"></path><path d="M12 7v.01"></path></svg>
+                        Full teacher details will be visible after admin approval
                       </p>
                     `
                     }
                   </div>
 
                   <!-- Course Details Grid -->
-                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
                     <div>
-                      <span style="color: #999; font-size: 0.85rem; text-transform: uppercase; font-weight: 600;">
-                        💵 Price
+                      <span style="color: #94a3b8; font-size: 0.8rem; text-transform: uppercase; font-weight: 700; display: flex; align-items: center; gap: 0.35rem;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"></rect><circle cx="12" cy="12" r="2"></circle><path d="M6 12h.01M18 12h.01"></path></svg>
+                        Price
                       </span>
-                      <p style="margin: 0.25rem 0 0 0; color: #333; font-size: 1.1rem; font-weight: bold;">
+                      <p style="margin: 0.35rem 0 0 0; color: #1e293b; font-size: 1.15rem; font-weight: 800;">
                         ₹${course.price || 0}
                       </p>
                     </div>
                     <div>
-                      <span style="color: #999; font-size: 0.85rem; text-transform: uppercase; font-weight: 600;">
-                        ⏱️ Duration
+                      <span style="color: #94a3b8; font-size: 0.8rem; text-transform: uppercase; font-weight: 700; display: flex; align-items: center; gap: 0.35rem;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                        Duration
                       </span>
-                      <p style="margin: 0.25rem 0 0 0; color: #333; font-size: 1.1rem; font-weight: bold;">
+                      <p style="margin: 0.35rem 0 0 0; color: #1e293b; font-size: 1.15rem; font-weight: 800;">
                         ${course.duration || 0} months
                       </p>
                     </div>
@@ -2498,12 +2838,12 @@ class Router {
                   ${
                     enrollment.progress
                       ? `
-                    <div style="margin-bottom: 1rem;">
+                    <div style="margin-bottom: 1.5rem;">
                       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                        <span style="font-size: 0.9rem; color: #666;">Progress</span>
-                        <span style="font-weight: 600; color: #667eea;">${enrollment.progress}%</span>
+                        <span style="font-size: 0.95rem; color: #64748b; font-weight: 500;">Progress</span>
+                        <span style="font-weight: 700; color: #667eea;">${enrollment.progress}%</span>
                       </div>
-                      <div style="width: 100%; height: 8px; background: #e5e7eb; border-radius: 4px; overflow: hidden;">
+                      <div style="width: 100%; height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden;">
                         <div style="width: ${enrollment.progress}%; height: 100%; background: linear-gradient(90deg, #667eea, #764ba2); border-radius: 4px;"></div>
                       </div>
                     </div>
@@ -2514,23 +2854,26 @@ class Router {
                   <!-- Action Buttons -->
                   <div style="display: flex; gap: 0.75rem; margin-top: 1rem;">
                         <button onclick="${canAccessTeacher ? `openWhatsApp('${teacher.mobileNumber || ""}', '${course.title || ""}')` : `showInfoPopup('Teacher contact is available after activation')`}"
-                          style="flex: 1; padding: 0.75rem; background: ${canAccessTeacher ? "#25d366" : "#ccc"}; color: white; 
-                                    border: none; border-radius: 6px; font-weight: 600; cursor: ${status === "active" ? "pointer" : "not-allowed"};
-                                    transition: background 0.3s;"
-                          onmouseover="${canAccessTeacher ? "this.style.background='#20ba5a'" : ""}"
-                          onmouseout="${canAccessTeacher ? "this.style.background='#25d366'" : ""}"
+                          style="flex: 1; padding: 0.75rem; display: flex; justify-content: center; align-items: center; gap: 0.5rem; background-color: ${canAccessTeacher ? "#25d366" : "#cbd5e1"} !important; color: ${canAccessTeacher ? "white" : "#64748b"} !important; 
+                                    border: none; border-radius: 6px; font-weight: 600; cursor: ${status === "active" ? "pointer" : "not-allowed"}; font-size: 0.95rem;
+                                    transition: background-color 0.3s;"
+                          onmouseover="${canAccessTeacher ? "this.style.setProperty('background-color', '#20ba5a', 'important')" : ""}"
+                          onmouseout="${canAccessTeacher ? "this.style.setProperty('background-color', '#25d366', 'important')" : ""}"
+                          onmousedown="${canAccessTeacher ? "this.style.setProperty('color', 'white', 'important')" : ""}"
                           ${!canAccessTeacher ? "disabled" : ""}>
-                      💬 WhatsApp
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+                      WhatsApp
                     </button>
                     
                     <button onclick="${canAccessTeacher ? `window.location.hash='#course-detail/${courseIdStr}'` : showPayNow ? `submitPaymentPrompt('${enrollment.paymentId || enrollment._id}', '${course.title || "Course"}', '${amount}')` : showWaitingPaymentConfirm ? `showInfoPopup('Your payment is submitted. Please wait for admin confirmation.')` : `showInfoPopup('Please wait for admin approval')`}"
-                              style="flex: 1; padding: 0.75rem; background: ${canAccessTeacher ? "#667eea" : showPayNow ? "#0ea5e9" : "#ccc"}; color: white; 
-                                border: none; border-radius: 6px; font-weight: 600; cursor: ${canAccessTeacher || showPayNow ? "pointer" : "not-allowed"};
-                                    transition: background 0.3s;"
-                          onmouseover="${canAccessTeacher ? "this.style.background='#5568d3'" : showPayNow ? "this.style.background='#0284c7'" : ""}"
-                          onmouseout="${canAccessTeacher ? "this.style.background='#667eea'" : showPayNow ? "this.style.background='#0ea5e9'" : ""}"
+                              style="flex: 1; padding: 0.75rem; display: flex; justify-content: center; align-items: center; gap: 0.5rem; background-color: ${canAccessTeacher ? "#667eea" : showPayNow ? "#0ea5e9" : "#cbd5e1"} !important; color: ${canAccessTeacher || showPayNow ? "white" : "#64748b"} !important; 
+                                border: none; border-radius: 6px; font-weight: 600; cursor: ${canAccessTeacher || showPayNow ? "pointer" : "not-allowed"}; font-size: 0.95rem;
+                                    transition: background-color 0.3s;"
+                          onmouseover="${canAccessTeacher ? "this.style.setProperty('background-color', '#5568d3', 'important')" : showPayNow ? "this.style.setProperty('background-color', '#0284c7', 'important')" : ""}"
+                          onmouseout="${canAccessTeacher ? "this.style.setProperty('background-color', '#667eea', 'important')" : showPayNow ? "this.style.setProperty('background-color', '#0ea5e9', 'important')" : ""}"
+                          onmousedown="this.style.setProperty('color', 'white', 'important')"
                           ${!canAccessTeacher && !showPayNow && !showWaitingPaymentConfirm ? "disabled" : ""}>
-                          ${canAccessTeacher ? "📖 View Course" : showPayNow ? `💳 Pay Now ₹${amount}` : showWaitingPaymentConfirm ? "⏳ Await Confirmation" : "🔒 Locked"}
+                          ${canAccessTeacher ? `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg> View Course` : showPayNow ? `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg> Pay Now ₹${amount}` : showWaitingPaymentConfirm ? `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> Await Confirmation` : `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg> Locked`}
                     </button>
                   </div>
                 </div>
@@ -2623,28 +2966,120 @@ class Router {
       );
 
       let html = `
-        <div class="your-courses-page">
-          <div style="padding: 0 2rem;">
-            <h1 style="margin: 2rem 0 0.5rem 0; font-size: 2.5rem; background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+        <style>
+          /* Light mode defaults */
+          :root {
+            --dashboard-bg: #fffbf7;
+            --card-bg: #ffffff;
+            --text-main: #1e3a8a;
+            --text-secondary: #475569;
+            --text-dark: #1e293b;
+            --text-darker: #0f172a;
+            --border-color: #f1f5f9;
+            --border-color-alt: #e2e8f0;
+            --avatar-bg: #e2e8f0;
+            --info-box-bg: #fff7ed;
+            --info-box-border: #ffedd5;
+            --progress-bg: #e2e8f0;
+            --btn-secondary-bg: #e2e8f0;
+            --btn-secondary-text: #334155;
+            --btn-secondary-hover-bg: #cbd5e1;
+            --review-input-bg: #ffffff;
+            --review-input-border: #e2e8f0;
+            --primary-bg: #f97316;
+            --primary-hover: #ea580c;
+            --primary-text: #d97706;
+            --primary-badge-bg: #ffedd5;
+            --primary-focus: #f97316;
+            --pending-status-bg: rgba(217, 119, 6, 0.1);
+            --pending-status-border: rgba(217, 119, 6, 0.2);
+            --pending-status-text: #d97706;
+          }
+
+          /* Dark mode overrides. */
+          html:not([data-theme="light"]) {
+            --dashboard-bg: #1a1b26;
+            --card-bg: #1e293b;
+            --text-main: #60a5fa;
+            --text-secondary: #94a3b8;
+            --text-dark: #f8fafc;
+            --text-darker: #f1f5f9;
+            --border-color: #334155;
+            --border-color-alt: #475569;
+            --avatar-bg: #334155;
+            --info-box-bg: #334155;
+            --info-box-border: #475569;
+            --progress-bg: #475569;
+            --btn-secondary-bg: #334155;
+            --btn-secondary-text: #f8fafc;
+            --btn-secondary-hover-bg: #475569;
+            --review-input-bg: #1e293b;
+            --review-input-border: #475569;
+            --primary-bg: #117864;
+            --primary-hover: #0e6252;
+            --primary-text: #117864;
+            --primary-badge-bg: rgba(17, 120, 100, 0.2);
+            --primary-focus: #117864;
+            --pending-status-bg: rgba(17, 120, 100, 0.15);
+            --pending-status-border: rgba(17, 120, 100, 0.3);
+            --pending-status-text: #117864;
+          }
+
+          .courses-dashboard-container {
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: var(--dashboard-bg);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+          }
+          .courses-dashboard-grid {
+            display: grid;
+            grid-template-columns: 1.3fr 1fr;
+            gap: 2rem;
+            align-items: start;
+          }
+          @media (max-width: 900px) {
+            .courses-dashboard-grid {
+              grid-template-columns: 1fr;
+            }
+          }
+          /* Custom Button Styles to override global button hover effects that turn text white */
+          button.btn-view-course {
+            flex: 1; min-width: 120px; padding: 0.75rem 1rem; border: none; border-radius: 20px; font-weight: 600; cursor: pointer; transition: all 0.3s; font-size: 1.05rem;
+            background-color: var(--primary-bg) !important;
+            color: #ffffff !important;
+          }
+          button.btn-view-course:hover {
+            background-color: var(--primary-hover) !important;
+            color: #ffffff !important;
+          }
+          button.btn-secondary-action {
+            flex: 1; min-width: 120px; padding: 0.75rem 1rem; border: none; border-radius: 20px; font-weight: 600; cursor: pointer; transition: all 0.3s; font-size: 1.05rem;
+            background-color: var(--btn-secondary-bg) !important;
+            color: var(--btn-secondary-text) !important;
+          }
+          button.btn-secondary-action:hover {
+            background-color: var(--btn-secondary-hover-bg) !important;
+            color: var(--btn-secondary-text) !important;
+          }
+        </style>
+        <div class="your-courses-page courses-dashboard-container">
+          <div style="margin-bottom: 2rem;">
+            <h1 style="margin: 0 0 0.5rem 0; font-size: 2.5rem; color: var(--text-main); font-weight: 700;">
               Your Courses Dashboard
             </h1>
-            <p style="color: #cbd5e1; margin: 0 0 2rem 0; font-size: 1.1rem;">
+            <p style="color: var(--text-secondary); margin: 0; font-size: 1.1rem;">
               Manage your enrolled courses and track their status
             </p>
           </div>
-      `;
-
-      // ===== APPROVED COURSES SECTION =====
-      html += `
-        <div style="padding: 0 2rem;">
-          <div class="courses-section-header approved">
-            ✅ Active Courses (${approvedEnrollments.length})
-          </div>
+          
+          <div class="courses-dashboard-grid">
+            <!-- Approved Courses Column -->
+            <div style="display: flex; flex-direction: column; gap: 1.5rem;">
       `;
 
       if (approvedEnrollments.length > 0) {
-        html += `<div class="courses-list" style="display: grid; gap: 1.5rem; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); margin-bottom: 3rem;">`;
-
         html += approvedEnrollments
           .map((enrollment) => {
             const course = enrollment.courseId || {};
@@ -2658,254 +3093,198 @@ class Router {
               "";
 
             return `
-              <div style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-                          border: 2px solid rgba(16, 185, 129, 0.2);
-                          border-left: 4px solid #10b981;
-                          border-radius: 12px; padding: 1.5rem; cursor: pointer; 
-                          transition: all 0.3s; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.1);"
-                   onmouseover="this.style.borderColor='#10b981'; this.style.boxShadow='0 8px 25px rgba(16, 185, 129, 0.2)'"
-                   onmouseout="this.style.borderColor='rgba(16, 185, 129, 0.2)'; this.style.boxShadow='0 4px 15px rgba(16, 185, 129, 0.1)'">
+              <div style="background: var(--card-bg); border-radius: 16px; padding: 1.5rem; box-shadow: 0 10px 30px rgba(0,0,0,0.12); border: 1px solid var(--border-color);">
                 
-                <!-- Status Badge -->
-                <div style="display: inline-block; background: rgba(16, 185, 129, 0.2); 
-                            color: #a7f3d0; padding: 0.4rem 0.8rem; border-radius: 20px; 
-                            font-size: 0.8rem; font-weight: 600; margin-bottom: 1rem;">
-                  ✓ Active & Approved
-                </div>
-
-                <!-- Course Title -->
-                <h3 style="margin: 0 0 0.5rem 0; color: #e2e8f0; font-size: 1.1rem;">
-                  ${course.title || "Unknown Course"}
-                </h3>
-
-                <!-- Teacher Information Box -->
-                <div style="background: rgba(102, 126, 234, 0.1); border-left: 4px solid #667eea; 
-                            padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
-                  <h4 style="margin: 0 0 0.5rem 0; color: #667eea; font-size: 0.9rem;">
-                    👨‍🏫 Your Instructor
-                  </h4>
-                  <p style="margin: 0.25rem 0; color: #e2e8f0; font-weight: 600;">
-                    ${course.instructor || teacher.name || "Unknown Teacher"}
-                  </p>
-                  <p style="margin: 0.25rem 0; color: #cbd5e1; font-size: 0.9rem;">
-                    🏢 ${course.company || teacher.company || "N/A"}
-                  </p>
-                  <p style="margin: 0.25rem 0; color: #cbd5e1; font-size: 0.9rem;">
-                    💼 ${course.role || teacher.profession || teacher.role || "Expert Instructor"}
-                  </p>
-                  <p style="margin: 0.5rem 0 0 0; color: #10b981; font-size: 0.9rem; font-weight: 500;">
-                    📱 Contact ready for learning support
-                  </p>
-                </div>
-
-                <!-- Course Details Grid -->
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; 
-                            padding: 1rem; background: rgba(102, 126, 234, 0.05); border-radius: 8px;">
-                  <div>
-                    <span style="color: #cbd5e1; font-size: 0.8rem; text-transform: uppercase; font-weight: 600;">
-                      💵 Fee Amount
-                    </span>
-                    <p style="margin: 0.25rem 0 0 0; color: #e2e8f0; font-size: 1.1rem; font-weight: bold;">
-                      ₹${course.price || 0}
-                    </p>
+                <!-- Header -->
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 0.5rem;">
+                  <h2 style="margin: 0; color: var(--text-dark); font-size: 1.6rem; font-weight: 700;">
+                    ${course.title || "Unknown Course"}
+                  </h2>
+                  <div style="background: var(--primary-badge-bg); color: var(--primary-text); padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.85rem; font-weight: 700; letter-spacing: 0.5px;">
+                    ACTIVE & APPROVED
                   </div>
-                  <div>
-                    <span style="color: #cbd5e1; font-size: 0.8rem; text-transform: uppercase; font-weight: 600;">
-                      📚 Duration
-                    </span>
-                    <p style="margin: 0.25rem 0 0 0; color: #e2e8f0; font-size: 1.1rem; font-weight: bold;">
-                      ${course.duration || "Self-paced"}
-                    </p>
+                </div>
+
+                <!-- Teacher Info -->
+                <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 1rem; border-bottom: 1px solid var(--border-color-alt); padding-bottom: 1.5rem; margin-bottom: 1.5rem;">
+                  <!-- Avatar -->
+                  <div style="width: 56px; height: 56px; border-radius: 50%; background: var(--avatar-bg); display: flex; justify-content: center; align-items: center; overflow: hidden; flex-shrink: 0;">
+                    <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                  </div>
+                  
+                  <!-- Name & Role -->
+                  <div style="flex: 1; min-width: 180px;">
+                    <div style="color: var(--text-darker); font-weight: 700; font-size: 1.25rem; margin-bottom: 0.2rem;">
+                      ${course.instructor || teacher.name || "Unknown Teacher"}
+                    </div>
+                    <div style="color: var(--text-secondary); font-size: 0.95rem;">
+                      Company: <span style="color: var(--text-dark);">${course.company || teacher.company || "N/A"}</span>
+                    </div>
+                    <div style="color: var(--text-secondary); font-size: 0.95rem;">
+                      Role: <span style="color: var(--text-dark);">${course.role || teacher.profession || teacher.role || "Expert Instructor"}</span>
+                    </div>
+                  </div>
+                  
+                  <!-- Contact Support -->
+                  <div style="display: flex; align-items: center; gap: 0.75rem; flex-shrink: 0; max-width: 210px;">
+                    <div style="width: 40px; height: 40px; border-radius: 50%; background: var(--avatar-bg); display: flex; justify-content: center; align-items: center; flex-shrink: 0;">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                      <span style="color: var(--text-dark); font-size: 0.95rem; font-weight: 500; line-height: 1.2;">
+                        Contact ready for learning support
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Course Details Row -->
+                <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap;">
+                  <div style="flex: 1; min-width: 150px; background: var(--info-box-bg); padding: 1.2rem; border-radius: 10px; border: 1px solid var(--info-box-border); display: flex; align-items: flex-start; gap: 0.75rem;">
+                    <svg width="24" height="24" style="margin-top: 0.1rem; flex-shrink: 0;" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"></rect><circle cx="12" cy="12" r="2"></circle><path d="M6 12h.01M18 12h.01"></path></svg>
+                    <div>
+                      <div style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 0.3rem;">Fee Amount</div>
+                      <div style="color: var(--text-darker); font-size: 1.4rem; font-weight: 700;">₹${course.price || 0}</div>
+                    </div>
+                  </div>
+                  <div style="flex: 1; min-width: 150px; background: var(--info-box-bg); padding: 1.2rem; border-radius: 10px; border: 1px solid var(--info-box-border); display: flex; align-items: flex-start; gap: 0.75rem;">
+                    <svg width="24" height="24" style="margin-top: 0.1rem; flex-shrink: 0;" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                    <div>
+                      <div style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 0.3rem;">Duration</div>
+                      <div style="color: var(--text-darker); font-size: 1.4rem; font-weight: 700;">${course.duration || "2 Months"}</div>
+                    </div>
                   </div>
                 </div>
 
                 <!-- Progress Bar -->
-                <div style="margin-bottom: 1rem;">
-                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                    <span style="font-size: 0.9rem; color: #cbd5e1;">Learning Progress</span>
-                    <span style="font-weight: 600; color: #10b981;">${enrollment.progress || 0}%</span>
+                <div style="margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-color-alt); padding-bottom: 1.5rem;">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                    <span style="font-size: 1.05rem; color: var(--text-dark); font-weight: 600;">Learning Progress</span>
+                    <span style="font-weight: 700; font-size: 1.05rem; color: #f97316;">${enrollment.progress || 0}%</span>
                   </div>
-                  <div style="width: 100%; height: 8px; background: rgba(102, 126, 234, 0.2); border-radius: 4px; overflow: hidden;">
-                    <div style="width: ${enrollment.progress || 0}%; height: 100%; background: linear-gradient(90deg, #10b981, #059669); border-radius: 4px; transition: width 0.3s;"></div>
+                  <div style="width: 100%; height: 8px; background: var(--progress-bg); border-radius: 4px; overflow: hidden;">
+                    <div style="width: ${enrollment.progress || 0}%; height: 100%; background: #f97316; border-radius: 4px; transition: width 0.3s;"></div>
                   </div>
+                </div>
+
+                <!-- Review Section -->
+                <div style="margin-bottom: 1.5rem;" onclick="event.stopPropagation();">
+                  <h4 style="margin: 0 0 0.75rem 0; color: var(--text-dark); font-size: 1.05rem;">Rate this Course</h4>
+                  <div class="star-rating" data-course="${courseIdStr}" style="display: flex; gap: 0.25rem; margin-bottom: 0.75rem; font-size: 1.7rem; color: #cbd5e1;">
+                    <span id="star-${courseIdStr}-1" onclick="window.setRating('${courseIdStr}', 1)" style="cursor: pointer; color: #cbd5e1;">★</span>
+                    <span id="star-${courseIdStr}-2" onclick="window.setRating('${courseIdStr}', 2)" style="cursor: pointer; color: #cbd5e1;">★</span>
+                    <span id="star-${courseIdStr}-3" onclick="window.setRating('${courseIdStr}', 3)" style="cursor: pointer; color: #cbd5e1;">★</span>
+                    <span id="star-${courseIdStr}-4" onclick="window.setRating('${courseIdStr}', 4)" style="cursor: pointer; color: #cbd5e1;">★</span>
+                    <span id="star-${courseIdStr}-5" onclick="window.setRating('${courseIdStr}', 5)" style="cursor: pointer; color: #cbd5e1;">★</span>
+                  </div>
+                  <input type="hidden" id="rating-val-${courseIdStr}" value="0">
+                  <textarea id="exp-${courseIdStr}" class="custom-scrollbar" rows="3" style="width: 100%; box-sizing: border-box; border-radius: 8px; border: 1px solid var(--review-input-border); background: var(--review-input-bg); color: var(--text-dark); padding: 0.75rem; resize: vertical; max-height: 150px; outline: none; transition: border-color 0.3s; font-family: inherit; font-size: 1rem;" placeholder="Write your experience..." onfocus="this.style.borderColor='var(--primary-focus)'" onblur="this.style.borderColor='var(--review-input-border)'"></textarea>
+                  <div id="review-msg-${courseIdStr}" style="margin-top: 0.5rem; font-size: 0.95rem;"></div>
                 </div>
 
                 <!-- Action Buttons -->
-                <div style="display: flex; gap: 0.75rem; margin-top: 1rem;">
-                  <button onclick="openWhatsApp('${teacher.mobileNumber || ""}', '${course.title || ""}')"
-                          style="flex: 1; padding: 0.75rem; background: #25d366; color: white; 
-                                  border: none; border-radius: 6px; font-weight: 600; cursor: pointer;
-                                  transition: all 0.3s; font-size: 0.9rem;"
-                          onmouseover="this.style.background='#20ba5a'; this.style.transform='translateY(-2px)'"
-                          onmouseout="this.style.background='#25d366'; this.style.transform='translateY(0)'">
-                    💬 Contact Teacher
+                <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+                  <button class="btn-view-course" onclick="window.location.hash='#course-detail/${courseIdStr}'">
+                    View Course
                   </button>
-                 
-
-                  <button onclick="window.location.hash='#course-detail/${courseIdStr}'"
-                          style="flex: 1; padding: 0.75rem; background: #667eea; color: white; 
-                                  border: none; border-radius: 6px; font-weight: 600; cursor: pointer;
-                                  transition: all 0.3s; font-size: 0.9rem;"
-                          onmouseover="this.style.background='#5568d3'; this.style.transform='translateY(-2px)'"
-                          onmouseout="this.style.background='#667eea'; this.style.transform='translateY(0)'">
-                    📖 View Course
+                  <button class="btn-secondary-action" onclick="openWhatsApp('${teacher.mobileNumber || ""}', '${course.title || ""}')">
+                    Contact Teacher
                   </button>
-                </div>
-
-                <!-- Course Review Section -->
-                <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.1);" onclick="event.stopPropagation();">
-                  <h4 style="margin: 0 0 0.5rem 0; color: #e2e8f0; font-size: 1rem;">Rate this Course</h4>
-                  <div class="star-rating" data-course="${courseIdStr}" style="display: flex; gap: 0.25rem; margin-bottom: 0.75rem; font-size: 1.5rem; color: #475569;">
-                    <span id="star-${courseIdStr}-1" onclick="window.setRating('${courseIdStr}', 1)" style="cursor: pointer;">★</span>
-                    <span id="star-${courseIdStr}-2" onclick="window.setRating('${courseIdStr}', 2)" style="cursor: pointer;">★</span>
-                    <span id="star-${courseIdStr}-3" onclick="window.setRating('${courseIdStr}', 3)" style="cursor: pointer;">★</span>
-                    <span id="star-${courseIdStr}-4" onclick="window.setRating('${courseIdStr}', 4)" style="cursor: pointer;">★</span>
-                    <span id="star-${courseIdStr}-5" onclick="window.setRating('${courseIdStr}', 5)" style="cursor: pointer;">★</span>
-                  </div>
-                  <input type="hidden" id="rating-val-${courseIdStr}" value="0">
-                  <label for="exp-${courseIdStr}" style="display:block; margin-bottom:0.25rem; font-size:0.85rem; color:#cbd5e1;">Experience</label>
-                  <textarea id="exp-${courseIdStr}" class="custom-scrollbar" rows="2" style="width: 100%; border-radius: 8px; border: 1px solid #475569; background: rgba(15, 23, 42, 0.6); color: white; padding: 0.75rem; margin-bottom: 0.75rem; resize: vertical; max-height: 150px; outline: none; transition: border-color 0.3s; font-family: inherit;" placeholder="Write your experience..." onfocus="this.style.borderColor='#60a5fa'" onblur="this.style.borderColor='#475569'"></textarea>
-                  <button onclick="window.submitReview('${courseIdStr}', '${typeof teacher === "string" ? teacher : teacher._id || teacher.id || ""}')"
-                          style="width: 100%; padding: 0.5rem; background: #f59e0b; color: white;
-                                 border: none; border-radius: 6px; font-weight: 600; cursor: pointer;
-                                 transition: all 0.3s; font-size: 0.9rem;"
-                          onmouseover="this.style.background='#d97706'"
-                          onmouseout="this.style.background='#f59e0b'">
+                  <button class="btn-secondary-action" onclick="window.submitReview('${courseIdStr}', '${typeof teacher === "string" ? teacher : teacher._id || teacher.id || ""}')">
                     Submit Review
                   </button>
-                  <div id="review-msg-${courseIdStr}" style="margin-top: 0.5rem; font-size: 0.85rem;"></div>
-<script>
-                    (async () => {
-                      window.currentTeacherId = '${typeof teacher === "string" ? teacher : teacher._id || teacher.id || ""}';
-                      await window.loadReviews('${courseIdStr}');
-                    })();
-                    </script>
-                    
                 </div>
-
-              </div>
-            `;
-          })
-          .join("");
-
-        html += `</div>`;
-      } else {
-        html += `
-          <div class="empty-section">
-            🎓 No active courses yet. Complete your payment to get started!
-          </div>
-        `;
-      }
-
-      html += `</div>`; // Close approved section
-
-      // ===== PENDING/PAYMENT AWAITING COURSES SECTION =====
-      html += `
-        <div style="padding: 0 2rem;">
-          <div class="courses-section-header pending">
-            ⏳ Pending Approval (${pendingEnrollments.length})
-          </div>
-      `;
-
-      if (pendingEnrollments.length > 0) {
-        html += `<div class="courses-list" style="display: grid; gap: 1.5rem; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); margin-bottom: 2rem;">`;
-
-        html += pendingEnrollments
-          .map((enrollment) => {
-            const course = enrollment.courseId || {};
-            const teacher = course.teacherId || {};
-            const statusText =
-              enrollment.status === "payment_submitted"
-                ? "Waiting for Admin Review"
-                : "Awaiting Admin Approval";
-
-            return `
-              <div style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-                          border: 2px solid rgba(245, 158, 11, 0.2);
-                          border-left: 4px solid #f59e0b;
-                          border-radius: 12px; padding: 1.5rem; cursor: pointer; 
-                          transition: all 0.3s; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.1);"
-                   onmouseover="this.style.borderColor='#f59e0b'; this.style.boxShadow='0 8px 25px rgba(245, 158, 11, 0.2)'"
-                   onmouseout="this.style.borderColor='rgba(245, 158, 11, 0.2)'; this.style.boxShadow='0 4px 15px rgba(245, 158, 11, 0.1)'">
                 
-                <!-- Status Badge -->
-                <div style="display: inline-block; background: rgba(245, 158, 11, 0.2); 
-                            color: #fbbf24; padding: 0.4rem 0.8rem; border-radius: 20px; 
-                            font-size: 0.8rem; font-weight: 600; margin-bottom: 1rem;">
-                  ⏳ ${statusText}
-                </div>
-
-                <!-- Course Title -->
-                <h3 style="margin: 0 0 0.5rem 0; color: #e2e8f0; font-size: 1.1rem;">
-                  ${course.title || "Unknown Course"}
-                </h3>
-
-                <!-- Teacher Information Box -->
-                <div style="background: rgba(245, 158, 11, 0.1); border-left: 4px solid #f59e0b; 
-                            padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
-                  <h4 style="margin: 0 0 0.5rem 0; color: #f59e0b; font-size: 0.9rem;">
-                    👨‍🏫 Instructor: ${teacher.name || "Unknown"}
-                  </h4>
-                  <p style="margin: 0.25rem 0; color: #cbd5e1; font-size: 0.9rem;">
-                    💼 ${teacher.profession || teacher.role || "Expert"}
-                  </p>
-                </div>
-
-                <!-- Course Details -->
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; 
-                            padding: 1rem; background: rgba(102, 126, 234, 0.05); border-radius: 8px;">
-                  <div>
-                    <span style="color: #cbd5e1; font-size: 0.8rem; text-transform: uppercase; font-weight: 600;">
-                      💵 Course Fee
-                    </span>
-                    <p style="margin: 0.25rem 0 0 0; color: #e2e8f0; font-size: 1.1rem; font-weight: bold;">
-                      ₹${course.price || 0}
-                    </p>
-                  </div>
-                  <div>
-                    <span style="color: #cbd5e1; font-size: 0.8rem; text-transform: uppercase; font-weight: 600;">
-                      📅 Submitted
-                    </span>
-                    <p style="margin: 0.25rem 0 0 0; color: #e2e8f0; font-size: 0.95rem;">
-                      ${new Date(enrollment.enrolledAt).toLocaleDateString()}
-                    </p>
-                  </div>
-                </div>
-
-                <!-- Information Box -->
-                <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2);
-                            padding: 1rem; border-radius: 8px; margin-bottom: 1rem; color: #fca5a5; font-size: 0.9rem;">
-                  <p style="margin: 0; line-height: 1.5;">
-                    Your payment is under review by the admin. You'll receive confirmation shortly. 
-                    Once approved, you can access the course immediately.
-                  </p>
-                </div>
-
-                <!-- Action Button -->
-                <button onclick="router.navigate('#my-enrollments')"
-                        style="width: 100%; padding: 0.75rem; background: #667eea; color: white; 
-                                border: none; border-radius: 6px; font-weight: 600; cursor: pointer;
-                                transition: all 0.3s; font-size: 0.9rem;"
-                        onmouseover="this.style.background='#5568d3'; this.style.transform='translateY(-2px)'"
-                        onmouseout="this.style.background='#667eea'; this.style.transform='translateY(0)'">
-                  📋 View Details
-                </button>
+                <script>
+                  (async () => {
+                    window.currentTeacherId = '${typeof teacher === "string" ? teacher : teacher._id || teacher.id || ""}';
+                    await window.loadReviews('${courseIdStr}');
+                  })();
+                </script>
               </div>
             `;
           })
           .join("");
-
-        html += `</div>`;
       } else {
         html += `
-          <div class="empty-section">
-            ✨ No pending courses. All your registrations are approved!
+          <div style="background: var(--card-bg); border-radius: 16px; padding: 2rem; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: 1px solid var(--border-color); text-align: center;">
+            <p style="color: var(--text-secondary); font-size: 1.1rem; margin: 0;">🎓 No active courses yet. Complete your payment to get started!</p>
           </div>
         `;
       }
 
-      html += `</div>`; // GClose pending section
-      html += `</div>`; // Close main container
+      html += `</div>`; // Close approved column
+
+      // ===== PENDING COURSES COLUMN =====
+      html += `
+            <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+              <div style="background: var(--card-bg); border-radius: 16px; padding: 1.5rem; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: 1px solid var(--border-color);">
+                <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;">
+                  <div style="position: relative; display: inline-block;">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--primary-text)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                      <polyline points="14 2 14 8 20 8"></polyline>
+                      <line x1="16" y1="13" x2="8" y2="13"></line>
+                      <line x1="16" y1="17" x2="8" y2="17"></line>
+                      <polyline points="10 9 9 9 8 9"></polyline>
+                    </svg>
+                    <!-- Hourglass floating icon -->
+                    <div style="position: absolute; bottom: -5px; right: -5px; background: var(--card-bg); border-radius: 50%; padding: 2px;">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--primary-text)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M5 22h14"></path>
+                        <path d="M5 2h14"></path>
+                        <path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"></path>
+                        <path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"></path>
+                      </svg>
+                    </div>
+                  </div>
+                  <h2 style="margin: 0; color: var(--text-dark); font-size: 1.4rem; font-weight: 700;">
+                    Pending Approval (${pendingEnrollments.length})
+                  </h2>
+                </div>
+                
+                ${
+                  pendingEnrollments.length > 0
+                    ? `<div style="display: flex; flex-direction: column; gap: 1rem;">
+                    ${pendingEnrollments
+                      .map((enrollment) => {
+                        const course = enrollment.courseId || {};
+                        const teacher = course.teacherId || {};
+                        const statusText =
+                          enrollment.status === "payment_submitted"
+                            ? "Waiting for Admin Review"
+                            : "Awaiting Admin Approval";
+                        return `
+                        <div style="background: var(--dashboard-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem;">
+                          <h3 style="margin: 0 0 0.5rem 0; color: var(--text-dark); font-size: 1.1rem; font-weight: 600;">${course.title || "Unknown Course"}</h3>
+                          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                            <span style="color: var(--text-secondary); font-size: 0.9rem;">Instructor:</span>
+                            <span style="color: var(--text-dark); font-weight: 500; font-size: 0.9rem;">${teacher.name || "Unknown"}</span>
+                          </div>
+                          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <span style="color: var(--text-secondary); font-size: 0.9rem;">Fee:</span>
+                            <span style="color: var(--text-dark); font-weight: 600; font-size: 0.9rem;">₹${course.price || 0}</span>
+                          </div>
+                          <div style="background: var(--pending-status-bg); padding: 0.5rem 0.75rem; border-radius: 6px; border: 1px solid var(--pending-status-border); font-size: 0.85rem; color: var(--pending-status-text); font-weight: 500; text-align: center;">
+                            ⏳ ${statusText}
+                          </div>
+                        </div>
+                      `;
+                      })
+                      .join("")}
+                  </div>`
+                    : `<div style="background: var(--dashboard-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem;">
+                    <p style="margin: 0; color: var(--text-secondary); font-size: 1rem; line-height: 1.5;">
+                      No pending courses. All your registrations are approved!
+                    </p>
+                  </div>`
+                }
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
 
       appDiv.innerHTML = html;
     } catch (error) {
@@ -2991,40 +3370,266 @@ class Router {
   renderSupport() {
     const appDiv = document.getElementById("app");
     const user = auth.getCurrentUser() || {};
+    const userName = user.name || "Student";
 
     appDiv.innerHTML = `
-      <div class="dashboard-header">
-        <h1>📞 Customer Support</h1>
-      </div>
-      <div class="content-card" style="max-width: 600px; margin: 0 auto; padding: 2rem;">
-        <h2 style="margin-top: 0;">Get in Touch</h2>
-        <p style="color: #666; margin-bottom: 2rem;">Experiencing an issue? Please fill out the form below and we will get back to you shortly.</p>
+      <style>
+        :root {
+          --card-bg: #ffffff;
+          --border-color: #e2e8f0;
+          --text-dark: #0f172a;
+          --text-secondary: #475569;
+          --dashboard-bg: #ffffff;
+          --primary-color: #ea580c;
+          --primary-hover: #c2410c;
+          --primary-border-glow: rgba(234, 88, 12, 0.1);
+        }
+        html:not([data-theme="light"]) {
+          --card-bg: #1e293b;
+          --border-color: #334155;
+          --text-dark: #f8fafc;
+          --text-secondary: #94a3b8;
+          --dashboard-bg: #0f172a;
+          --primary-color: #117864;
+          --primary-hover: #0e6252;
+          --primary-border-glow: rgba(17, 120, 100, 0.2);
+        }
         
-        <form onsubmit="submitSupportForm(event)" style="display: flex; flex-direction: column; gap: 1.5rem;">
-          <div class="form-group">
-            <label for="supName">Name / UserId</label>
-            <input type="text" id="supName" value="${user.name || user._id || ""}" required style="width: 100%; padding: 0.8rem; border: 1px solid #ddd; border-radius: 8px;">
+        .support-container {
+          max-width: 1100px;
+          margin: 0 auto;
+          padding: 2rem;
+          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .support-page-title {
+          font-size: 1.8rem;
+          color: var(--text-dark);
+          font-weight: 700;
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          margin-bottom: 2rem;
+        }
+        .support-hero {
+          text-align: center;
+          margin-bottom: 3rem;
+        }
+        .support-hero h2 {
+          font-size: 2.2rem;
+          color: var(--primary-color);
+          margin-bottom: 0.5rem;
+          font-family: serif;
+        }
+        .support-hero p {
+          color: var(--text-secondary);
+          font-size: 1.1rem;
+          max-width: 600px;
+          margin: 0 auto;
+          line-height: 1.5;
+        }
+        .support-main-layout {
+          display: grid;
+          grid-template-columns: 300px 1fr;
+          gap: 2rem;
+          align-items: start;
+        }
+        @media (max-width: 800px) {
+          .support-main-layout {
+            grid-template-columns: 1fr;
+          }
+        }
+        .support-card {
+          background: var(--card-bg);
+          border-radius: 12px;
+          padding: 1.5rem;
+          border: 1px solid var(--border-color);
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+          margin-bottom: 1rem;
+        }
+        .support-card h3 {
+          margin-top: 0;
+          font-size: 1.2rem;
+          color: var(--text-dark);
+          margin-bottom: 1.2rem;
+        }
+        .contact-options-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 1rem;
+          text-align: center;
+        }
+        .contact-option {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 0.5rem;
+        }
+        .contact-icon-wrapper {
+          width: 50px;
+          height: 50px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: #f1f5f9;
+          border-radius: 50%;
+          color: #475569;
+        }
+        .contact-option-text {
+          font-weight: 600;
+          color: #334155;
+          font-size: 0.95rem;
+          text-decoration: none;
+          display: flex;
+          align-items: center;
+          gap: 0.3rem;
+        }
+        .contact-option-subtext {
+          font-size: 0.8rem;
+          color: #94a3b8;
+        }
+        .status-dot {
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          background-color: #10b981;
+          display: inline-block;
+        }
+        .direct-support-row {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+        .direct-support-email {
+          color: var(--text-secondary);
+          font-size: 0.95rem;
+        }
+        .copy-btn {
+          background: var(--primary-color);
+          border: none;
+          border-radius: 6px;
+          padding: 0.5rem;
+          color: white;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: background 0.3s;
+        }
+        .copy-btn:hover {
+          background: var(--primary-hover);
+        }
+        
+        .support-form-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 1.5rem;
+        }
+        @media (max-width: 600px) {
+          .support-form-grid {
+            grid-template-columns: 1fr;
+          }
+        }
+        .form-group-full {
+          grid-column: 1 / -1;
+        }
+        .support-form label {
+          display: block;
+          margin-bottom: 0.5rem;
+          font-size: 0.9rem;
+          color: var(--text-secondary);
+          font-weight: 500;
+        }
+        .support-form input, .support-form textarea {
+          width: 100%;
+          padding: 0.75rem;
+          background: var(--dashboard-bg);
+          border: 1px solid var(--border-color);
+          border-radius: 8px;
+          font-family: inherit;
+          box-sizing: border-box;
+          color: var(--text-dark);
+          font-size: 0.95rem;
+        }
+        .support-form input:focus, .support-form textarea:focus {
+          outline: none;
+          border-color: var(--primary-color);
+          box-shadow: 0 0 0 3px var(--primary-border-glow);
+        }
+        .support-submit-btn {
+          width: 100%;
+          padding: 1rem;
+          background: var(--primary-color);
+          border: none;
+          border-radius: 8px;
+          color: white;
+          font-weight: 700;
+          font-size: 1.05rem;
+          cursor: pointer;
+          transition: background 0.3s;
+          margin-top: 1rem;
+        }
+        .support-submit-btn:hover {
+          background: var(--primary-hover);
+        }
+      </style>
+
+      <div class="support-container">
+        <h1 class="support-page-title">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#e11d48" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+          Customer Support
+        </h1>
+
+        <div class="support-hero">
+          <h2>We're Here to Help, ${userName}!</h2>
+          <p>Facing an issue with a teacher, course, or platform feature? Contact the StudBridge corporate support team directly.</p>
+        </div>
+
+        <div class="support-main-layout">
+          <!-- Left Column -->
+          <div>
+            <div class="support-card">
+              <h3>Direct Corporate Support</h3>
+              <div class="direct-support-row">
+                <a href="mailto:hr@studbridge.com" class="direct-support-email" style="text-decoration: underline; font-weight: 600; color: var(--primary-color);">hr@studbridge.com</a>
+                <button class="copy-btn" onclick="navigator.clipboard.writeText('hr@studbridge.com').then(() => showInfoPopup('Email copied!'))" title="Copy email">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                </button>
+              </div>
+            </div>
           </div>
-          
-          <div class="form-group">
-            <label for="supEmail">Email Address</label>
-            <input type="email" id="supEmail" value="${user.email || ""}" required style="width: 100%; padding: 0.8rem; border: 1px solid #ddd; border-radius: 8px;">
+
+          <!-- Right Column -->
+          <div class="support-card">
+            <h3>Submit a Detailed Support Ticket</h3>
+            <form onsubmit="submitSupportForm(event)" class="support-form">
+              <div class="support-form-grid">
+                <div class="form-group">
+                  <label for="supName">Name/UserID</label>
+                  <input type="text" id="supName" value="${user.name || user._id || ""}" required>
+                </div>
+                
+                <div class="form-group">
+                  <label for="supEmail">Email Address</label>
+                  <input type="email" id="supEmail" value="${user.email || ""}" required>
+                </div>
+                
+                <div class="form-group form-group-full">
+                  <label for="supMobile">Mobile Number</label>
+                  <input type="tel" id="supMobile" value="${user.mobileNumber || ""}" required style="background: var(--dashboard-bg);">
+                </div>
+                
+                <div class="form-group form-group-full">
+                  <label for="supIssue">Issue you are facing</label>
+                  <textarea id="supIssue" rows="4" required placeholder="Describe your issue in detail. If about a specific teacher, please include their name."></textarea>
+                </div>
+              </div>
+              
+              <button type="submit" class="support-submit-btn">
+                Send to Support
+              </button>
+            </form>
           </div>
-          
-          <div class="form-group">
-            <label for="supMobile">Mobile Number</label>
-            <input type="tel" id="supMobile" value="${user.mobileNumber || ""}" required style="width: 100%; padding: 0.8rem; border: 1px solid #ddd; border-radius: 8px;">
-          </div>
-          
-          <div class="form-group">
-            <label for="supIssue">Issue you are facing</label>
-            <textarea id="supIssue" rows="5" required placeholder="Describe your problem in detail..." style="width: 100%; padding: 0.8rem; border: 1px solid #ddd; border-radius: 8px; resize: vertical;"></textarea>
-          </div>
-          
-          <button type="submit" class="btn btn-primary" style="padding: 1rem; margin-top: 1rem;">
-            Send to Support
-          </button>
-        </form>
+        </div>
       </div>
     `;
     this.updateNavbar();
@@ -3044,7 +3649,7 @@ class Router {
 
         <div class="settings-grid">
           <section class="settings-card">
-            <h3>👤 Profile</h3>
+            <h3><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px; vertical-align: middle;"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg> Profile</h3>
             <div class="settings-list">
               <div><span>Full Name</span><strong>${user.name || "Not specified"}</strong></div>
               <div><span>Email</span><strong>${user.email || "Not specified"}</strong></div>
@@ -3056,10 +3661,14 @@ class Router {
             <button class="btn btn-secondary" onclick="router.navigate('#profile')">Edit Profile</button>
           </section>
 
-          
+          <section class="settings-card">
+            <h3><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px; vertical-align: middle;"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg> Appearance</h3>
+            <p class="settings-muted">Customize how StudBridge looks on your device.</p>
+            <button id="theme-toggle-btn" class="btn" style="border: none; padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer; transition: all 0.3s; font-weight: 500;" onclick="toggleTheme()">Toggle Theme</button>
+          </section>
 
           <section class="settings-card settings-security-card">
-            <h3>🔐 Security</h3>
+            <h3><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px; vertical-align: middle;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg> Security</h3>
             <p class="settings-muted">Keep your account protected and end sessions securely.</p>
             <button class="btn btn-secondary" onclick="showPasswordComingSoon()">Change Password</button>
             <button class="btn btn-danger settings-logout-btn" onclick="confirmLogoutFromSettings()">Logout</button>

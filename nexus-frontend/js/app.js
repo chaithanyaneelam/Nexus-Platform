@@ -31,11 +31,11 @@ class NexusApp {
       mobileMenuToggle.addEventListener("click", () => {
         navbarMenu.classList.toggle("active");
         if (navbarMenu.classList.contains("active")) {
-          mobileMenuToggle.innerHTML = "&times;"; // close symbol
-          mobileMenuToggle.style.fontSize = "2rem"; // slightly larger for 'x'
+          mobileMenuToggle.innerHTML =
+            '<span class="material-icons" style="font-size: 1.8rem;">close</span>';
         } else {
-          mobileMenuToggle.innerHTML = "&#9776;"; // hamburger
-          mobileMenuToggle.style.fontSize = "1.5rem";
+          mobileMenuToggle.innerHTML =
+            '<span class="material-icons" style="font-size: 1.8rem;">menu</span>';
         }
       });
 
@@ -46,8 +46,8 @@ class NexusApp {
           e.target.classList.contains("nav-link")
         ) {
           navbarMenu.classList.remove("active");
-          mobileMenuToggle.innerHTML = "&#9776;";
-          mobileMenuToggle.style.fontSize = "1.5rem";
+          mobileMenuToggle.innerHTML =
+            '<span class="material-icons" style="font-size: 1.8rem;">menu</span>';
         }
       });
     }
@@ -123,13 +123,21 @@ class ThemeManager {
     if (themeBtn) {
       const currentTheme = this.getCurrentTheme();
       if (currentTheme === this.LIGHT_THEME) {
-        themeBtn.textContent = "🌙 Dark Mode";
+        themeBtn.innerHTML =
+          '<span class="material-icons" style="margin-right: 0.5rem; vertical-align: middle;">dark_mode</span>Dark Mode';
         themeBtn.style.background = "#0a0a0a";
         themeBtn.style.color = "white";
+        themeBtn.style.display = "flex";
+        themeBtn.style.alignItems = "center";
+        themeBtn.style.justifyContent = "center";
       } else {
-        themeBtn.textContent = "☀️ Light Mode";
+        themeBtn.innerHTML =
+          '<span class="material-icons" style="margin-right: 0.5rem; vertical-align: middle;">light_mode</span>Light Mode';
         themeBtn.style.background = "#f97316";
         themeBtn.style.color = "white";
+        themeBtn.style.display = "flex";
+        themeBtn.style.alignItems = "center";
+        themeBtn.style.justifyContent = "center";
       }
     }
   }
@@ -159,21 +167,28 @@ window.submitSupportForm = function (event) {
   const mobile = document.getElementById("supMobile").value || "Unknown Mobile";
   const issue = document.getElementById("supIssue").value || "";
 
-  const adminMail = "neelamchaithanya9@gmail.com";
+  const adminMail = "hr@studbridge.com";
   const subject = encodeURIComponent("Support Request from " + name);
   const body = encodeURIComponent(
     `Name: ${name}\nEmail: ${email}\nMobile: ${mobile}\n\nIssue:\n${issue}`,
   );
 
   const mailtoLink = `mailto:${adminMail}?subject=${subject}&body=${body}`;
-  const a = document.createElement("a");
-  a.href = mailtoLink;
-  a.target = "_blank"; // Opens email client correctly without getting blocked by typical browser rules
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
 
-  NexusApp.notify("Opening mail client...", "success");
+  // Create a hidden iframe mechanism to force the mailto action reliably
+  const iframe = document.createElement("iframe");
+  iframe.style.display = "none";
+  iframe.src = mailtoLink;
+  document.body.appendChild(iframe);
+  setTimeout(() => document.body.removeChild(iframe), 500);
+
+  // Fallback: Also try window.open which sometimes bypasses strict mailto blockings
+  window.open(mailtoLink, "_blank");
+
+  NexusApp.notify(
+    "Opening mail client... If it didn't open, click the direct email link.",
+    "success",
+  );
 };
 
 window.setRating = function (courseId, rating) {
@@ -357,21 +372,63 @@ window.loadReviews = async function (courseId) {
 
 window.viewCourseReviews = async function (courseId) {
   try {
+    // Show a loading overlay first
+    const loaderHTML = `
+      <div id="reviewsModalLoading" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--modal-backdrop, rgba(255, 255, 255, 0.8)); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 9999;">
+        <div class="spinner" style="width: 40px; height: 40px; border: 4px solid rgba(232, 112, 42, 0.3); border-left-color: #E8702A; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+        <style>@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } } </style>
+      </div>
+    `;
+
+    // Add dark mode backdrop support if document is dark
+    let backdropStyle = "rgba(255, 255, 255, 0.8)";
+    let isDarkMode =
+      !document.documentElement.hasAttribute("data-theme") ||
+      document.documentElement.getAttribute("data-theme") !== "light";
+    if (isDarkMode) backdropStyle = "rgba(0, 0, 0, 0.7)";
+
+    document.body.insertAdjacentHTML(
+      "beforeend",
+      loaderHTML.replace(
+        "var(--modal-backdrop, rgba(255, 255, 255, 0.8))",
+        backdropStyle,
+      ),
+    );
+
     const response = await api.getCourseReviews(courseId);
+
+    // Remove loader
+    const loader = document.getElementById("reviewsModalLoading");
+    if (loader) loader.remove();
+
     if (response && response.success) {
       const reviews = response.data || [];
 
+      // Determine modal colors based on theme
+      const bgMain = isDarkMode ? "#0f172a" : "#ffffff";
+      const bgCard = isDarkMode ? "#1e293b" : "#f3f4f6";
+      const textColor = isDarkMode ? "#ffffff" : "#1f2937";
+      const subTextColor = isDarkMode ? "#94a3b8" : "#6b7280";
+      const borderColor = isDarkMode ? "#334155" : "#e5e7eb";
+      const closeBtnBg = isDarkMode ? "#334155" : "#eb7a41";
+      const closeBtnHoverBg = isDarkMode ? "#475569" : "#d65c1c";
+
       // Create modal for displaying reviews
       let reviewsHTML = `
-        <div id="reviewsModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); display: flex; align-items: center; justify-content: center; z-index: 9999; padding: 1rem;">
-          <div style="background: #0f172a; border-radius: 12px; max-width: 600px; width: 100%; max-height: 80vh; overflow-y: auto; padding: 2rem; position: relative; border: 1px solid #334155; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);">
-            <button onclick="document.getElementById('reviewsModal').remove()" style="position: absolute; top: 1rem; right: 1rem; background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; padding: 0;">✕</button>
+        <div id="reviewsModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: ${backdropStyle}; backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 9999; padding: 1rem;">
+          <div style="background: ${bgMain}; border-radius: 16px; max-width: 600px; width: 100%; max-height: 80vh; overflow-y: auto; padding: 2rem; position: relative; border: 1px solid ${borderColor}; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);">
+            <button onclick="document.getElementById('reviewsModal').remove()" style="position: absolute; top: 1.5rem; right: 1.5rem; background: ${closeBtnBg}; border: none; color: white; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 1.2rem; cursor: pointer; padding: 0; transition: all 0.2s ease;" onmouseover="this.style.transform='scale(1.1)'; this.style.backgroundColor='${closeBtnHoverBg}'" onmouseout="this.style.transform='scale(1)'; this.style.backgroundColor='${closeBtnBg}'">✕</button>
             
-            <h2 style="margin: 0 0 2rem 0; color: white; font-size: 1.5rem;">Student Reviews</h2>
+            <h2 style="margin: 0 0 2rem 0; color: ${textColor}; font-size: 1.8rem; display: flex; align-items: center; gap: 12px; font-family: 'Playfair Display', serif; font-weight: 700;">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 21C16.9706 21 21 16.9706 21 12C21 7.02944 16.9706 3 12 3C7.02944 3 3 7.02944 3 12C3 13.4876 3.36093 14.891 4 16.1272L3 21L7.8728 20C9.10904 20.6391 10.5124 21 12 21Z" fill="#fca5a5" stroke="#eb7a41" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              Student Reviews
+            </h2>
       `;
 
       if (reviews.length === 0) {
-        reviewsHTML += `<p style="text-align: center; color: #94a3b8; padding: 2rem;">No reviews yet for this course.</p>`;
+        reviewsHTML += `<p style="text-align: center; color: ${subTextColor}; padding: 2rem; font-family: 'Inter', sans-serif;">No reviews yet for this course.</p>`;
       } else {
         reviews.forEach((review) => {
           const studentName = review.studentId?.name || "Anonymous Student";
@@ -384,23 +441,35 @@ window.viewCourseReviews = async function (courseId) {
             day: "numeric",
           });
 
+          // Generate SVG stars
+          const ratingCount = Math.round(review.rating) || 5;
+          const fullStar =
+            '<svg width="20" height="20" viewBox="0 0 24 24" fill="#fbbf24" stroke="#fbbf24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>';
+          const emptyStar =
+            '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>';
+          const starsHTML =
+            Array(ratingCount).fill(fullStar).join("") +
+            Array(5 - ratingCount)
+              .fill(emptyStar)
+              .join("");
+
           reviewsHTML += `
-            <div style="background: #1e293b; border: 1px solid #334155; padding: 1.5rem; border-radius: 8px; margin-bottom: 1rem;">
-              <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
-                <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #667eea, #764ba2); display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; font-size: 1rem;">
+            <div style="background: ${bgCard}; border: 1px solid ${borderColor}; padding: 1.5rem; border-radius: 12px; margin-bottom: 1rem; font-family: 'Inter', sans-serif;">
+              <div style="display: flex; align-items: flex-start; gap: 1rem; margin-bottom: 1rem;">
+                <div style="width: 48px; height: 48px; border-radius: 50%; background: #b592e3; display: flex; align-items: center; justify-content: center; font-weight: 600; color: white; font-size: 1.2rem; flex-shrink: 0;">
                   ${initial}
                 </div>
-                <div>
-                  <h4 style="margin: 0 0 0.25rem 0; color: #e2e8f0; font-size: 0.95rem;">${studentName}</h4>
-                  <div style="display: flex; align-items: center; gap: 0.5rem;">
-                    <div style="color: #fbbf24; font-size: 0.9rem;">
-                      ${"⭐".repeat(review.rating)}
+                <div style="flex-grow: 1;">
+                  <h4 style="margin: 0 0 0.4rem 0; color: ${textColor}; font-size: 1.1rem; font-weight: 700;">${studentName}</h4>
+                  <div style="display: flex; align-items: center; gap: 1rem;">
+                    <div style="display: flex; align-items: center; gap: 2px;">
+                      ${starsHTML}
                     </div>
-                    <span style="color: #94a3b8; font-size: 0.8rem;">${dateStr}</span>
+                    <span style="color: ${subTextColor}; font-size: 0.95rem;">${dateStr}</span>
                   </div>
                 </div>
               </div>
-              <p style="margin: 0; color: #cbd5e1; line-height: 1.5; font-size: 0.9rem; border-left: 3px solid #667eea; padding-left: 1rem;">"${review.experience}"</p>
+              <p style="margin: 0; color: ${textColor}; line-height: 1.6; font-size: 1.05rem; border-left: 3px solid #eb7a41; padding-left: 1rem;">${review.experience}</p>
             </div>
           `;
         });
@@ -427,6 +496,8 @@ window.viewCourseReviews = async function (courseId) {
       });
     }
   } catch (error) {
+    const loader = document.getElementById("reviewsModalLoading");
+    if (loader) loader.remove();
     console.error("Error loading reviews:", error);
     alert("Failed to load reviews. Please try again.");
   }

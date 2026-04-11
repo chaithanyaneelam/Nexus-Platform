@@ -84,7 +84,12 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Lora:wght@500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Google Material Icons -->
+    <link
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
       rel="stylesheet"
     />
     <link rel="stylesheet" href="css/style.css" />
@@ -96,6 +101,10 @@
     />
 
     <link rel="icon" type="image/png" href="./assets/logo.png" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/devicon.min.css"
+    />
   </head>
   <body>
     <!-- Navigation Bar -->
@@ -112,7 +121,7 @@
           id="mobileMenuToggle"
           style="font-size: 1.5rem; cursor: pointer; display: none"
         >
-          ☰
+          <span class="material-icons" style="font-size: 1.8rem">menu</span>
         </div>
         <ul class="navbar-menu" id="navbarMenu">
           <li><a href="#home" class="nav-link">Home</a></li>
@@ -146,18 +155,37 @@
               href="#create-meeting"
               id="navCreateMeetingBtn"
               class="nav-link"
-              style="color: #ff9800; font-weight: bold"
-              >🎥 Create Meeting</a
+              style="
+                color: #ff9800;
+                font-weight: bold;
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+              "
             >
+              <span class="material-icons" style="font-size: 1.2rem"
+                >videocam</span
+              >
+              Create Meeting
+            </a>
           </li>
           <li>
             <a
               href="#settings"
               class="nav-link"
               id="settingsLink"
-              style="display: none"
-              >⚙️ Settings</a
+              style="
+                display: none;
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+              "
             >
+              <span class="material-icons" style="font-size: 1.2rem"
+                >settings</span
+              >
+              Settings
+            </a>
           </li>
           <li>
             <a href="#login" class="nav-link" id="loginLink">Login</a>
@@ -172,14 +200,40 @@
 
     <!-- Main Content Area -->
     <div id="app" class="app-container">
-      <!-- This will be populated by the router -->
+      <section class="course-page">
+        <h1 class="page-title">Explore All Courses</h1>
+        <div class="search-bar-container">
+          <input
+            type="text"
+            class="search-bar"
+            placeholder="Find your next career path..."
+          />
+          <button class="btn btn-outline advanced-filters">
+            Advanced Filters
+          </button>
+        </div>
+        <div class="course-grid">
+          <!-- Dynamic Course Cards will be injected here -->
+        </div>
+      </section>
     </div>
 
     <!-- Payment Modal -->
     <div id="paymentModal" class="modal" style="display: none">
       <div class="modal-content payment-modal">
         <div class="modal-header">
-          <h2>💳 Submit Payment Details</h2>
+          <h2>
+            <span
+              class="material-icons"
+              style="
+                font-size: 1.4rem;
+                vertical-align: middle;
+                margin-right: 0.5rem;
+              "
+              >credit_card</span
+            >
+            Submit Payment Details
+          </h2>
           <button class="modal-close" onclick="closePaymentModal()">
             &times;
           </button>

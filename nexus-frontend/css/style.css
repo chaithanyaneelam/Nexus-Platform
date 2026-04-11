@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap");
+
 /**
  * Main Styles
  * Global styles for Nexus Platform
@@ -14,11 +16,12 @@
   --primary-color: #0f766e;
   --secondary-color: #164e63;
   --accent-color: #ea580c;
+  --accent-primary: #117864; /* Navbar hover line in dark mode */
   --success-color: #10b981;
   --danger-color: #ef4444;
   --warning-color: #f59e0b;
   --bg-color: #07111f;
-  --text-color: #dbe7ff;
+  --text-color: #f0f4ff;
   --border-color: #23374f;
   --card-bg: #0d2036;
   --shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
@@ -94,6 +97,38 @@
   color: var(--accent-hover);
 }
 
+.nav-link,
+.navbar a,
+.navbar-menu a {
+  position: relative;
+  text-decoration: none;
+}
+
+.nav-link::after,
+.navbar a::after,
+.navbar-menu a::after {
+  content: "";
+  position: absolute;
+  width: 0;
+  height: 2px;
+  bottom: -4px;
+  left: 0;
+  background-color: var(--accent-primary);
+  transition: width 0.3s ease;
+}
+
+.nav-link:hover,
+.navbar a:hover,
+.navbar-menu a:hover {
+  color: var(--text-color);
+}
+
+.nav-link:hover::after,
+.navbar a:hover::after,
+.navbar-menu a:hover::after {
+  width: 100%;
+}
+
 [data-theme="light"] .nav-link,
 [data-theme="light"] .navbar a {
   color: #1a1a1a;
@@ -101,7 +136,7 @@
 
 [data-theme="light"] .nav-link:hover,
 [data-theme="light"] .navbar a:hover {
-  color: var(--accent-primary);
+  color: #1a1a1a;
 }
 
 /* ===== LIGHT MODE CARD AND BOX BACKGROUNDS ===== */
@@ -253,12 +288,12 @@
 }
 
 /* ===== LIGHT MODE NAVBAR BRAND ===== */
-/* ===== LIGHT MODE PROBLEM 1 — SEARCH BARS ===== */
+/* ===== LIGHT MODE PROBLEM 1 ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â SEARCH BARS ===== */
 [data-theme="light"] input[type="search"],
-[data-theme="light"] input[type="text"],
+[data-theme="light"] input[type="text"]:not(.search-bar input),
 [data-theme="light"] .search-bar,
 [data-theme="light"] .search-input,
-[data-theme="light"] [class*="search"] input,
+[data-theme="light"] [class*="search"] input:not([type="text"]),
 [data-theme="light"] [class*="search-bar"],
 [data-theme="light"] [class*="search-box"] {
   background: #ffffff !important;
@@ -266,6 +301,16 @@
   border: 1px solid #d4a574 !important;
   caret-color: #f97316;
   box-shadow: none !important;
+  border-radius: 8px !important;
+}
+
+[data-theme="light"] .search-bar input,
+[data-theme="light"] [class*="search-bar"] input,
+[data-theme="light"] [class*="search-box"] input {
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0.5rem !important;
 }
 
 [data-theme="light"] input::placeholder,
@@ -274,20 +319,16 @@
   color: #a08070 !important;
 }
 
-/* ===== LIGHT MODE PROBLEM 2 — INSTRUCTOR INFO BOXES ===== */
+/* ===== LIGHT MODE PROBLEM 2 ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â INSTRUCTOR INFO BOXES ===== */
 [data-theme="light"] .instructor-box,
 [data-theme="light"] .instructor-info,
 [data-theme="light"] .course-instructor,
-[data-theme="light"] [class*="instructor"],
-[data-theme="light"] .course-meta,
-[data-theme="light"] [class*="course-meta"],
-[data-theme="light"] .course-card .info-box,
-[data-theme="light"] .course-card > div > div {
-  background: #fef5f0 !important;
-  border: 1px solid #e8c4a8 !important;
-  color: #5a3a2c !important;
-  box-shadow: none !important;
-  border-radius: 6px !important;
+[data-theme="light"] [class*="instructor"] {
+  background: transparent;
+  border: none;
+  color: inherit;
+  box-shadow: none;
+  border-radius: 6px;
 }
 
 [data-theme="light"] .instructor-box a,
@@ -308,32 +349,26 @@
   color: #5a3a2c !important;
 }
 
-/* ===== LIGHT MODE PROBLEM 3 — COURSE CARD TEXT ===== */
-[data-theme="light"] .course-card p,
-[data-theme="light"] .course-card span,
-[data-theme="light"] .course-card li,
-[data-theme="light"] [class*="course-card"] p,
-[data-theme="light"] [class*="course-card"] span {
-  color: #5a3a2c !important;
-}
+/* ===== LIGHT MODE PROBLEM 3 ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â COURSE CARD TEXT ===== */
+/* (Text colors handled by specific class targeting above) */
 
 [data-theme="light"] .course-card .price,
 [data-theme="light"] [class*="price"] {
-  color: #f97316 !important;
+  color: #f97316;
   font-weight: 600;
 }
 
 [data-theme="light"] .course-card .duration,
 [data-theme="light"] [class*="duration"] {
-  color: #f97316 !important;
+  color: #f97316;
 }
 
 [data-theme="light"] .course-description,
 [data-theme="light"] [class*="description"] {
-  color: #5a3a2c !important;
+  color: #0f172a;
 }
 
-/* ===== LIGHT MODE PROBLEM 4 — MY COURSES DASHBOARD ===== */
+/* ===== LIGHT MODE PROBLEM 4 ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â MY COURSES DASHBOARD ===== */
 [data-theme="light"] .my-course-card,
 [data-theme="light"] .enrolled-card,
 [data-theme="light"] .dashboard-card,
@@ -399,7 +434,7 @@
   color: #f97316 !important;
 }
 
-/* ===== LIGHT MODE PROBLEM 5 — SETTINGS PAGE ===== */
+/* ===== LIGHT MODE PROBLEM 5 ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â SETTINGS PAGE ===== */
 [data-theme="light"] .settings-card,
 [data-theme="light"] .profile-box,
 [data-theme="light"] .appearance-box,
@@ -464,43 +499,145 @@
 /* ===== LIGHT MODE COURSE CARD ENHANCEMENTS ===== */
 [data-theme="light"] .course-card,
 [data-theme="light"] [class*="course-card"] {
-  background: #fff4ec !important;
-  border: 2px solid #d4a574 !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05) !important;
   border-radius: 12px !important;
-  transition: all 0.3s ease !important;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease !important;
   overflow: hidden !important;
-}
-
-/* Course card header with colored background */
-[data-theme="light"] .course-card > :first-child,
-[data-theme="light"] .course-card [class*="header"],
-[data-theme="light"] .course-card [class*="image"],
-[data-theme="light"] .course-card img {
-  background: #5b5fc7 !important;
-  color: white !important;
-}
-
-[data-theme="light"] .course-card > :first-child {
-  padding: 24px !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  background: #5b5fc7 !important;
+  display: flex;
+  flex-direction: column !important;
 }
 
 [data-theme="light"] .course-card:hover,
 [data-theme="light"] [class*="course-card"]:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12) !important;
-  border-color: #c9945c !important;
+  transform: translateY(-4px) !important;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1) !important;
+  border-color: transparent !important;
 }
 
-/* Ensure icon/image in header stays white */
-[data-theme="light"] .course-card > :first-child img,
-[data-theme="light"] .course-card [class*="header"] img {
-  background: white !important;
-  padding: 12px !important;
-  border-radius: 4px !important;
+[data-theme="light"] .course-icon {
+  background: #1e293b !important;
+  padding: 25px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 12px 12px 0 0 !important;
+}
+
+[data-theme="light"] .course-info {
+  background: #ffffff !important;
+  padding: 1.5rem !important;
+  display: flex !important;
+  flex-direction: column !important;
+  flex: 1 !important;
+  height: 100% !important;
+}
+
+[data-theme="light"] .course-info h3 {
+  margin: 0 0 1rem 0 !important;
+  color: #0f172a !important;
+  font-size: 1.25rem !important;
+  font-weight: 700 !important;
+}
+
+[data-theme="light"] .course-meta-box,
+[data-theme="light"] .course-description-box {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+}
+
+[data-theme="light"] .course-meta-box p {
+  margin: 0.4rem 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+  color: #334155 !important;
+  font-size: 0.9rem !important;
+}
+
+[data-theme="light"] .course-meta-box .material-icons {
+  font-size: 1.1rem !important;
+  color: #64748b !important;
+}
+
+[data-theme="light"] .course-description-box {
+  margin: 1rem 0 !important;
+}
+
+[data-theme="light"] .course-description-box ul {
+  padding-left: 1.2rem !important;
+  margin: 0 !important;
+}
+
+[data-theme="light"] .course-description-box li {
+  color: #0f172a !important;
+  font-size: 0.9rem !important;
+  list-style-type: disc !important;
+  line-height: 1.5 !important;
+  margin-bottom: 0.4rem !important;
+}
+
+[data-theme="light"] .registered-students {
+  color: #475569 !important;
+  font-size: 0.95rem !important;
+  font-weight: 500 !important;
+  margin: 0.5rem 0 1rem 0 !important;
+}
+
+[data-theme="light"] .registered-students .material-icons {
+  color: #64748b !important;
+}
+
+[data-theme="light"] .course-meta {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  margin-top: auto !important;
+  padding-top: 1rem !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+[data-theme="light"] .course-meta .price {
+  color: #0f172a !important;
+  font-weight: 700 !important;
+  font-size: 1.15rem !important;
+}
+
+[data-theme="light"] .course-meta .duration {
+  color: #475569 !important;
+  font-size: 0.95rem !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+[data-theme="light"] .course-card .enroll-btn {
+  background: transparent !important;
+  color: #f97316 !important;
+  border: 1px solid #f97316 !important;
+  border-radius: 20px !important;
+  padding: 0.75rem 1.5rem !important;
+  width: 100% !important;
+  text-align: center !important;
+  font-weight: 600 !important;
+  margin-top: 1.25rem !important;
+  display: block !important;
+  transition:
+    background 0.3s ease,
+    color 0.3s ease,
+    transform 0.1s ease !important;
+}
+
+[data-theme="light"] .course-card .enroll-btn:hover {
+  background: #f97316 !important;
+  color: #ffffff !important;
+  transform: translateY(-2px) !important;
 }
 
 /* ===== LIGHT MODE BUTTONS & INTERACTIVE ELEMENTS ===== */
@@ -508,7 +645,7 @@
 [data-theme="light"] button,
 [data-theme="light"] [type="button"],
 [data-theme="light"] [type="submit"],
-[data-theme="light"] [class*="btn"] {
+[data-theme="light"] [class*="btn"]:not(.advanced-filters-btn) {
   background: #f97316 !important;
   color: #ffffff !important;
   box-shadow: none !important;
@@ -517,10 +654,25 @@
   transition: all 0.3s ease !important;
 }
 
+[data-theme="light"] .advanced-filters-btn {
+  background: #ffffff !important;
+  color: #0f172a !important;
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 8px !important;
+}
+
+[data-theme="light"] .advanced-filters-btn:hover {
+  background: #f1f5f9 !important;
+  border-color: #cbd5e1 !important;
+  color: #0f172a !important;
+}
+
 /* View Course button - Outlined style */
 [data-theme="light"] [class*="view-course"],
 [data-theme="light"] .course-card button,
-[data-theme="light"] [class*="course"] [class*="btn"] {
+[data-theme="light"]
+  [class*="course"]
+  [class*="btn"]:not(.advanced-filters-btn) {
   background: transparent !important;
   color: #f97316 !important;
   border: 2px solid #f97316 !important;
@@ -531,7 +683,8 @@
 [data-theme="light"] button:hover,
 [data-theme="light"] [type="button"]:hover,
 [data-theme="light"] [type="submit"]:hover,
-[data-theme="light"] [class*="btn"]:hover {
+[data-theme="light"]
+  [class*="btn"]:not(.advanced-filters-btn):not(.enroll-btn):hover {
   background: #ff8c42 !important;
   box-shadow: 0 2px 6px rgba(249, 115, 22, 0.2) !important;
 }
@@ -539,7 +692,9 @@
 /* View Course button hover */
 [data-theme="light"] [class*="view-course"]:hover,
 [data-theme="light"] .course-card button:hover,
-[data-theme="light"] [class*="course"] [class*="btn"]:hover {
+[data-theme="light"]
+  [class*="course"]
+  [class*="btn"]:not(.advanced-filters-btn):not(.enroll-btn):hover {
   background: #f97316 !important;
   color: #ffffff !important;
   border-color: #f97316 !important;
@@ -622,9 +777,9 @@
   box-shadow: none !important;
 }
 
-/* ===== LIGHT MODE PROFESSIONAL STYLING — ALL ELEMENTS ===== */
+/* ===== LIGHT MODE PROFESSIONAL STYLING ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â ALL ELEMENTS ===== */
 
-/* All boxes, panels, containers — WHITE background */
+/* All boxes, panels, containers ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â WHITE background */
 [data-theme="light"] .box,
 [data-theme="light"] .panel,
 [data-theme="light"] .container,
@@ -746,16 +901,19 @@
 }
 
 /* Dividers - subtle tan */
-[data-theme="light"] hr,
-[data-theme="light"] [class*="divider"] {
+[data-theme="light"] hr {
   border-color: #d4a574 !important;
   background-color: #d4a574 !important;
+}
+
+[data-theme="light"] [class*="divider"] {
+  background-color: transparent !important;
+  color: #5a3a2c !important;
 }
 
 /* All buttons - ORANGE primary */
 [data-theme="light"] .btn-primary,
 [data-theme="light"] .explore-btn,
-[data-theme="light"] .enroll-btn,
 [data-theme="light"] button[class*="primary"] {
   background-color: #f97316 !important;
   color: #ffffff !important;
@@ -922,7 +1080,7 @@ body {
 
 body {
   font-family:
-    "Plus Jakarta Sans", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    "Inter", "Poppins", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   background:
     radial-gradient(
       circle at 10% 20%,
@@ -947,6 +1105,21 @@ body {
     color 0.3s ease;
 }
 
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: "Playfair Display", serif;
+}
+
+.brand-stud,
+.brand-bridge {
+  font-family: "Poppins", sans-serif;
+  font-weight: 700;
+}
+
 /* Light mode background */
 [data-theme="light"] body {
   background: #ffffff;
@@ -960,6 +1133,63 @@ a {
 
 a:hover {
   color: var(--secondary-color);
+}
+
+/* ===== Material Icons ===== */
+.material-icons {
+  font-family: "Material Icons";
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  display: inline-block;
+  line-height: 1;
+  text-transform: none;
+  letter-spacing: normal;
+  word-wrap: normal;
+  white-space: nowrap;
+  direction: ltr;
+  user-select: none;
+}
+
+/* ===== Typography ===== */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: -0.5px;
+}
+
+h1 {
+  font-size: 2.5rem;
+}
+
+h2 {
+  font-size: 1.875rem;
+}
+
+h3 {
+  font-size: 1.5rem;
+}
+
+h4 {
+  font-size: 1.25rem;
+}
+
+h5 {
+  font-size: 1.1rem;
+}
+
+h6 {
+  font-size: 1rem;
+}
+
+p {
+  line-height: 1.6;
+  letter-spacing: 0.25px;
 }
 
 /* ===== Navigation Bar ===== */
@@ -976,7 +1206,7 @@ a:hover {
 .navbar-container {
   max-width: 1400px;
   width: 95%;
-  padding: 1rem 2rem;
+  padding: 0.75rem 2rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -1020,7 +1250,7 @@ a:hover {
 }
 
 .navbar-menu a:hover {
-  color: #67e8f9;
+  color: var(--text-color);
 }
 
 .user-info {
@@ -1055,6 +1285,10 @@ a:hover {
 
 #settingsLink {
   cursor: pointer;
+  display: flex !important;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem 1.5rem;
 }
 
 /* ===== Buttons ===== */
@@ -1063,10 +1297,12 @@ a:hover {
   border: none;
   border-radius: 8px;
   font-size: 1rem;
+  font-weight: 600;
   cursor: pointer;
   transition: var(--transition);
   display: inline-block;
   text-align: center;
+  text-decoration: none;
 }
 
 .btn-primary {
@@ -1076,11 +1312,12 @@ a:hover {
     var(--secondary-color)
   );
   color: white;
+  box-shadow: 0 8px 20px rgba(15, 118, 110, 0.25);
 }
 
 .btn-primary:hover {
   transform: translateY(-3px);
-  box-shadow: 0 15px 30px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 15px 35px rgba(15, 118, 110, 0.35);
 }
 
 .btn-secondary {
@@ -1092,6 +1329,19 @@ a:hover {
 .btn-secondary:hover {
   background-color: var(--primary-color);
   color: white;
+  transform: translateY(-2px);
+}
+
+.btn-outline {
+  background-color: transparent;
+  border: 2px solid var(--accent-color);
+  color: var(--accent-color);
+}
+
+.btn-outline:hover {
+  background-color: var(--accent-color);
+  color: white;
+  transform: translateY(-2px);
 }
 
 .btn-small {
@@ -1414,6 +1664,9 @@ a:hover {
   overflow: hidden;
   border: 1px solid var(--border-color);
   transition: var(--transition);
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
 }
 
 .course-card:hover {
@@ -1421,46 +1674,100 @@ a:hover {
   box-shadow: 0 20px 40px rgba(102, 126, 234, 0.2);
 }
 
-.course-card img {
-  width: 100%;
-  height: 200px;
-  object-fit: cover;
+.course-icon {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 30px;
+  text-align: center;
+  border-radius: 12px 12px 0 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .course-info {
   padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
 }
 
 .course-info h3 {
   font-size: 1.3rem;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.8rem;
+  color: var(--text-color);
 }
 
-.instructor {
-  color: var(--primary-color);
-  font-size: 0.9rem;
-  margin-bottom: 0.5rem;
+.course-meta-box {
+  background: rgba(102, 126, 234, 0.1);
+  padding: 0.75rem;
+  border-radius: 6px;
+  margin-bottom: 0.75rem;
 }
 
-.description {
+.course-meta-box p {
+  margin: 0.25rem 0;
   color: #cbd5e1;
-  margin-bottom: 1rem;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.course-meta-box .instructor {
+  color: #dbe7ff;
   font-size: 0.95rem;
+}
+
+.course-meta-box .material-icons {
+  font-size: 1.1rem;
+  color: #667eea;
+}
+
+.course-description-box {
+  margin: 0.5rem 0;
+  color: #cbd5e1;
+  font-size: 0.95rem;
+}
+
+.course-description-box ul {
+  padding-left: 1.2rem;
+  margin: 0;
+}
+
+.course-description-box li {
+  margin-bottom: 0.25rem;
+  list-style-type: disc;
+  line-height: 1.4;
+}
+
+.registered-students {
+  margin: 0.5rem 0 1rem 0;
+  color: #667eea;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
 }
 
 .course-meta {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid var(--border-color);
+  margin-top: auto;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-color);
 }
 
 .price {
   font-size: 1.3rem;
   font-weight: bold;
-  color: var(--success-color);
+  color: #ffffff;
+}
+
+.course-card .enroll-btn {
+  width: 100%;
+  margin-top: 1.2rem;
+  border-radius: 8px;
 }
 
 .level {
@@ -1770,7 +2077,7 @@ a:hover {
   background-color: var(--card-bg);
   border-top: 1px solid var(--border-color);
   text-align: center;
-  padding: 2rem;
+  padding: 1.25rem;
   margin-top: auto;
   width: 100%;
   color: #cbd5e1;
@@ -2384,4 +2691,17 @@ a:hover {
 }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #64748b;
+}
+
+/* ===== LIGHT MODE AUTH CARDS ENHANCEMENTS ===== */
+[data-theme="light"] .auth-card {
+  border-radius: 12px !important;
+}
+
+[data-theme="light"] .auth-card .divider {
+  background: transparent !important;
+  color: #5a3a2c !important;
+}
+[data-theme="light"] .auth-card .divider hr {
+  height: 1px !important;
 }

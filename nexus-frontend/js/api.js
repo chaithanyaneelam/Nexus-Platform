@@ -47,11 +47,18 @@ class APIClient {
       return await response.json();
     } catch (error) {
       console.error("API Error:", error);
+
+      // Override browser's default cryptic fetch error when offline
+      if (error.message === "Failed to fetch" || !navigator.onLine) {
+        throw new Error(
+          "You lost your network connection. Please check your network and try again.",
+        );
+      }
+
       throw error;
     }
   }
 
-  // ===== Authentication =====
   async register(userData) {
     return this.request("/auth/register", "POST", userData);
   }
