@@ -120,6 +120,20 @@ class ThemeManager {
 
   updateThemeButton() {
     const themeBtn = document.getElementById("theme-toggle-btn");
+    const themeToggleCheck = document.getElementById("themeToggleCheckbox");
+    const themeTextLabel = document.getElementById("themeTextLabel");
+
+    if (themeToggleCheck && themeTextLabel) {
+      const currentTheme = this.getCurrentTheme();
+      if (currentTheme === this.LIGHT_THEME) {
+        themeToggleCheck.checked = false;
+        themeTextLabel.textContent = "Dark Mode";
+      } else {
+        themeToggleCheck.checked = true;
+        themeTextLabel.textContent = "Light Mode";
+      }
+    }
+
     if (themeBtn) {
       const currentTheme = this.getCurrentTheme();
       if (currentTheme === this.LIGHT_THEME) {

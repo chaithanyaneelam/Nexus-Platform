@@ -539,6 +539,14 @@ class Router {
           background: var(--text-color, #1e293b);
           color: var(--bg-color, white);
         }
+
+        /* Dynamic Logo for Light/Dark Mode */
+        html[data-theme="light"] .home-logo-dark {
+          display: none !important;
+        }
+        html:not([data-theme="light"]) .home-logo-light {
+          display: none !important;
+        }
       </style>
 
       <div class="home-container" id="homeScrollContainer">
@@ -555,7 +563,8 @@ class Router {
               </div>
             </div>
             <div class="section-image" style="align-items: center; justify-content: center;">
-              <img src="assets/logo.png" alt="StudBridge Logo" style="box-shadow: none; max-width: 80%; border-radius: 0;" onerror="this.src='https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'">
+              <img src="assets/logo_DM.png" class="home-logo-dark" alt="StudBridge Logo (Dark)" style="box-shadow: none; max-width: 80%; border-radius: 0;" onerror="this.src='https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'">
+              <img src="assets/logo_LM.png" class="home-logo-light" alt="StudBridge Logo (Light)" style="box-shadow: none; max-width: 80%; border-radius: 0;" onerror="this.src='https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'">
             </div>
           </div>
         </section>
@@ -3884,11 +3893,7 @@ class Router {
 
     appDiv.innerHTML = `
       <div class="settings-page">
-        <div class="settings-hero">
-          <p class="admin-kicker">Account Center</p>
-          <h2>Settings</h2>
-          <p>Profile details, account controls, and secure logout in one place.</p>
-        </div>
+        <style>.theme-toggle-wrapper {display: flex; align-items: center; gap: 12px;background: var(--card-bg, #1e293b); padding: 8px 16px; border-radius: 30px;border: 1px solid var(--border-color, #334155); box-shadow: 0 4px 6px rgba(0,0,0,0.05);}html:not([data-theme="light"]) .theme-toggle-wrapper {background: var(--card-bg, #1e293b); border-color: var(--border-color, #334155);}html[data-theme="light"] .theme-toggle-wrapper {background: #ffffff; border-color: #d1d5db;}.theme-switch {position: relative; display: inline-block; width: 48px; height: 24px; margin: 0;}.theme-switch input { opacity: 0; width: 0; height: 0; }.slider {position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;background-color: #cbd5e1; transition: .4s; border-radius: 24px;}.slider:before {position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px;background-color: white; transition: .4s; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.2);}input:checked + .slider { background-color: #E8702A; }input:checked + .slider:before { transform: translateX(24px); }html:not([data-theme="light"]) input:checked + .slider { background-color: #667eea; }.theme-toggle-text {font-size: 0.95rem; font-weight: 600; color: var(--text-color, #f8fafc); min-width: 85px; text-align: right;}</style><div class="settings-hero" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;"><div><p class="admin-kicker">Account Center</p><h2 style="margin-bottom: 0.5rem; margin-top: 0;">Settings</h2><p style="margin: 0; opacity: 0.9;">Profile details, account controls, and secure logout in one place.</p></div><div class="theme-toggle-wrapper"><span class="theme-toggle-text" id="themeTextLabel">Light Mode</span><label class="theme-switch" aria-label="Toggle Theme"><input type="checkbox" id="themeToggleCheckbox" onchange="window.toggleTheme()"><span class="slider"></span></label></div></div>
 
         <div class="settings-grid">
           <section class="settings-card">
@@ -3904,11 +3909,7 @@ class Router {
             <button class="btn btn-secondary" onclick="router.navigate('#profile')">Edit Profile</button>
           </section>
 
-          <section class="settings-card">
-            <h3><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px; vertical-align: middle;"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg> Appearance</h3>
-            <p class="settings-muted">Customize how StudBridge looks on your device.</p>
-            <button id="theme-toggle-btn" class="btn" style="border: none; padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer; transition: all 0.3s; font-weight: 500;" onclick="toggleTheme()">Toggle Theme</button>
-          </section>
+          
 
           <section class="settings-card settings-security-card">
             <h3><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px; vertical-align: middle;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg> Security</h3>
