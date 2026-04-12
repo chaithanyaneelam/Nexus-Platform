@@ -368,43 +368,286 @@ class Router {
   renderHome() {
     const appDiv = document.getElementById("app");
     appDiv.innerHTML = `
-      <div class="home-page">
-        <header class="hero-section">
-          <h1><span class="brand-stud">Stud</span><span class="brand-bridge">Bridge</span>: Industry-Led Mentorship & Career Guidance</h1>
-          <h2>Learn Directly from Top Tech Professionals</h2>
-          <p class="subtitle">Experience a premium one-to-one platform where real-world professionals mentor you, guide your resume, and provide tech market insights.</p>
-          <div class="button-group">
-            <a href="#courses" class="btn btn-primary" aria-label="Explore industry-led courses">Explore Courses</a>
-            ${!auth.isAuthenticated() ? `<a href="#register" class="btn btn-secondary" aria-label="Get started with StudBridge">Get Started</a>` : ""}
-          </div>
-        </header>
+      <style>
+        .home-container {
+          font-family: 'Poppins', sans-serif;
+          overflow-x: hidden;
+        }
 
-        <main class="features-section" aria-label="StudBridge Features">
-          <section class="feature">
-            <!-- Using semantic structure and alt-text concepts -->
-            <img src="./assets/mentorship-icon.png" alt="1-on-1 Mentorship Icon" style="width: 48px; display: block; margin: 0 auto 10px; display: none;" />
-            <h3>🤝 1-on-1 Mentorship</h3>
-            <p>Get personalized career guidance and learn directly from real-world working professionals.</p>
-          </section>
-          <section class="feature">
-            <img src="./assets/portfolio-icon.png" alt="Resume and Portfolio Building Icon" style="width: 48px; display: block; margin: 0 auto 10px; display: none;" />
-            <h3>💼 Resume & Portfolio Building</h3>
-            <p>Build real projects, refine your resume, and add them to your portfolio.</p>
-          </section>
-          <section class="feature">
-            <img src="./assets/insights-icon.png" alt="Tech Market Insights Icon" style="width: 48px; display: block; margin: 0 auto 10px; display: none;" />
-            <h3>📈 Tech Market Insights</h3>
-            <p>Advance your career with industry-recognized skills and insider knowledge.</p>
-          </section>
-          <section class="feature">
-            <img src="./assets/courses-icon.png" alt="Industry-led Courses Icon" style="width: 48px; display: block; margin: 0 auto 10px; display: none;" />
-            <h3>🚀 Industry-Led Courses</h3>
-            <p>Master the latest and greatest in the tech industry through expert-led curriculum.</p>
-          </section>
-        </main>
+        .home-section {
+          min-height: calc(100vh - 70px);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 60px 5%;
+        }
+
+        .section-content {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 40px;
+          max-width: 1200px;
+          width: 100%;
+        }
+
+        @media(min-width: 768px) {
+          .section-content {
+            flex-direction: row;
+            justify-content: space-between;
+          }
+          .section-content.reverse {
+            flex-direction: row-reverse;
+          }
+        }
+
+        /* Setup staggered animations */
+        .section-text {
+          flex: 1;
+          text-align: left;
+          opacity: 0;
+          transform: translateX(-50px);
+          transition: opacity 1s cubic-bezier(0.16, 1, 0.3, 1), transform 1s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .section-content.reverse .section-text {
+          transform: translateX(50px);
+        }
+
+        .section-image {
+          flex: 1;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          opacity: 0;
+          transform: translateX(50px) scale(0.95);
+          transition: opacity 1s cubic-bezier(0.16, 1, 0.3, 1) 0.2s, transform 1s cubic-bezier(0.16, 1, 0.3, 1) 0.2s;
+        }
+
+        .section-content.reverse .section-image {
+          transform: translateX(-50px) scale(0.95);
+        }
+
+        .home-section.visible .section-text,
+        .home-section.visible .section-image {
+          opacity: 1;
+          transform: translate(0) scale(1);
+        }
+
+        /* Subtle parallax and float animation for images */
+        @keyframes floatImage {
+          0% { transform: translateY(0px); }
+          50% { transform: translateY(-15px); }
+          100% { transform: translateY(0px); }
+        }
+
+        .section-image img {
+          max-width: 100%;
+          border-radius: 16px;
+          box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+          transition: transform 0.5s ease, box-shadow 0.5s ease;
+          position: relative;
+          z-index: 1;
+        }
+
+        .home-section.visible .section-image img {
+          animation: floatImage 6s ease-in-out infinite;
+        }
+
+        .section-image img:hover {
+          transform: scale(1.03) !important;
+          box-shadow: 0 25px 45px rgba(0,0,0,0.3);
+          animation-play-state: paused;
+        }
+
+        .home-title {
+          font-size: clamp(2.5rem, 5vw, 4rem);
+          font-weight: 800;
+          margin-bottom: 20px;
+          background: linear-gradient(135deg, #E8702A, #f97316);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+        }
+
+        html:not([data-theme="light"]) .home-title {
+          background: linear-gradient(135deg, #667eea, #764ba2);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+        }
+
+        .home-subtitle {
+          font-size: clamp(1.8rem, 3vw, 2.5rem);
+          font-weight: 700;
+          margin-bottom: 20px;
+          color: var(--text-color, #1e293b);
+          line-height: 1.3;
+        }
+
+        .home-text {
+          font-size: 1.1rem;
+          line-height: 1.8;
+          margin-bottom: 30px;
+          color: var(--text-color, #475569);
+          opacity: 0.9;
+        }
+
+        .home-buttons {
+          display: flex;
+          gap: 15px;
+          flex-wrap: wrap;
+        }
+
+        .home-btn {
+          padding: 12px 30px;
+          border-radius: 30px;
+          font-size: 1.1rem;
+          font-weight: 600;
+          text-decoration: none;
+          transition: all 0.3s ease;
+          display: inline-block;
+        }
+
+        .btn-explore {
+          background: #E8702A;
+          color: white;
+          border: 2px solid #E8702A;
+        }
+
+        html:not([data-theme="light"]) .btn-explore {
+          background: #667eea;
+          border: 2px solid #667eea;
+        }
+
+        .btn-explore:hover {
+          box-shadow: 0 5px 15px rgba(232, 112, 42, 0.4);
+          transform: translateY(-2px);
+          color: white;
+        }
+
+        html:not([data-theme="light"]) .btn-explore:hover {
+          box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+          color: white;
+        }
+
+        .btn-login {
+          background: transparent;
+          color: var(--text-color, #1e293b);
+          border: 2px solid var(--text-color, #1e293b);
+        }
+
+        .btn-login:hover {
+          background: var(--text-color, #1e293b);
+          color: var(--bg-color, white);
+        }
+      </style>
+
+      <div class="home-container" id="homeScrollContainer">
+        <!-- Section 1: Intro -->
+        <section class="home-section">
+          <div class="section-content">
+            <div class="section-text">
+              <h1 class="home-title">StudBridge</h1>
+              <h2 class="home-subtitle">We turn students into Engineers.</h2>
+              <p class="home-text">Enroll with top working professionals today to land an internship or a high-paying job quickly. Master real-world skills and accelerate your career right now.</p>
+              <div class="home-buttons">
+                <a href="#courses" class="home-btn btn-explore">View the Courses</a>
+                ${!auth.isAuthenticated() ? `<a href="#login" class="home-btn btn-login">Login</a>` : ""}
+              </div>
+            </div>
+            <div class="section-image" style="align-items: center; justify-content: center;">
+              <img src="assets/logo.png" alt="StudBridge Logo" style="box-shadow: none; max-width: 80%; border-radius: 0;" onerror="this.src='https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'">
+            </div>
+          </div>
+        </section>
+
+        <!-- Section 2: Teachers -->
+        <section class="home-section">
+          <div class="section-content reverse">
+            <div class="section-text">
+              <h2 class="home-subtitle">Learn from Working Professionals</h2>
+              <p class="home-text">Our teachers aren't just instructors—they are active software engineers and industry leaders doing the job. Secure direct guidance from professionals currently working at top tech companies.</p>
+            </div>
+            <div class="section-image">
+              <img src="assets/working_professional_pic.png" alt="Working Professionals" onerror="this.src='https://images.unsplash.com/photo-1513258496099-48168024aec0?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'">
+            </div>
+          </div>
+        </section>
+
+        <!-- Section 3: 1-on-1 Mentorship -->
+        <section class="home-section">
+          <div class="section-content">
+            <div class="section-text">
+              <h2 class="home-subtitle">1-on-1 Mentorship on Google Meet</h2>
+              <p class="home-text">Your teacher will personally guide you through coding challenges, help you build robust projects, and teach you how to crack rigorous technical interviews. Upskill yourself with undivided attention.</p>
+            </div>
+            <div class="section-image">
+              <img src="assets/1-on-1-mentorship_pic.png" alt="1-on-1 Mentorship" onerror="this.src='https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'">
+            </div>
+          </div>
+        </section>
+
+        <!-- Section 4: Tech Insights -->
+        <section class="home-section">
+          <div class="section-content reverse">
+            <div class="section-text">
+              <h2 class="home-subtitle">Navigate the Changing Tech Industry</h2>
+              <p class="home-text">The world is shifting from simple programming to complex architecture. System design and DSA are more crucial than ever. Our mentors will help you choose the right domains, master architecture, and survive and thrive in today's tech landscape.</p>
+            </div>
+            <div class="section-image">
+              <img src="assets/tech_insights_pic.png" alt="Tech Insights" onerror="this.src='https://images.unsplash.com/photo-1504384308090-c894fdcc538d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'">
+            </div>
+          </div>
+        </section>
+
+        <!-- Section 5: Resume & Portfolio -->
+        <section class="home-section">
+          <div class="section-content">
+            <div class="section-text">
+              <h2 class="home-subtitle">Build a Standout Resume & Portfolio</h2>
+              <p class="home-text">Your resume is your ticket to the interview. Our industry experts will personally help you craft a professional resume and an impressive portfolio that catches the eye of top recruiters.</p>
+            </div>
+            <div class="section-image">
+              <img src="assets/resum_portfolio_pic.png" alt="Resume and Portfolio Building" onerror="this.src='https://images.unsplash.com/photo-1586281380349-632531db7ed4?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'">
+            </div>
+          </div>
+        </section>
+
+        <!-- Section 6: Reviews & Refunds -->
+        <section class="home-section">
+          <div class="section-content reverse">
+            <div class="section-text">
+              <h2 class="home-subtitle">Trusted by Students, Backed by Us</h2>
+              <p class="home-text">Check out our <a href="#" target="_blank" style="color:#E8702A; font-weight:600; text-decoration:underline;">Google Reviews</a>! See what students have to say about their teachers before joining.</p>
+              <p class="home-text" style="font-weight:600; color: #10b981;">Guaranteeing quality and peace of mind. If you face any unresolvable issues with your teacher, reach out directly to our team. We offer a 100% Refundable Amount policy to ensure your satisfaction.</p>
+            </div>
+            <div class="section-image">
+              <img src="assets/reviews_page_pic.png" alt="Student Reviews" onerror="this.src='https://images.unsplash.com/photo-1522071820081-009f0129c71c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'">
+            </div>
+          </div>
+        </section>
       </div>
     `;
     this.updateNavbar();
+
+    // Init scroll observer for animations
+    setTimeout(() => {
+      const sections = document.querySelectorAll(".home-section");
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add("visible");
+            }
+          });
+        },
+        { threshold: 0.15 },
+      );
+
+      sections.forEach((sec) => observer.observe(sec));
+
+      // Make first section visible immediately
+      if (sections.length > 0) sections[0].classList.add("visible");
+    }, 100);
   }
 
   renderLogin() {
@@ -1089,7 +1332,7 @@ class Router {
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>
                   <a href="${course.teacherId?.githubUrl || "#"}" target="_blank" style="color: #0284c7; text-decoration: none;">GitHub Profile</a>
                 </p>
-                <p style="margin: 1rem 0 0 0; color: #334155; font-size: 1.05rem;">${course.description}</p>
+                
               </div>
 
               <div class="details-info-card" style="border: 2px solid #d1d5db; border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; background: var(--light-card-bg, #fff);">

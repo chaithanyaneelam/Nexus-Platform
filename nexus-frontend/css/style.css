@@ -11,6 +11,17 @@
   box-sizing: border-box;
 }
 
+/* Hide scrollbar for Chrome, Safari and Opera */
+::-webkit-scrollbar {
+  display: none;
+}
+/* Hide scrollbar for IE, Edge and Firefox */
+html,
+body {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
 :root {
   /* Dark Mode = Default */
   --primary-color: #0f766e;
@@ -1075,7 +1086,7 @@
 
 html,
 body {
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 body {
@@ -1099,7 +1110,7 @@ body {
   flex-direction: column;
   min-height: 100vh;
   min-height: 100dvh;
-  overflow-x: hidden;
+  overflow-x: clip;
   transition:
     background-color 0.3s ease,
     color 0.3s ease;
@@ -2077,10 +2088,12 @@ p {
   background-color: var(--card-bg);
   border-top: 1px solid var(--border-color);
   text-align: center;
-  padding: 1.25rem;
+  padding: 1.5rem;
   margin-top: auto;
   width: 100%;
-  color: #cbd5e1;
+  color: var(--text-color);
+  font-size: 1rem;
+  font-weight: 500;
 }
 
 /* ===== App Container ===== */
