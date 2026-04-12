@@ -626,7 +626,7 @@ class Router {
           <div class="section-content reverse">
             <div class="section-text">
               <h2 class="home-subtitle">Trusted by Students, Backed by Us</h2>
-              <p class="home-text">Check out our <a href="#" target="_blank" style="color:#E8702A; font-weight:600; text-decoration:underline;">Google Reviews</a>! See what students have to say about their teachers before joining.</p>
+              <p class="home-text">Check out our <a href="https://g.page/r/CXrVJDchmzS_EBM/review" target="_blank" style="color:#E8702A; font-weight:600; text-decoration:underline;">Google Reviews</a>! See what students have to say about their teachers before joining.</p>
               <p class="home-text" style="font-weight:600; color: #10b981;">Guaranteeing quality and peace of mind. If you face any unresolvable issues with your teacher, reach out directly to our team. We offer a 100% Refundable Amount policy to ensure your satisfaction.</p>
             </div>
             <div class="section-image">
