@@ -17,187 +17,187 @@ class Router {
   setupRoutes() {
     // Public routes
     this.routes["home"] = {
-      path: "#home",
+      path: "/home",
       requiresAuth: false,
       render: () => this.renderHome(),
     };
 
     this.routes["login"] = {
-      path: "#login",
+      path: "/login",
       requiresAuth: false,
       render: () => this.renderLogin(),
     };
 
     this.routes["register"] = {
-      path: "#register",
+      path: "/register",
       requiresAuth: false,
       render: () => this.renderRegister(),
     };
 
     this.routes["courses"] = {
-      path: "#courses",
+      path: "/courses",
       requiresAuth: false,
       render: () => this.renderCourses(),
     };
 
     this.routes["course-detail"] = {
-      path: "#course-detail",
+      path: "/course-detail",
       requiresAuth: false,
       render: (courseId) => this.renderCourseDetail(courseId),
     };
 
     // Protected routes
     this.routes["profile"] = {
-      path: "#profile",
+      path: "/profile",
       requiresAuth: true,
       render: () => this.renderProfile(),
     };
 
     this.routes["student-dashboard"] = {
-      path: "#student-dashboard",
+      path: "/student-dashboard",
       requiresAuth: true,
       role: "student",
       render: () => this.renderStudentDashboard(),
     };
 
     this.routes["teacher-dashboard"] = {
-      path: "#teacher-dashboard",
+      path: "/teacher-dashboard",
       requiresAuth: true,
       role: "teacher",
       render: () => this.renderTeacherDashboard(),
     };
 
     this.routes["admin-dashboard"] = {
-      path: "#admin-dashboard",
+      path: "/admin-dashboard",
       requiresAuth: true,
       role: "admin",
       render: () => this.renderAdminDashboard(),
     };
 
     this.routes["admin-approve-courses"] = {
-      path: "#admin-approve-courses",
+      path: "/admin-approve-courses",
       requiresAuth: true,
       role: "admin",
       render: () => this.renderAdminApproveCourses(),
     };
 
     this.routes["admin-student-approvals"] = {
-      path: "#admin-student-approvals",
+      path: "/admin-student-approvals",
       requiresAuth: true,
       role: "admin",
       render: () => this.renderAdminStudentApprovals(),
     };
 
     this.routes["admin-payments"] = {
-      path: "#admin-payments",
+      path: "/admin-payments",
       requiresAuth: true,
       role: "admin",
       render: () => this.renderAdminPayments(),
     };
 
     this.routes["admin-teachers"] = {
-      path: "#admin-teachers",
+      path: "/admin-teachers",
       requiresAuth: true,
       role: "admin",
       render: () => this.renderAdminTeachers(),
     };
 
     this.routes["admin-teacher-dues"] = {
-      path: "#admin-teacher-dues",
+      path: "/admin-teacher-dues",
       requiresAuth: true,
       role: "admin",
       render: () => this.renderAdminTeacherDues(),
     };
 
     this.routes["admin-teacher-details"] = {
-      path: "#admin-teacher-details",
+      path: "/admin-teacher-details",
       requiresAuth: true,
       role: "admin",
       render: () => this.renderAdminTeacherDetails(),
     };
 
     this.routes["admin-details"] = {
-      path: "#admin-details",
+      path: "/admin-details",
       requiresAuth: true,
       role: "admin",
       render: () => this.renderAdminDetails(),
     };
 
     this.routes["my-courses"] = {
-      path: "#my-courses",
+      path: "/my-courses",
       requiresAuth: true,
       render: () => this.renderMyCourses(),
     };
 
     this.routes["create-course"] = {
-      path: "#create-course",
+      path: "/create-course",
       requiresAuth: true,
       role: "teacher",
       render: () => this.renderCreateCourse(),
     };
 
     this.routes["edit-course"] = {
-      path: "#edit-course",
+      path: "/edit-course",
       requiresAuth: true,
       role: "teacher",
       render: (courseId) => this.renderEditCourse(courseId),
     };
 
     this.routes["my-enrollments"] = {
-      path: "#my-enrollments",
+      path: "/my-enrollments",
       requiresAuth: true,
       role: "student",
       render: () => this.renderMyEnrollments(),
     };
 
     this.routes["payment"] = {
-      path: "#payment",
+      path: "/payment",
       requiresAuth: true,
       role: "student",
       render: () => this.renderPayment(),
     };
 
     this.routes["your-courses"] = {
-      path: "#your-courses",
+      path: "/your-courses",
       requiresAuth: true,
       role: "student",
       render: () => this.renderYourCourses(),
     };
 
     this.routes["teacher-students"] = {
-      path: "#teacher-students",
+      path: "/teacher-students",
       requiresAuth: true,
       role: "teacher",
       render: () => this.renderTeacherStudents(),
     };
 
     this.routes["settings"] = {
-      path: "#settings",
+      path: "/settings",
       requiresAuth: true,
       render: () => this.renderSettings(),
     };
 
     this.routes["support"] = {
-      path: "#support",
+      path: "/support",
       requiresAuth: true,
       render: () => this.renderSupport(),
     };
 
     this.routes["documentations"] = {
-      path: "#documentations",
+      path: "/documentations",
       requiresAuth: true,
       render: () => this.renderDocumentations(),
     };
 
     this.routes["create-meeting"] = {
-      path: "#create-meeting",
+      path: "/create-meeting",
       requiresAuth: true,
       role: "teacher",
       render: () => this.renderCreateMeeting(),
     };
 
     this.routes["teacher-reviews"] = {
-      path: "#teacher-reviews",
+      path: "/teacher-reviews",
       requiresAuth: false,
       render: (teacherId) => this.renderTeacherReviews(teacherId),
     };
@@ -4887,3 +4887,4 @@ async function loadCourseStudents(courseId, courseTitle) {
     container.innerHTML = `<div style="color: red; padding: 2rem; text-align: center;">Error loading students: ${error.message}</div>`;
   }
 }
+
