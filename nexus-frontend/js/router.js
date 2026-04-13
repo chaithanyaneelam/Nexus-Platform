@@ -257,30 +257,49 @@ class Router {
 
     let routePath = "";
 
-    // Fall back to hash or calculate path robustly
+    // Check hash first
     if (window.location.hash.length > 1) {
       routePath = window.location.hash.substring(1);
-      if (routePath.startsWith("/")) routePath = routePath.substring(1);
     } else {
-      const pathName = window.location.pathname;
-      const parts = pathName
-        .split("/")
-        .filter((p) => p && !p.includes(".html") && p !== "nexus-frontend");
+      routePath = window.location.pathname;
+    }
 
-      for (let i = parts.length - 1; i >= 0; i--) {
-        if (this.routes[parts[i]]) {
-          routePath = parts.slice(i).join("/");
-          break;
-        }
-      }
+    if (routePath.startsWith("/")) {
+      routePath = routePath.substring(1);
+    }
+
+    // Clean up base path if needed
+    if (routePath.includes("nexus-frontend/")) {
+      routePath = routePath.split("nexus-frontend/")[1];
+    }
+    if (routePath.includes(".html")) {
+      routePath = routePath.replace(/\/[^/]+\.html$/, "");
     }
 
     if (!routePath) {
       routePath = "home";
     }
 
-    const [routeName, ...params] = routePath.split("/");
-    const route = this.routes[routeName];
+    const parts = routePath.split("/");
+    let routeName = parts[0];
+    let params = parts.slice(1);
+    let route = this.routes[routeName];
+
+    // Robustly handle 'course-detail/:id' logic
+    if (
+      routeName === "course-detail" ||
+      routePath.startsWith("course-detail/") ||
+      (routeName === "courses" && parts[1] === "course-detail")
+    ) {
+      if (routeName === "courses" && parts[1] === "course-detail") {
+        routeName = "course-detail";
+        params = parts.slice(2);
+      } else {
+        routeName = "course-detail";
+        params = parts.slice(1);
+      }
+      route = this.routes[routeName];
+    }
 
     if (!route) {
       this.renderNotFound();
@@ -1406,12 +1425,23 @@ class Router {
                   <div style="display: flex; align-items: center; gap: 0.5rem;">
                     <span style="font-size: 1.5rem; font-weight: 700; color: #0f172a;">(${(course.teacherId?.averageRating || 0).toFixed(1)})</span>
                     <div style="display: flex; align-items: center; gap: 4px; margin-top: 2px;">
-                      ${Array(Math.round(course.teacherId?.averageRating || 0))
+                      ${Array(
+                        Math.max(
+                          0,
+                          Math.min(
+                            5,
+                            Math.round(course.teacherId?.averageRating || 0),
+                          ),
+                        ),
+                      )
                         .fill(
                           '<svg width="22" height="22" viewBox="0 0 24 24" fill="#fbbf24" stroke="#fbbf24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>',
                         )
                         .join("")}${Array(
-                        5 - Math.round(course.teacherId?.averageRating || 0),
+                        Math.max(
+                          0,
+                          5 - Math.round(course.teacherId?.averageRating || 0),
+                        ),
                       )
                         .fill(
                           '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>',
@@ -1425,16 +1455,17 @@ class Router {
 
               <div>
                 ${
-                  auth.isAuthenticated() && auth.isStudent() && !isEnrolled
-                    ? `<button class="btn btn-primary course-detail-enroll-btn" onclick="enrollCourse('${courseId}')" style="padding: 0.8rem 2rem; font-size: 1.1rem; border-radius: 30px; border: none; width: max-content; color: white;">Enroll Now - ₹${course.price || 0}</button>`
-                    : auth.isAuthenticated() && auth.isStudent() && isEnrolled
-                      ? `<button class="btn btn-success" disabled style="padding: 0.8rem 2rem; font-size: 1.1rem; border-radius: 30px; border: none; width: max-content; background: #10b981; color: white;">Already Enrolled</button>`
-                      : auth.isAuthenticated() &&
-                          auth.isTeacher() &&
-                          auth.getCurrentUser()._id ===
-                            (course.teacherId?._id || course.teacherId)
-                        ? `<a href="/edit-course/${courseId}" class="btn btn-secondary" style="padding: 0.8rem 2rem; font-size: 1.1rem; border-radius: 30px; width: max-content; display: inline-block;">Edit Course</a>`
-                        : ""
+                  !auth.isAuthenticated()
+                    ? `<button class="btn btn-primary course-detail-enroll-btn" onclick="enrollCourse('${courseId}')" style="padding: 0.8rem 2rem; font-size: 1.1rem; border-radius: 30px; border: none; width: max-content; color: white;">Login to Enroll - ₹${course.price || 0}</button>`
+                    : auth.isStudent() && !isEnrolled
+                      ? `<button class="btn btn-primary course-detail-enroll-btn" onclick="enrollCourse('${courseId}')" style="padding: 0.8rem 2rem; font-size: 1.1rem; border-radius: 30px; border: none; width: max-content; color: white;">Enroll Now - ₹${course.price || 0}</button>`
+                      : auth.isStudent() && isEnrolled
+                        ? `<button class="btn btn-success" disabled style="padding: 0.8rem 2rem; font-size: 1.1rem; border-radius: 30px; border: none; width: max-content; background: #10b981; color: white;">Already Enrolled</button>`
+                        : auth.isTeacher() &&
+                            auth.getCurrentUser()._id ===
+                              (course.teacherId?._id || course.teacherId)
+                          ? `<a href="/edit-course/${courseId}" class="btn btn-secondary" style="padding: 0.8rem 2rem; font-size: 1.1rem; border-radius: 30px; width: max-content; display: inline-block;">Edit Course</a>`
+                          : ""
                 }
               </div>
             </div>
@@ -1447,7 +1478,12 @@ class Router {
 
             <h3 style="font-size: 1.4rem; margin: 0 0 1rem 0; font-family: 'Playfair Display', serif;">Highlights</h3>
             <ul style="list-style-type: none; padding: 0; margin: 0; color: #334155; line-height: 1.7; display: flex; flex-wrap: wrap; gap: 1.5rem; font-family: 'Inter', sans-serif;">
-              ${(course.highlights || [])
+              ${(Array.isArray(course.highlights)
+                ? course.highlights
+                : course.highlights
+                  ? [course.highlights]
+                  : []
+              )
                 .map(
                   (
                     highlight,
@@ -1833,7 +1869,7 @@ class Router {
                 <div class="highlights-section">
                   <strong>Highlights:</strong>
                   <ul>
-                    ${course.highlights.map((h) => `<li>${h}</li>`).join("")}
+                    ${(course.highlights || []).map((h) => `<li>${h}</li>`).join("")}
                   </ul>
                 </div>
               </div>
@@ -4443,6 +4479,15 @@ window.addEventListener("load", () => {
 
 // Enroll in course function
 async function enrollCourse(courseId) {
+  if (!auth.isAuthenticated()) {
+    showInfoPopup(
+      "Please login or create an account to enroll in courses.",
+      "Login Required",
+    );
+    router.navigate("#login");
+    return;
+  }
+
   // Find the button that was clicked to show loading state
   const enrollBtn = document.querySelector(
     `button[onclick="enrollCourse('${courseId}')"]`,
@@ -4887,4 +4932,3 @@ async function loadCourseStudents(courseId, courseTitle) {
     container.innerHTML = `<div style="color: red; padding: 2rem; text-align: center;">Error loading students: ${error.message}</div>`;
   }
 }
-
