@@ -207,18 +207,28 @@ class Router {
    * Setup event listeners for navigation
    */
   setupEventListeners() {
+    window.addEventListener("popstate", () => this.navigate());
     window.addEventListener("hashchange", () => this.navigate());
     document.addEventListener("click", async (e) => {
-      if (e.target.classList.contains("nav-link")) {
+      const navLink =
+        e.target.closest(".nav-link") ||
+        (e.target.classList.contains("nav-link") ? e.target : null);
+      if (navLink) {
         e.preventDefault();
-        const hash = e.target.getAttribute("href");
-        window.location.hash = hash;
+        const href = navLink.getAttribute("href");
+        if (href && href.startsWith("#")) {
+          this.navigate(href.substring(1));
+        } else if (href && href.startsWith("/")) {
+          this.navigate(href.substring(1));
+        } else if (href) {
+          window.location.href = href;
+        }
       }
     });
   }
 
   async handleCreateInstantMeet(btn) {
-    window.location.hash = "#create-meeting";
+    this.navigate("create-meeting");
   }
 
   /**
@@ -226,12 +236,49 @@ class Router {
    */
   navigate(path = null) {
     if (path) {
-      window.location.hash = path;
+      const cleanPath = path.startsWith("#") ? path.substring(1) : path;
+      try {
+        const currentPath = window.location.pathname;
+        let newUrl = "/" + cleanPath;
+        if (currentPath.includes("nexus-frontend")) {
+          const basePath = currentPath.substring(
+            0,
+            currentPath.indexOf("nexus-frontend") + "nexus-frontend".length,
+          );
+          newUrl = basePath + "/" + cleanPath;
+        }
+        window.history.pushState({}, "", newUrl);
+      } catch (e) {
+        window.location.hash = cleanPath;
+      }
+      this.navigate();
       return;
     }
 
-    const hash = window.location.hash.slice(1) || "home";
-    const [routeName, ...params] = hash.split("/");
+    let routePath = "";
+
+    // Fall back to hash or calculate path robustly
+    if (window.location.hash.length > 1) {
+      routePath = window.location.hash.substring(1);
+    } else {
+      const pathName = window.location.pathname;
+      const parts = pathName
+        .split("/")
+        .filter((p) => p && !p.includes(".html") && p !== "nexus-frontend");
+
+      for (let i = parts.length - 1; i >= 0; i--) {
+        if (this.routes[parts[i]]) {
+          routePath = parts.slice(i).join("/");
+          break;
+        }
+      }
+    }
+
+    if (!routePath) {
+      routePath = "home";
+    }
+
+    const [routeName, ...params] = routePath.split("/");
     const route = this.routes[routeName];
 
     if (!route) {
@@ -241,7 +288,7 @@ class Router {
 
     // Check authentication
     if (route.requiresAuth && !auth.isAuthenticated()) {
-      window.location.hash = "#login";
+      this.navigate("login");
       return;
     }
 
@@ -264,17 +311,17 @@ class Router {
    */
   redirectToDashboard() {
     if (!auth.isAuthenticated()) {
-      window.location.hash = "#home";
+      this.navigate("home");
       return;
     }
 
     const role = auth.getUserRole();
     if (role === "admin") {
-      window.location.hash = "#admin-dashboard";
+      this.navigate("admin-dashboard");
     } else if (role === "teacher") {
-      window.location.hash = "#teacher-dashboard";
+      this.navigate("teacher-dashboard");
     } else {
-      window.location.hash = "#student-dashboard";
+      this.navigate("student-dashboard");
     }
   }
 
@@ -687,7 +734,7 @@ class Router {
             <!-- Google button rendered here -->
           </div>
 
-          <p class="auth-link">Don't have an account? <a href="#register">Register here</a></p>
+          <p class="auth-link">Don't have an account? <a href="/register">Register here</a></p>
           <div id="loginMessage" class="message"></div>
         </div>
       </div>
@@ -813,7 +860,7 @@ class Router {
             <!-- Google button rendered here dynamically -->
           </div>
 
-          <p class="auth-link">Already have an account? <a href="#login">Login here</a></p>
+          <p class="auth-link">Already have an account? <a href="/login">Login here</a></p>
           <div id="registerMessage" class="message"></div>
         </div>
       </div>
@@ -1579,7 +1626,7 @@ class Router {
     const btnStartLive = document.getElementById("btn-start-live");
     if (btnStartLive) {
       btnStartLive.addEventListener("click", () => {
-        window.location.hash = "#create-meeting";
+        router.navigate("create-meeting");
       });
     }
 
@@ -1834,7 +1881,7 @@ class Router {
         messageDiv.className = "message success";
         messageDiv.textContent = "Course approved successfully! Reloading...";
         setTimeout(() => {
-          window.location.hash = "#admin-approve-courses";
+          router.navigate("admin-approve-courses");
         }, 1500);
       } else {
         messageDiv.className = "message error";
@@ -1864,7 +1911,7 @@ class Router {
         messageDiv.className = "message success";
         messageDiv.textContent = "Course rejected successfully! Reloading...";
         setTimeout(() => {
-          window.location.hash = "#admin-approve-courses";
+          router.navigate("admin-approve-courses");
         }, 1500);
       } else {
         messageDiv.className = "message error";
@@ -1969,7 +2016,7 @@ class Router {
         messageDiv.textContent =
           "Student approved successfully. Payment request sent to student.";
         setTimeout(() => {
-          window.location.hash = "#admin-student-approvals";
+          router.navigate("admin-student-approvals");
         }, 1200);
       } else {
         messageDiv.className = "message error";
@@ -2001,7 +2048,7 @@ class Router {
         messageDiv.className = "message success";
         messageDiv.textContent = "Student request rejected.";
         setTimeout(() => {
-          window.location.hash = "#admin-student-approvals";
+          router.navigate("admin-student-approvals");
         }, 1200);
       } else {
         messageDiv.className = "message error";
@@ -2054,7 +2101,7 @@ class Router {
               <td style="padding: 1rem; border-bottom: 1px solid var(--border-color);">${t.name}</td>
               <td style="padding: 1rem; border-bottom: 1px solid var(--border-color);">${t.email}</td>
               <td style="padding: 1rem; border-bottom: 1px solid var(--border-color);">
-                <button class="btn btn-secondary btn-small" onclick="window.location.hash='#admin-teacher-details?id=${t._id}&name=${encodeURIComponent(t.name)}'">View Courses & Students</button>
+                <button class="btn btn-secondary btn-small" onclick="router.navigate('admin-teacher-details?id=${t._id}&name=${encodeURIComponent(t.name)}')">View Courses & Students</button>
               </td>
             </tr>
           `;
@@ -2096,7 +2143,7 @@ class Router {
       : "Teacher";
 
     if (!teacherId) {
-      window.location.hash = "#admin-teachers";
+      router.navigate("admin-teachers");
       return;
     }
 
@@ -2688,7 +2735,7 @@ class Router {
             messageDiv.textContent =
               "Course created successfully! Redirecting...";
             setTimeout(() => {
-              window.location.hash = "#my-courses";
+              router.navigate("my-courses");
             }, 1500);
           } else {
             messageDiv.className = "message error";
@@ -2864,7 +2911,7 @@ class Router {
               msgDiv.textContent =
                 "Course updated successfully! Redirecting...";
               setTimeout(() => {
-                window.location.hash = "#my-courses";
+                router.navigate("my-courses");
               }, 1000);
             } else {
               msgDiv.className = "message error";
@@ -3117,7 +3164,7 @@ class Router {
                       WhatsApp
                     </button>
                     
-                    <button onclick="${canAccessTeacher ? `window.location.hash='#course-detail/${courseIdStr}'` : showPayNow ? `submitPaymentPrompt('${enrollment.paymentId || enrollment._id}', '${course.title || "Course"}', '${amount}')` : showWaitingPaymentConfirm ? `showInfoPopup('Your payment is submitted. Please wait for admin confirmation.')` : `showInfoPopup('Please wait for admin approval')`}"
+                    <button onclick="${canAccessTeacher ? `router.navigate('course-detail/${courseIdStr}')` : showPayNow ? `submitPaymentPrompt('${enrollment.paymentId || enrollment._id}', '${course.title || "Course"}', '${amount}')` : showWaitingPaymentConfirm ? `showInfoPopup('Your payment is submitted. Please wait for admin confirmation.')` : `showInfoPopup('Please wait for admin approval')`}"
                               style="flex: 1; padding: 0.75rem; display: flex; justify-content: center; align-items: center; gap: 0.5rem; background-color: ${canAccessTeacher ? "#667eea" : showPayNow ? "#0ea5e9" : "#cbd5e1"} !important; color: ${canAccessTeacher || showPayNow ? "white" : "#64748b"} !important; 
                                 border: none; border-radius: 6px; font-weight: 600; cursor: ${canAccessTeacher || showPayNow ? "pointer" : "not-allowed"}; font-size: 0.95rem;
                                     transition: background-color 0.3s;"
@@ -3437,7 +3484,7 @@ class Router {
 
                 <!-- Action Buttons -->
                 <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
-                  <button class="btn-view-course" onclick="window.location.hash='#course-detail/${courseIdStr}'">
+                  <button class="btn-view-course" onclick="router.navigate('course-detail/${courseIdStr}')">
                     View Course
                   </button>
                   <button class="btn-secondary-action" onclick="openWhatsApp('${teacher.mobileNumber || ""}', '${course.title || ""}')">
@@ -4379,13 +4426,13 @@ async function confirmLogoutFromSettings() {
 }
 
 function goToProfile() {
-  window.location.hash = "#settings";
+  router.navigate("settings");
 }
 
 function logout() {
   auth.logout();
   router.updateNavbar();
-  window.location.hash = "#home";
+  router.navigate("home");
 }
 
 // Navigate on page load

@@ -31,7 +31,11 @@ class APIClient {
       if (response.status === 401) {
         localStorage.removeItem("token");
         localStorage.removeItem("user");
-        window.location.href = "#login";
+        if (typeof router !== "undefined") {
+          router.navigate("login");
+        } else {
+          window.location.href = "/login";
+        }
         throw new Error("Unauthorized. Please login again.");
       }
 

@@ -16,6 +16,14 @@ class NexusApp {
 
     router.navigate();
 
+    window.addEventListener("popstate", () => {
+      // Close mobile menu on navigate
+      const navbarMenu = document.getElementById("navbarMenu");
+      if (navbarMenu.classList.contains("active")) {
+        navbarMenu.classList.remove("active");
+      }
+    });
+
     window.addEventListener("hashchange", () => {
       // Close mobile menu on navigate
       const navbarMenu = document.getElementById("navbarMenu");

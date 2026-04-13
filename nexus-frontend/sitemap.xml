@@ -4,12 +4,76 @@
         xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
         http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
 
-  <!-- Homepage — highest priority, most frequently updated -->
+  <!-- Primary Landing Page (Highest Priority) -->
   <url>
     <loc>https://studbridge.com/</loc>
-    <lastmod>2026-04-08</lastmod>
-    <changefreq>weekly</changefreq>
+    <lastmod>2026-04-13</lastmod>
+    <changefreq>daily</changefreq>
     <priority>1.0</priority>
+  </url>
+
+  <!-- Main Courses Catalog -->
+  <url>
+    <loc>https://studbridge.com/courses</loc>
+    <lastmod>2026-04-13</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+
+  <!-- Authentication: Login -->
+  <url>
+    <loc>https://studbridge.com/login</loc>
+    <lastmod>2026-04-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Authentication: Register -->
+  <url>
+    <loc>https://studbridge.com/register</loc>
+    <lastmod>2026-04-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Onboarding Flow -->
+  <url>
+    <loc>https://studbridge.com/onboarding</loc>
+    <lastmod>2026-04-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Teacher Reviews Public Overview -->
+  <url>
+    <loc>https://studbridge.com/teacher-reviews</loc>
+    <lastmod>2026-04-13</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Support Page -->
+  <url>
+    <loc>https://studbridge.com/support</loc>
+    <lastmod>2026-04-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <!-- Settings Page -->
+  <url>
+    <loc>https://studbridge.com/settings</loc>
+    <lastmod>2026-04-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+
+  <!-- Documentations Page -->
+  <url>
+    <loc>https://studbridge.com/documentations</loc>
+    <lastmod>2026-04-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
   </url>
 
 </urlset>
