@@ -1044,6 +1044,17 @@ class Router {
                           ],
                         },
                         {
+                          keywords: [
+                            "low level design",
+                            "lld",
+                            "system design",
+                          ],
+                          icons: [
+                            "devicon-java-plain colored",
+                            "devicon-cplusplus-plain colored",
+                          ],
+                        },
+                        {
                           keywords: ["python", "django"],
                           icons: [
                             "devicon-python-plain colored",
@@ -1205,6 +1216,13 @@ class Router {
         {
           keywords: ["java", "spring"],
           icons: ["devicon-java-plain colored", "devicon-spring-plain colored"],
+        },
+        {
+          keywords: ["low level design", "lld", "system design"],
+          icons: [
+            "devicon-java-plain colored",
+            "devicon-cplusplus-plain colored",
+          ],
         },
         {
           keywords: ["python", "django"],

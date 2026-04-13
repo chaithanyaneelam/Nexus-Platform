@@ -37,6 +37,8 @@ const newSegment = `          if (enrollmentsResp.success) {
         iconHtml = \`<div style="display: flex; gap: 15px; align-items: center; justify-content: center; font-size: 70px;"><i class="devicon-azure-plain colored"></i> <i class="devicon-windows8-original colored"></i></div>\`;
       } else if (t.includes("mobile") || t.includes("android") || t.includes("ios") || t.includes("flutter")) {
         iconHtml = \`<div style="display: flex; gap: 20px; align-items: center; justify-content: center; font-size: 65px;"><i class="devicon-android-plain colored"></i> <i class="devicon-apple-original" style="color: #333;"></i></div>\`;
+      } else if (t.includes("low level design") || t.includes("lld") || t.includes("system design")) {
+        iconHtml = \`<div style="display: flex; gap: 20px; align-items: center; justify-content: center; font-size: 65px;"><i class="devicon-java-plain colored"></i> <i class="devicon-cplusplus-plain colored"></i></div>\`;
       }
 
       appDiv.innerHTML = \`
