@@ -101,7 +101,7 @@ const newSegment = `          if (enrollmentsResp.success) {
                           auth.isTeacher() &&
                           auth.getCurrentUser()._id ===
                             (course.teacherId?._id || course.teacherId)
-                        ? \`<a href="#edit-course/\${courseId}" class="btn btn-secondary" style="padding: 0.8rem 2rem; font-size: 1.1rem; border-radius: 30px; width: max-content; display: inline-block;">Edit Course</a>\`
+                        ? \`<a href="/edit-course/\${courseId}" class="btn btn-secondary" style="padding: 0.8rem 2rem; font-size: 1.1rem; border-radius: 30px; width: max-content; display: inline-block;">Edit Course</a>\`
                         : ""
                 }
               </div>

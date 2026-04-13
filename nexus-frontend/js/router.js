@@ -260,6 +260,7 @@ class Router {
     // Fall back to hash or calculate path robustly
     if (window.location.hash.length > 1) {
       routePath = window.location.hash.substring(1);
+      if (routePath.startsWith("/")) routePath = routePath.substring(1);
     } else {
       const pathName = window.location.pathname;
       const parts = pathName
@@ -605,8 +606,8 @@ class Router {
               <h2 class="home-subtitle">We turn students into Engineers.</h2>
               <p class="home-text">Enroll with top working professionals today to land an internship or a high-paying job quickly. Master real-world skills and accelerate your career right now.</p>
               <div class="home-buttons">
-                <a href="#courses" class="home-btn btn-explore">View the Courses</a>
-                ${!auth.isAuthenticated() ? `<a href="#login" class="home-btn btn-login">Login</a>` : ""}
+                <a href="/courses" class="home-btn btn-explore">View the Courses</a>
+                ${!auth.isAuthenticated() ? `<a href="/login" class="home-btn btn-login">Login</a>` : ""}
               </div>
             </div>
             <div class="section-image" style="align-items: center; justify-content: center;">
@@ -1003,7 +1004,7 @@ class Router {
                 </svg>
                 <input type="text" id="courseSearchInput" placeholder="Find your next career path..." style="background: transparent; color: #334155; padding: 0.4rem; width: 100%; font-size: 15px; margin-left: 8px;">
               </div>
-              ${showCreateButton ? `<a href="#create-course" class="btn btn-primary">Create Course</a>` : ""}
+              ${showCreateButton ? `<a href="/create-course" class="btn btn-primary">Create Course</a>` : ""}
             </div>
           </div>
           <div class="courses-grid" id="coursesGrid">
@@ -1119,7 +1120,7 @@ class Router {
                       ${course.duration || 0} months
                     </span>
                   </div>
-                  <a href="#course-detail/${course._id}" class="btn enroll-btn">Enroll Now</a>
+                  <a href="/course-detail/${course._id}" class="btn enroll-btn">Enroll Now</a>
                 </div>
               </div>
             `;
@@ -1432,7 +1433,7 @@ class Router {
                           auth.isTeacher() &&
                           auth.getCurrentUser()._id ===
                             (course.teacherId?._id || course.teacherId)
-                        ? `<a href="#edit-course/${courseId}" class="btn btn-secondary" style="padding: 0.8rem 2rem; font-size: 1.1rem; border-radius: 30px; width: max-content; display: inline-block;">Edit Course</a>`
+                        ? `<a href="/edit-course/${courseId}" class="btn btn-secondary" style="padding: 0.8rem 2rem; font-size: 1.1rem; border-radius: 30px; width: max-content; display: inline-block;">Edit Course</a>`
                         : ""
                 }
               </div>
@@ -1581,22 +1582,22 @@ class Router {
           <div class="dashboard-card">
             <h3>My Enrollments</h3>
             <p>Explore courses you're enrolled in</p>
-            <a href="#my-enrollments" class="btn btn-secondary">View</a>
+            <a href="/my-enrollments" class="btn btn-secondary">View</a>
           </div>
           <div class="dashboard-card">
             <h3>Browse Courses</h3>
             <p>Discover new courses to learn</p>
-            <a href="#courses" class="btn btn-secondary">Explore</a>
+            <a href="/courses" class="btn btn-secondary">Explore</a>
           </div>
           <div class="dashboard-card">
             <h3>My Profile</h3>
             <p>Manage your account settings</p>
-            <a href="#profile" class="btn btn-secondary">Edit</a>
+            <a href="/profile" class="btn btn-secondary">Edit</a>
           </div>
           <div class="dashboard-card">
             <h3>Payments</h3>
             <p>View your transaction history</p>
-            <a href="#payment" class="btn btn-secondary">History</a>
+            <a href="/payment" class="btn btn-secondary">History</a>
           </div>
         </div>
       </div>
@@ -1707,7 +1708,7 @@ class Router {
               </p>
             </div>
           </div>
-          <a href="#course-detail/${course._id}" class="btn btn-secondary" style="display: inline-block; margin-top: 1rem;">
+          <a href="/course-detail/${course._id}" class="btn btn-secondary" style="display: inline-block; margin-top: 1rem;">
             Edit Course
           </a>
         </div>
@@ -1746,43 +1747,43 @@ class Router {
           <div class="dashboard-card admin-card">
             <h3>📚 Course Approvals</h3>
             <p>Review newly created teacher courses and publish quality content quickly.</p>
-            <a href="#admin-approve-courses" class="btn btn-primary">Open Queue</a>
+            <a href="/admin-approve-courses" class="btn btn-primary">Open Queue</a>
           </div>
 
           <div class="dashboard-card admin-card">
             <h3>🧑‍🎓 Student Approvals</h3>
             <p>Review student registration requests and move approved learners to payment.</p>
-            <a href="#admin-student-approvals" class="btn btn-primary">Review Requests</a>
+            <a href="/admin-student-approvals" class="btn btn-primary">Review Requests</a>
           </div>
 
           <div class="dashboard-card admin-card">
             <h3>💰 Payment Operations</h3>
             <p>Validate student transactions and complete approvals without leaving this dashboard.</p>
-            <a href="#admin-payments" class="btn btn-primary">Manage Payments</a>
+            <a href="/admin-payments" class="btn btn-primary">Manage Payments</a>
           </div>
 
           <div class="dashboard-card admin-card">
             <h3>👨‍🏫 Teachers View</h3>
             <p>Monitor teacher-side enrollment visibility and student activation status.</p>
-            <a href="#admin-teachers" class="btn btn-secondary">Inspect</a>
+            <a href="/admin-teachers" class="btn btn-secondary">Inspect</a>
           </div>
 
           <div class="dashboard-card admin-card">
             <h3>💸 Dues to Teacher</h3>
             <p>Settle the pending payments to teachers after taking the commission.</p>
-            <a href="#admin-teacher-dues" class="btn btn-primary">Settle Dues</a>
+            <a href="/admin-teacher-dues" class="btn btn-primary">Settle Dues</a>
           </div>
 
           <div class="dashboard-card admin-card">
             <h3>👥 User Details</h3>
             <p>View all registered students and teachers contact information.</p>
-            <a href="#admin-details" class="btn btn-secondary">View Details</a>
+            <a href="/admin-details" class="btn btn-secondary">View Details</a>
           </div>
 
           <div class="dashboard-card admin-card">
             <h3>⚙️ Account Settings</h3>
             <p>Centralized profile, account security options, and logout under one settings page.</p>
-            <a href="#settings" class="btn btn-secondary">Go to Settings</a>
+            <a href="/settings" class="btn btn-secondary">Go to Settings</a>
           </div>
         </div>
       </div>
@@ -2165,7 +2166,7 @@ class Router {
               <h2>📚 Courses by: \${teacherName}</h2>
               <p>Total published courses and registered active students</p>
             </div>
-            <a href="#admin-teachers" class="btn btn-secondary">Back to Teachers</a>
+            <a href="/admin-teachers" class="btn btn-secondary">Back to Teachers</a>
           </div>
       `;
 
@@ -2215,7 +2216,7 @@ class Router {
               <h2>👥 User Details Directory</h2>
               <p>View contact information for all registered students and teachers.</p>
             </div>
-            <a href="#admin-dashboard" class="btn btn-secondary">Back to Dashboard</a>
+            <a href="/admin-dashboard" class="btn btn-secondary">Back to Dashboard</a>
           </div>
 
           <!-- Tabs -->
@@ -2539,7 +2540,7 @@ class Router {
                 <input type="text" id="myCourseSearchInput" placeholder="Search my courses..." style="background: transparent; border: none; color: var(--text-color); padding: 0.5rem; outline: none; width: 100%;">
               </div>
             </div>
-            <a href="#create-course" class="btn btn-primary" style="margin-left:auto">Create New Course</a>
+            <a href="/create-course" class="btn btn-primary" style="margin-left:auto">Create New Course</a>
           </div>
           <div class="courses-table" style="overflow-x: auto;">
             <table>
@@ -2570,8 +2571,8 @@ class Router {
                           : "Published"
                     }</span></td>
                     <td>
-                      <a href="#course-detail/${course._id}" class="btn btn-small">View</a>
-                      <a href="#edit-course/${course._id}" class="btn btn-small">Edit</a>
+                      <a href="/course-detail/${course._id}" class="btn btn-small">View</a>
+                      <a href="/edit-course/${course._id}" class="btn btn-small">Edit</a>
                     </td>
                   </tr>
                 `,
@@ -3612,7 +3613,7 @@ class Router {
         html += `
           <div style="text-align: center; padding: 2rem; color: #999;">
             <p>No courses created yet. Create a course first to see students!</p>
-            <a href="#create-course" class="btn btn-primary" style="margin-top: 1rem;">Create Course</a>
+            <a href="/create-course" class="btn btn-primary" style="margin-top: 1rem;">Create Course</a>
           </div>
         `;
       } else {
@@ -4108,7 +4109,7 @@ class Router {
       <div class="not-found">
         <h2>404 - Page Not Found</h2>
         <p>The page you're looking for doesn't exist.</p>
-        <a href="#home" class="btn btn-primary">Go to Home</a>
+        <a href="/home" class="btn btn-primary">Go to Home</a>
       </div>
     `;
     this.updateNavbar();
