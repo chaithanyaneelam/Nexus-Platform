@@ -3,7 +3,7 @@ const fs = require("fs");
 const path = require("path");
 
 const PORT = 3000;
-const PUBLIC_DIR = path.join(__dirname, "nexus-frontend");
+const PUBLIC_DIR = path.join(__dirname, "client");
 
 const MIME_TYPES = {
   ".html": "text/html",
@@ -26,8 +26,8 @@ const MIME_TYPES = {
 const server = http.createServer((req, res) => {
   console.log(`[REQUEST] ${req.method} ${req.url}`);
 
-  // Remove '/nexus-frontend' prefix if requested that way so it maps correctly
-  let reqUrl = req.url.replace(/^\/nexus-frontend/, "");
+  // Remove '/client' prefix if requested that way so it maps correctly
+  let reqUrl = req.url.replace(/^\/client/, "");
 
   // Parse URL and determine strictly if it's a file request (has extension)
   const ext = path.extname(reqUrl).toLowerCase();

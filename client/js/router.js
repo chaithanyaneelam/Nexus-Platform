@@ -399,6 +399,7 @@ class Router {
         supportMenuItem.style.display = "block";
         documentationsMenuItem.style.display = "block";
       } else if (user.role === "teacher") {
+        coursesMenuItem.style.display = "block";
         myCoursesMenuItem.style.display = "block";
         studentsMenuItem.style.display = "block";
         supportMenuItem.style.display = "block";
@@ -973,19 +974,16 @@ class Router {
 
       // Filter courses based on user role
       const user = auth.getCurrentUser();
-      if (user && user.role === "teacher") {
-        // Teachers see only their own courses
-        courses = courses.filter(
-          (c) => c.teacherId && c.teacherId._id === user._id,
-        );
-      } else if (user && user.role === "student") {
-        // Students see only published courses
+
+      // Allow everyone (including teachers) to see all published courses
+      // In the courses view, teachers shouldn't be restricted to only their own
+      if (user && user.role !== "admin") {
+        // Students and Teachers see only published courses
         courses = courses.filter((c) => c.status === "published");
       }
       // Admin sees all courses
 
-      const pageTitle =
-        user && user.role === "teacher" ? "My Courses" : "Explore All Courses";
+      const pageTitle = "Explore All Courses";
       const showCreateButton = auth.isTeacher();
 
       appDiv.innerHTML = `
@@ -1150,13 +1148,13 @@ class Router {
                       ${course.duration || 0} months
                     </span>
                   </div>
-                  <a href="/course-detail/${course._id}" class="btn enroll-btn">Enroll Now</a>
+                  ${auth.isTeacher() ? `<a href="/course-detail/${course._id}" class="btn enroll-btn" style="background-color: var(--secondary-color)">View Course</a>` : `<a href="/course-detail/${course._id}" class="btn enroll-btn">View Course Details</a>`}
                 </div>
               </div>
             `;
                     })
                     .join("")
-                : `<p class='no-courses'>No courses available${user && user.role === "teacher" ? ". Create your first course!" : ""}</p>`
+                : `<p class='no-courses'>No courses available.</p>`
             }
           </div>
         </div>
