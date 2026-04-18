@@ -4059,10 +4059,13 @@ class Router {
 
     docs.forEach((doc) => {
       html += `
-          <div style="background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.5rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
-            <h3 style="margin-top: 0; margin-bottom: 1rem; color: #0f172a;">${doc.title} Documentation</h3>
-            <p style="color: #64748b; margin-bottom: 1.5rem;">Access the comprehensive guide and learning materials for ${doc.title}.</p>
-            <a href="${doc.link}" target="_blank" style="display: inline-block; background: #2563eb; color: white; padding: 0.75rem 1.5rem; border-radius: 8px; text-decoration: none; font-weight: 600;">View Documentation ↗</a>
+          <div class="course-card" style="background: var(--card-bg, white); border: 1px solid var(--border-color, #e2e8f0); border-radius: 12px; padding: 1.5rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); display: flex; flex-direction: column;">
+            <div style="margin-bottom: 1rem; display: flex; align-items: center; justify-content: center; height: 100px; background: #f8fafc; border-radius: 8px;">
+               <i class="${doc.title === "HTML" ? "devicon-html5-plain colored" : doc.title === "JavaScript" ? "devicon-javascript-plain colored" : doc.title === "React" ? "devicon-react-original colored" : "devicon-devicon-plain"}" style="font-size: 60px;"></i>
+            </div>
+            <h3 style="margin-top: 0; margin-bottom: 0.5rem; color: var(--text-primary, #0f172a); font-size: 1.25rem;">${doc.title} Documentation</h3>
+            <p style="color: var(--text-secondary, #64748b); margin-bottom: 1.5rem; font-size: 0.95rem; flex-grow: 1;">Access the comprehensive guide and learning materials for ${doc.title}.</p>
+            <a href="${doc.link}" target="_blank" class="btn btn-primary" style="display: inline-block; background: #2563eb; color: white; padding: 0.75rem 1.5rem; border-radius: 8px; text-decoration: none; font-weight: 600; text-align: center; width: 100%; box-sizing: border-box;">View Documentation ↗</a>
           </div>
       `;
     });
