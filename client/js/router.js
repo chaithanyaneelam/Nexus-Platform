@@ -4036,7 +4036,15 @@ class Router {
     const docs = [
       {
         title: "HTML",
-        link: "https://nexus-upskill-html-course.vercel.app/",
+        link: "https://nexus-upskill-html-course.vercel.app/htmlcss.html",
+      },
+      {
+        title: "JavaScript",
+        link: "https://nexus-upskill-html-course.vercel.app/javascript.html",
+      },
+      {
+        title: "React",
+        link: "https://nexus-upskill-html-course.vercel.app/react.html",
       },
     ];
 
