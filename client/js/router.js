@@ -4063,7 +4063,7 @@ class Router {
             <div style="margin-bottom: 1rem; display: flex; align-items: center; justify-content: center; height: 100px; background: #f8fafc; border-radius: 8px;">
                <i class="${doc.title === "HTML" ? "devicon-html5-plain colored" : doc.title === "JavaScript" ? "devicon-javascript-plain colored" : doc.title === "React" ? "devicon-react-original colored" : "devicon-devicon-plain"}" style="font-size: 60px;"></i>
             </div>
-            <h3 style="margin-top: 0; margin-bottom: 0.5rem; color: var(--text-primary, #0f172a); font-size: 1.25rem;">${doc.title} Documentation</h3>
+            <h3 style="margin-top: 0; margin-bottom: 0.5rem; color: var(--text-primary, #cdd9f5); font-size: 1.25rem;">${doc.title} Documentation</h3>
             <p style="color: var(--text-secondary, #64748b); margin-bottom: 1.5rem; font-size: 0.95rem; flex-grow: 1;">Access the comprehensive guide and learning materials for ${doc.title}.</p>
             <a href="${doc.link}" target="_blank" class="btn btn-primary" style="display: inline-block; background: #2563eb; color: white; padding: 0.75rem 1.5rem; border-radius: 8px; text-decoration: none; font-weight: 600; text-align: center; width: 100%; box-sizing: border-box;">View Documentation ↗</a>
           </div>
