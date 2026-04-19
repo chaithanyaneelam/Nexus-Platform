@@ -201,6 +201,25 @@ class Router {
       requiresAuth: false,
       render: (teacherId) => this.renderTeacherReviews(teacherId),
     };
+
+    // Legal Routes
+    this.routes["terms"] = {
+      path: "/terms",
+      requiresAuth: false,
+      render: () => this.renderTerms(),
+    };
+
+    this.routes["privacy"] = {
+      path: "/privacy",
+      requiresAuth: false,
+      render: () => this.renderPrivacy(),
+    };
+
+    this.routes["refund"] = {
+      path: "/refund",
+      requiresAuth: false,
+      render: () => this.renderRefund(),
+    };
   }
 
   /**
@@ -322,6 +341,20 @@ class Router {
     this.currentRoute = routeName;
     const appDiv = document.getElementById("app");
     appDiv.innerHTML = "";
+
+    // Toggle main footer visibility
+    const footer = document.querySelector(".footer");
+    if (footer) {
+      if (
+        ["home", "login", "register", "settings"].includes(routeName) ||
+        routeName === ""
+      ) {
+        footer.style.display = "block";
+      } else {
+        footer.style.display = "none";
+      }
+    }
+
     window.scrollTo({ top: 0, behavior: "smooth" });
     route.render(...params);
   }
@@ -756,6 +789,7 @@ class Router {
           </div>
 
           <p class="auth-link">Don't have an account? <a href="/register">Register here</a></p>
+          <p style="text-align: center; font-size: 0.875rem; color: #94a3b8; margin-top: 15px;">By logging in, you agree to our <a href="/terms" class="nav-link" style="color: #6366f1;">Terms and Conditions</a></p>
           <div id="loginMessage" class="message"></div>
         </div>
       </div>
@@ -882,6 +916,7 @@ class Router {
           </div>
 
           <p class="auth-link">Already have an account? <a href="/login">Login here</a></p>
+          <p style="text-align: center; font-size: 0.875rem; color: #94a3b8; margin-top: 15px;">By registering, you agree to our <a href="/terms" class="nav-link" style="color: #6366f1;">Terms and Conditions</a></p>
           <div id="registerMessage" class="message"></div>
         </div>
       </div>
@@ -4306,6 +4341,111 @@ class Router {
       console.error(e);
       appDiv.innerHTML = `<div style="padding:4rem; text-align:center; color:#ef4444;">Error loading reviews.</div>`;
     }
+  }
+
+  renderTerms() {
+    const appDiv = document.getElementById("app");
+    window.scrollTo(0, 0);
+    appDiv.innerHTML = `
+      <div class="legal-page" style="padding: 4rem 2rem; max-width: 800px; margin: 0 auto; color: var(--text-color, #ffffff); line-height: 1.6;">
+        <h1 style="font-size: 2.5rem; margin-bottom: 1rem; color: var(--text-color, #ffffff);">Terms and Conditions</h1>
+        
+        <p>Welcome to StudBridge. By accessing our website and enrolling in our courses, you agree to be bound by these Terms and Conditions.</p>
+
+        <h3 style="margin-top: 2rem; color: var(--text-color, #ffffff);">Platform Use</h3>
+        <p>StudBridge is an educational platform providing courses and industry mentorship. You agree to use the platform for lawful educational purposes only.</p>
+
+        <h3 style="margin-top: 2rem; color: var(--text-color, #ffffff);">Account Registration</h3>
+        <p>You must provide accurate information when registering. You are responsible for maintaining the confidentiality of your account credentials.</p>
+
+        <h3 style="margin-top: 2rem; color: var(--text-color, #ffffff);">Payments</h3>
+        <p>All payments for courses are processed securely through our authorized payment gateways. By purchasing a course, you agree to pay the specified fees.</p>
+
+        <h3 style="margin-top: 2rem; color: var(--text-color, #ffffff);">Intellectual Property</h3>
+        <p>All course materials, scripts, and platform content are the exclusive property of StudBridge. You may not distribute, reproduce, or resell any content without written permission.</p>
+
+        <h3 style="margin-top: 2rem; color: var(--text-color, #ffffff);">User Conduct</h3>
+        <p>Any harassment, sharing of account access, or misuse of the platform's resources will result in immediate termination of your account without a refund.</p>
+
+        <h3 style="margin-top: 2rem; color: var(--text-color, #ffffff);">Limitation of Liability</h3>
+        <p>StudBridge provides educational content and mentorship but does not guarantee specific career or financial outcomes.</p>
+
+        <div style="margin-top: 4rem; padding-top: 2rem; border-top: 1px solid var(--border-color, #334155); display:flex; gap: 2rem; justify-content: center; flex-wrap: wrap;">
+          <a href="/terms" class="nav-link" style="color: #3b82f6; text-decoration: none;">Terms & Conditions</a>
+          <a href="/privacy" class="nav-link" style="color: #3b82f6; text-decoration: none;">Privacy Policy</a>
+          <a href="/refund" class="nav-link" style="color: #3b82f6; text-decoration: none;">Refund Policy</a>
+        </div>
+      </div>
+    `;
+    this.updateNavbar();
+  }
+
+  renderPrivacy() {
+    const appDiv = document.getElementById("app");
+    window.scrollTo(0, 0);
+    appDiv.innerHTML = `
+      <div class="legal-page" style="padding: 4rem 2rem; max-width: 800px; margin: 0 auto; color: var(--text-color, #ffffff); line-height: 1.6;">
+        <h1 style="font-size: 2.5rem; margin-bottom: 1rem; color: var(--text-color, #ffffff);">Privacy Policy</h1>
+        
+        <p>StudBridge is committed to protecting your privacy. This policy explains how we collect, use, and safeguard your data.</p>
+
+        <h3 style="margin-top: 2rem; color: var(--text-color, #ffffff);">Information We Collect</h3>
+        <p>We collect personal information you provide when registering, including your name, email address (e.g., example@gmail.com), phone number, and educational background.</p>
+
+        <h3 style="margin-top: 2rem; color: var(--text-color, #ffffff);">How We Use Your Information</h3>
+        <p>We use your data to provide access to courses, process payments, connect you with mentors, and send important administrative emails or platform updates.</p>
+
+        <h3 style="margin-top: 2rem; color: var(--text-color, #ffffff);">Data Sharing</h3>
+        <p>We do not sell your personal data. We only share necessary information with trusted third-party service providers (like payment gateways and cloud hosting providers) strictly for operating our platform.</p>
+
+        <h3 style="margin-top: 2rem; color: var(--text-color, #ffffff);">Data Security</h3>
+        <p>We implement standard security measures to protect your data against unauthorized access or disclosure.</p>
+
+        <h3 style="margin-top: 2rem; color: var(--text-color, #ffffff);">Contact Us</h3>
+        <p>For privacy-related inquiries, please contact us at: <a href="mailto:chaithanya@studbridge.com" style="color:#3b82f6;">chaithanya@studbridge.com</a>.</p>
+
+        <div style="margin-top: 4rem; padding-top: 2rem; border-top: 1px solid var(--border-color, #334155); display:flex; gap: 2rem; justify-content: center; flex-wrap: wrap;">
+          <a href="/terms" class="nav-link" style="color: #3b82f6; text-decoration: none;">Terms & Conditions</a>
+          <a href="/privacy" class="nav-link" style="color: #3b82f6; text-decoration: none;">Privacy Policy</a>
+          <a href="/refund" class="nav-link" style="color: #3b82f6; text-decoration: none;">Refund Policy</a>
+        </div>
+      </div>
+    `;
+    this.updateNavbar();
+  }
+
+  renderRefund() {
+    const appDiv = document.getElementById("app");
+    window.scrollTo(0, 0);
+    appDiv.innerHTML = `
+      <div class="legal-page" style="padding: 4rem 2rem; max-width: 800px; margin: 0 auto; color: var(--text-color, #ffffff); line-height: 1.6;">
+        <h1 style="font-size: 2.5rem; margin-bottom: 1rem; color: var(--text-color, #ffffff);">Refund and Cancellation Policy</h1>
+        
+        <p>At StudBridge, we strive to deliver high-quality educational content and mentorship.</p>
+
+        <h3 style="margin-top: 2rem; color: var(--text-color, #ffffff);">Digital Goods Nature</h3>
+        <p>Because our courses are digital and access is granted immediately upon purchase, we generally maintain a strict <strong>No Refund</strong> policy once a course has been accessed.</p>
+
+        <h3 style="margin-top: 2rem; color: var(--text-color, #ffffff);">Cancellation</h3>
+        <p>If you have purchased a course but have not yet logged in or accessed any of the materials, you may request a cancellation within 48 hours of the transaction.</p>
+
+        <h3 style="margin-top: 2rem; color: var(--text-color, #ffffff);">Exceptions</h3>
+        <p>If you experience severe technical issues that prevent you from accessing the course content, and our support team cannot resolve the issue within a reasonable timeframe, a partial or full refund may be issued at the sole discretion of StudBridge management.</p>
+
+        <h3 style="margin-top: 2rem; color: var(--text-color, #ffffff);">Processing Time</h3>
+        <p>Approved refunds will be credited back to the original payment method (UPI, Bank Account, or Card) within 5 to 7 business days.</p>
+
+        <h3 style="margin-top: 2rem; color: var(--text-color, #ffffff);">Contact for Support</h3>
+        <p>To request a cancellation or report an issue, email <a href="mailto:chaithanya@studbridge.com" style="color:#3b82f6;">chaithanya@studbridge.com</a> with your transaction ID and registered email address.</p>
+
+        <div style="margin-top: 4rem; padding-top: 2rem; border-top: 1px solid var(--border-color, #334155); display:flex; gap: 2rem; justify-content: center; flex-wrap: wrap;">
+          <a href="/terms" class="nav-link" style="color: #3b82f6; text-decoration: none;">Terms & Conditions</a>
+          <a href="/privacy" class="nav-link" style="color: #3b82f6; text-decoration: none;">Privacy Policy</a>
+          <a href="/refund" class="nav-link" style="color: #3b82f6; text-decoration: none;">Refund Policy</a>
+        </div>
+      </div>
+    `;
+    this.updateNavbar();
   }
 }
 
