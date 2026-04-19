@@ -220,6 +220,14 @@ class Router {
       requiresAuth: false,
       render: () => this.renderRefund(),
     };
+
+    // Teacher Specific Rules
+    this.routes["teacher-terms"] = {
+      path: "/teacher-terms",
+      requiresAuth: true,
+      role: "teacher",
+      render: () => this.renderTeacherTerms(),
+    };
   }
 
   /**
@@ -352,6 +360,12 @@ class Router {
         footer.style.display = "block";
       } else {
         footer.style.display = "none";
+      }
+
+      const teacherFooterLink = document.getElementById("teacher-footer-link");
+      if (teacherFooterLink) {
+        teacherFooterLink.style.display =
+          auth.getUserRole() === "teacher" ? "inline-block" : "none";
       }
     }
 
@@ -4052,6 +4066,19 @@ class Router {
             <button class="btn btn-secondary" onclick="showPasswordComingSoon()">Change Password</button>
             <button class="btn btn-danger settings-logout-btn" onclick="confirmLogoutFromSettings()">Logout</button>
           </section>
+
+          ${
+            user.role === "teacher"
+              ? `
+          <section class="settings-card">
+            <h3><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px; vertical-align: middle;"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg> Platform Commission</h3>
+            <p class="settings-muted">View platform fee and your revenue share details.</p>
+            <button class="btn btn-secondary" onclick="router.navigate('teacher-terms')">View Terms</button>
+          </section>
+              `
+              : ""
+          }
+
         </div>
       </div>
     `;
@@ -4437,6 +4464,35 @@ class Router {
 
         <h3 style="margin-top: 2rem; color: var(--text-color, #ffffff);">Contact for Support</h3>
         <p>To request a cancellation or report an issue, email <a href="mailto:chaithanya@studbridge.com" style="color:#3b82f6;">chaithanya@studbridge.com</a> with your transaction ID and registered email address.</p>
+
+        <div style="margin-top: 4rem; padding-top: 2rem; border-top: 1px solid var(--border-color, #334155); display:flex; gap: 2rem; justify-content: center; flex-wrap: wrap;">
+          <a href="/terms" class="nav-link" style="color: #3b82f6; text-decoration: none;">Terms & Conditions</a>
+          <a href="/privacy" class="nav-link" style="color: #3b82f6; text-decoration: none;">Privacy Policy</a>
+          <a href="/refund" class="nav-link" style="color: #3b82f6; text-decoration: none;">Refund Policy</a>
+        </div>
+      </div>
+    `;
+    this.updateNavbar();
+  }
+
+  renderTeacherTerms() {
+    const appDiv = document.getElementById("app");
+    window.scrollTo(0, 0);
+    appDiv.innerHTML = `
+      <div class="legal-page" style="padding: 4rem 2rem; max-width: 800px; margin: 0 auto; color: var(--text-color, #ffffff); line-height: 1.6;">
+        <h1 style="font-size: 2.5rem; margin-bottom: 1rem; color: var(--text-color, #ffffff);">Platform Commission Terms</h1>
+        <p style="color: var(--text-muted, #94a3b8); margin-bottom: 2rem;">Overview of earnings and platform fees</p>
+        
+        <p>If you are registered as an instructor or mentor providing courses or guidance on StudBridge, the following terms apply to your earnings:</p>
+
+        <h3 style="margin-top: 2rem; color: var(--text-color, #ffffff);">Platform Fee</h3>
+        <p>StudBridge charges a standard <strong>20% platform fee</strong> on the total sale price of any course or service sold through the platform.</p>
+
+        <h3 style="margin-top: 2rem; color: var(--text-color, #ffffff);">Instructor Revenue</h3>
+        <p>The instructor will receive the remaining <strong>80% of the course fee</strong>.</p>
+
+        <h3 style="margin-top: 2rem; color: var(--text-color, #ffffff);">Payouts</h3>
+        <p>Earnings will be calculated and remitted to the instructor's designated bank account on a regular schedule (e.g., the 5th of every month) for all cleared transactions from the previous month. StudBridge reserves the right to withhold payouts for transactions that are disputed or refunded.</p>
 
         <div style="margin-top: 4rem; padding-top: 2rem; border-top: 1px solid var(--border-color, #334155); display:flex; gap: 2rem; justify-content: center; flex-wrap: wrap;">
           <a href="/terms" class="nav-link" style="color: #3b82f6; text-decoration: none;">Terms & Conditions</a>
