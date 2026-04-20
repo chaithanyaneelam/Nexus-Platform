@@ -4397,6 +4397,15 @@ class Router {
         <h3 style="margin-top: 2rem; color: var(--text-color, #ffffff);">Limitation of Liability</h3>
         <p>StudBridge provides educational content and mentorship but does not guarantee specific career or financial outcomes.</p>
 
+        <h3 style="margin-top: 2rem; color: var(--text-color, #ffffff);">Contact Us</h3>
+        <p>If you have any questions or queries regarding these Terms and Conditions, please contact us:</p>
+        <ul style="list-style-type: none; padding-left: 0;">
+          <li><strong>Owner:</strong> N Chaithanya</li>
+          <li><strong>Email:</strong> <a href="mailto:chaithanya@studbridge.com" style="color: #3b82f6;">chaithanya@studbridge.com</a></li>
+          <li><strong>Contact Number:</strong> 6304886413</li>
+          <li><strong>Address:</strong> Thorur, Puttur, Tirupati, Andhra Pradesh</li>
+        </ul>
+
         <div style="margin-top: 4rem; padding-top: 2rem; border-top: 1px solid var(--border-color, #334155); display:flex; gap: 2rem; justify-content: center; flex-wrap: wrap;">
           <a href="/terms" class="nav-link" style="color: #3b82f6; text-decoration: none;">Terms & Conditions</a>
           <a href="/privacy" class="nav-link" style="color: #3b82f6; text-decoration: none;">Privacy Policy</a>
