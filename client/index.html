@@ -145,12 +145,125 @@
           <li id="adminMenuItem" style="display: none">
             <a href="/admin-dashboard" class="nav-link">Admin Dashboard</a>
           </li>
-          <li id="supportMenuItem" style="display: none">
-            <a href="/support" class="nav-link">Support</a>
+          <li
+            id="servicesMenuItem"
+            class="nav-dropdown"
+            style="display: none; position: relative; flex-direction: column"
+          >
+            <span
+              class="nav-link dropdown-toggle"
+              style="
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                width: 100%;
+                box-sizing: border-box;
+              "
+              >Services
+              <span
+                class="material-icons dropdown-icon"
+                style="font-size: 1.2rem; margin-left: 0.2rem"
+                >expand_more</span
+              ></span
+            >
+            <ul
+              class="dropdown-menu"
+              style="
+                display: none;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                background: var(--bg-color, #1e293b);
+                list-style: none;
+                padding: 0.5rem 0;
+                margin: 0;
+                border: 1px solid var(--border-color, #334155);
+                border-radius: 4px;
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+                min-width: 150px;
+                z-index: 100;
+              "
+            >
+              <li id="supportMenuItem" style="display: none; width: 100%">
+                <a
+                  href="/support"
+                  class="nav-link"
+                  style="
+                    padding: 0.5rem 1rem;
+                    display: block;
+                    border-bottom: none;
+                    width: 100%;
+                    box-sizing: border-box;
+                  "
+                  >Support</a
+                >
+              </li>
+              <li
+                id="documentationsMenuItem"
+                style="display: none; width: 100%"
+              >
+                <a
+                  href="/documentations"
+                  class="nav-link"
+                  style="
+                    padding: 0.5rem 1rem;
+                    display: block;
+                    border-bottom: none;
+                    width: 100%;
+                    box-sizing: border-box;
+                  "
+                  >Documentation</a
+                >
+              </li>
+            </ul>
           </li>
-          <li id="documentationsMenuItem" style="display: none">
-            <a href="/documentations" class="nav-link">Documentations</a>
-          </li>
+          <style>
+            @media (min-width: 769px) {
+              .nav-dropdown:hover .dropdown-menu {
+                display: block !important;
+              }
+            }
+            .dropdown-menu a:hover {
+              background-color: rgba(255, 255, 255, 0.05);
+            }
+            @media (max-width: 768px) {
+              .navbar-menu .nav-dropdown {
+                padding-bottom: 0;
+                width: 100%;
+              }
+              .navbar-menu span.nav-link.dropdown-toggle {
+                display: flex !important;
+                font-size: 1.25rem !important;
+                padding: 1rem 1.5rem !important;
+                color: var(--text-color) !important;
+                border-radius: 8px !important;
+                font-weight: 500 !important;
+              }
+              .navbar-menu .nav-dropdown .nav-link {
+                width: 100%;
+                box-sizing: border-box;
+              }
+              .navbar-menu .dropdown-menu {
+                position: absolute !important;
+                width: calc(100% - 2rem) !important;
+                margin-left: 1rem !important;
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+                border: 1px solid var(--border-color, #334155) !important;
+                padding-left: 0 !important;
+                background: var(--bg-color, #1e293b) !important;
+                z-index: 1001 !important;
+              }
+              .dropdown-menu .nav-link {
+                font-size: 1.1rem !important;
+                padding: 0.6rem 1.5rem !important;
+                width: 100%;
+              }
+              .nav-dropdown.open .dropdown-icon {
+                transform: rotate(180deg);
+              }
+            }
+          </style>
           <li id="createMeetingMenuItem" style="display: none">
             <a
               href="/create-meeting"

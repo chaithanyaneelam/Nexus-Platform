@@ -406,6 +406,7 @@ class Router {
     const myCoursesMenuItem = document.getElementById("myCoursesMenuItem");
     const studentsMenuItem = document.getElementById("studentsMenuItem");
     const adminMenuItem = document.getElementById("adminMenuItem");
+    const servicesMenuItem = document.getElementById("servicesMenuItem");
     const supportMenuItem = document.getElementById("supportMenuItem");
     const documentationsMenuItem = document.getElementById(
       "documentationsMenuItem",
@@ -434,6 +435,7 @@ class Router {
       myCoursesMenuItem.style.display = "none";
       studentsMenuItem.style.display = "none";
       adminMenuItem.style.display = "none";
+      if (servicesMenuItem) servicesMenuItem.style.display = "none";
       supportMenuItem.style.display = "none";
       documentationsMenuItem.style.display = "none";
       if (createMeetingMenuItem) createMeetingMenuItem.style.display = "none";
@@ -443,12 +445,14 @@ class Router {
         coursesMenuItem.style.display = "block";
         yourCoursesMenuItem.style.display = "block";
         myEnrollmentsMenuItem.style.display = "block";
+        if (servicesMenuItem) servicesMenuItem.style.display = "block";
         supportMenuItem.style.display = "block";
         documentationsMenuItem.style.display = "block";
       } else if (user.role === "teacher") {
         coursesMenuItem.style.display = "block";
         myCoursesMenuItem.style.display = "block";
         studentsMenuItem.style.display = "block";
+        if (servicesMenuItem) servicesMenuItem.style.display = "block";
         supportMenuItem.style.display = "block";
         documentationsMenuItem.style.display = "block";
         if (createMeetingMenuItem)
@@ -456,6 +460,7 @@ class Router {
       } else if (user.role === "admin") {
         coursesMenuItem.style.display = "block";
         adminMenuItem.style.display = "block";
+        if (servicesMenuItem) servicesMenuItem.style.display = "block";
         documentationsMenuItem.style.display = "block";
       }
     } else {
@@ -470,6 +475,7 @@ class Router {
       myCoursesMenuItem.style.display = "none";
       studentsMenuItem.style.display = "none";
       adminMenuItem.style.display = "none";
+      if (servicesMenuItem) servicesMenuItem.style.display = "none";
       if (supportMenuItem) supportMenuItem.style.display = "none";
       if (documentationsMenuItem) documentationsMenuItem.style.display = "none";
       if (createMeetingMenuItem) createMeetingMenuItem.style.display = "none";

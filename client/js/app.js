@@ -49,6 +49,25 @@ class NexusApp {
 
       // Close menu on link click
       navbarMenu.addEventListener("click", (e) => {
+        // Prevent closing when clicking on the Services dropdown toggle
+        const dropdownToggle = e.target.closest("#servicesMenuItem > span");
+        if (dropdownToggle) {
+          const servicesMenuItem = document.getElementById("servicesMenuItem");
+          const dropdownMenu = document.querySelector(
+            "#servicesMenuItem .dropdown-menu",
+          );
+          if (dropdownMenu) {
+            const isBlock = dropdownMenu.style.display === "block";
+            dropdownMenu.style.display = isBlock ? "none" : "block";
+            if (!isBlock) {
+              servicesMenuItem.classList.add("open");
+            } else {
+              servicesMenuItem.classList.remove("open");
+            }
+          }
+          return;
+        }
+
         if (
           e.target.tagName === "A" ||
           e.target.classList.contains("nav-link")
@@ -56,6 +75,14 @@ class NexusApp {
           navbarMenu.classList.remove("active");
           mobileMenuToggle.innerHTML =
             '<span class="material-icons" style="font-size: 1.8rem;">menu</span>';
+
+          // Close dropdown menu state
+          const servicesMenuItem = document.getElementById("servicesMenuItem");
+          if (servicesMenuItem) servicesMenuItem.classList.remove("open");
+          const dropdownMenu = document.querySelector(
+            "#servicesMenuItem .dropdown-menu",
+          );
+          if (dropdownMenu) dropdownMenu.style.display = "none";
         }
       });
     }
