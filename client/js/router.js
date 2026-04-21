@@ -781,9 +781,27 @@ class Router {
           </div>
         </section>
 
-        <!-- Section 4: Tech Insights -->
+
+        <!-- Section 4: Freelance -->
         <section class="home-section">
           <div class="section-content reverse">
+            <div class="section-text">
+              <h2 class="home-subtitle">Earn While You Learn</h2>
+              <p class="home-text">
+              Turn Your Skills Into <strong>Real Income</strong> — From Day One,
+              Why wait until you graduate to start earning? With our <strong>Freelance Launchpad</strong>, you'll land real client projects while still mastering your craft. We connect you with opportunities, help you build a standout portfolio, and teach you how to price, pitch, and deliver — so you're not just a student, you're already a professional.
+              </p>
+            </div>
+            <div class="section-image">
+              <img src="assets/freelaceProject.png" alt="freelance" onerror="this.src='https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'">
+            </div>
+          </div>
+        </section>
+
+
+        <!-- Section 5: Tech Insights -->
+        <section class="home-section">
+          <div class="section-content">
             <div class="section-text">
               <h2 class="home-subtitle">Navigate the Changing Tech Industry</h2>
               <p class="home-text">The world is shifting from simple programming to complex architecture. System design and DSA are more crucial than ever. Our mentors will help you choose the right domains, master architecture, and survive and thrive in today's tech landscape.</p>
@@ -794,9 +812,9 @@ class Router {
           </div>
         </section>
 
-        <!-- Section 5: Resume & Portfolio -->
+        <!-- Section 6: Resume & Portfolio -->
         <section class="home-section">
-          <div class="section-content">
+          <div class="section-content reverse">
             <div class="section-text">
               <h2 class="home-subtitle">Build a Standout Resume & Portfolio</h2>
               <p class="home-text">Your resume is your ticket to the interview. Our industry experts will personally help you craft a professional resume and an impressive portfolio that catches the eye of top recruiters.</p>
@@ -807,9 +825,9 @@ class Router {
           </div>
         </section>
 
-        <!-- Section 6: Reviews & Refunds -->
+        <!-- Section 7: Reviews & Refunds -->
         <section class="home-section">
-          <div class="section-content reverse">
+          <div class="section-content">
             <div class="section-text">
               <h2 class="home-subtitle">Trusted by Students, Backed by Us</h2>
               <p class="home-text">Check out our <a href="https://g.page/r/CXrVJDchmzS_EBM/review" target="_blank" style="color:#E8702A; font-weight:600; text-decoration:underline;">Google Reviews</a>! See what students have to say about their teachers before joining.</p>
