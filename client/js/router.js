@@ -4410,6 +4410,7 @@ class Router {
           <li><strong>Email:</strong> <a href="mailto:chaithanya@studbridge.com" style="color: #3b82f6;">chaithanya@studbridge.com</a></li>
           <li><strong>Contact Number:</strong> 6304886413</li>
           <li><strong>Address:</strong> Thorur, Puttur, Tirupati, Andhra Pradesh</li>
+          <li><strong>Pincode:</strong> 517583</li>
         </ul>
 
         <div style="margin-top: 4rem; padding-top: 2rem; border-top: 1px solid var(--border-color, #334155); display:flex; gap: 2rem; justify-content: center; flex-wrap: wrap;">
