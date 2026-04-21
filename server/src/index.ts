@@ -39,7 +39,7 @@ app.get("/", (req: Request, res: Response) => {
           <p style="font-size: 1.1rem; line-height: 1.6; margin-bottom: 1.5rem;">
             The backend server is running successfully. This is the API endpoint.
           </p>
-          <a href="https://the-nexus-upskill.vercel.app" style="display: inline-block; padding: 0.75rem 1.5rem; background: #0f766e; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; transition: background 0.3s;" onmouseover="this.style.background='#134e4a'" onmouseout="this.style.background='#0f766e'">
+          <a href="https://www.studbridge.com" style="display: inline-block; padding: 0.75rem 1.5rem; background: #0f766e; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; transition: background 0.3s;" onmouseover="this.style.background='#134e4a'" onmouseout="this.style.background='#0f766e'">
             Go to Frontend Application
           </a>
         </div>

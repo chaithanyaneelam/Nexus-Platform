@@ -726,6 +726,13 @@ class Router {
         html:not([data-theme="light"]) .home-logo-light {
           display: none !important;
         }
+
+        .home-scroll-btn {
+          background: #E8702A;
+        }
+        html:not([data-theme="light"]) .home-scroll-btn {
+          background: #667eea;
+        }
       </style>
 
       <div class="home-container" id="homeScrollContainer">
@@ -814,6 +821,11 @@ class Router {
           </div>
         </section>
       </div>
+
+      <!-- Scroll Button -->
+      <button id="homeScrollBtn" class="home-scroll-btn" style="position: fixed; bottom: 30px; right: 30px; z-index: 100; width: 50px; height: 50px; border-radius: 50%; color: white; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.3); transition: transform 0.3s, background 0.3s;">
+        <span class="material-icons" id="homeScrollIcon">arrow_downward</span>
+      </button>
     `;
     this.updateNavbar();
 
@@ -835,6 +847,44 @@ class Router {
 
       // Make first section visible immediately
       if (sections.length > 0) sections[0].classList.add("visible");
+
+      // Scroll button logic
+      const scrollBtn = document.getElementById("homeScrollBtn");
+      const scrollIcon = document.getElementById("homeScrollIcon");
+
+      if (scrollBtn && scrollIcon) {
+        const handleScroll = () => {
+          // Add a small threshold (like 50px) to handle mobile browsers and zoom rounding
+          if (
+            window.innerHeight + window.scrollY >=
+            document.body.offsetHeight - 50
+          ) {
+            scrollIcon.textContent = "arrow_upward";
+          } else {
+            scrollIcon.textContent = "arrow_downward";
+          }
+        };
+
+        window.addEventListener("scroll", handleScroll);
+
+        // Remove listener when navigating away
+        const originalNavigate = router.navigate;
+        router.navigate = function (path) {
+          window.removeEventListener("scroll", handleScroll);
+          originalNavigate.call(router, path);
+        };
+
+        scrollBtn.addEventListener("click", () => {
+          if (scrollIcon.textContent === "arrow_upward") {
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          } else {
+            window.scrollTo({
+              top: document.body.scrollHeight,
+              behavior: "smooth",
+            });
+          }
+        });
+      }
     }, 100);
   }
 
@@ -851,7 +901,10 @@ class Router {
             </div>
             <div class="form-group">
               <label for="password">Password:</label>
-              <input type="password" id="password" name="password" required>
+              <div style="position: relative; display: flex; align-items: center;">
+                <input type="password" id="password" name="password" required style="width: 100%; padding-right: 40px;">
+                <span class="material-icons" id="toggleLoginPasswordBtn" style="position: absolute; right: 10px; cursor: pointer; color: #94a3b8; user-select: none;">visibility_off</span>
+              </div>
             </div>
             <button type="submit" class="btn btn-primary" id="loginBtn" style="width: 100%;">Login</button>
           </form>
@@ -902,6 +955,22 @@ class Router {
       }
     }, 100);
     setTimeout(() => clearInterval(renderGoogleBtn), 5000);
+
+    const toggleLoginPasswordBtn = document.getElementById(
+      "toggleLoginPasswordBtn",
+    );
+    const loginPasswordInput = document.getElementById("password");
+    if (toggleLoginPasswordBtn && loginPasswordInput) {
+      toggleLoginPasswordBtn.addEventListener("click", () => {
+        const type =
+          loginPasswordInput.getAttribute("type") === "password"
+            ? "text"
+            : "password";
+        loginPasswordInput.setAttribute("type", type);
+        toggleLoginPasswordBtn.textContent =
+          type === "password" ? "visibility_off" : "visibility";
+      });
+    }
 
     const form = document.getElementById("loginForm");
     form.addEventListener("submit", async (e) => {
@@ -959,7 +1028,17 @@ class Router {
             </div>
             <div class="form-group">
               <label for="password">Password:</label>
-              <input type="password" id="password" name="password" placeholder="At least 6 characters with uppercase and numbers" required>
+              <div style="position: relative; display: flex; align-items: center;">
+                <input type="password" id="password" name="password" placeholder="At least 6 characters with uppercase and numbers" required style="width: 100%; padding-right: 40px;">
+                <span class="material-icons" id="togglePasswordBtn" style="position: absolute; right: 10px; cursor: pointer; color: #94a3b8; user-select: none;">visibility_off</span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="confirmPassword">Confirm Password:</label>
+              <div style="position: relative; display: flex; align-items: center;">
+                <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Re-enter your password" required style="width: 100%; padding-right: 40px;">
+                <span class="material-icons" id="toggleConfirmPasswordBtn" style="position: absolute; right: 10px; cursor: pointer; color: #94a3b8; user-select: none;">visibility_off</span>
+              </div>
             </div>
             <div class="form-group">
               <label for="mobileNumber">Mobile Number:</label>
@@ -1031,16 +1110,57 @@ class Router {
     }, 100);
     setTimeout(() => clearInterval(renderGoogleBtnReg), 5000);
 
+    // Toggle Password Visibility Logic
+    const togglePasswordBtn = document.getElementById("togglePasswordBtn");
+    const passwordInput = document.getElementById("password");
+    if (togglePasswordBtn && passwordInput) {
+      togglePasswordBtn.addEventListener("click", () => {
+        const type =
+          passwordInput.getAttribute("type") === "password"
+            ? "text"
+            : "password";
+        passwordInput.setAttribute("type", type);
+        togglePasswordBtn.textContent =
+          type === "password" ? "visibility_off" : "visibility";
+      });
+    }
+
+    const toggleConfirmPasswordBtn = document.getElementById(
+      "toggleConfirmPasswordBtn",
+    );
+    const confirmPasswordInput = document.getElementById("confirmPassword");
+    if (toggleConfirmPasswordBtn && confirmPasswordInput) {
+      toggleConfirmPasswordBtn.addEventListener("click", () => {
+        const type =
+          confirmPasswordInput.getAttribute("type") === "password"
+            ? "text"
+            : "password";
+        confirmPasswordInput.setAttribute("type", type);
+        toggleConfirmPasswordBtn.textContent =
+          type === "password" ? "visibility_off" : "visibility";
+      });
+    }
+
     const form = document.getElementById("registerForm");
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
+
+      const password = document.getElementById("password").value;
+      const confirmPassword = document.getElementById("confirmPassword").value;
+      const messageDiv = document.getElementById("registerMessage");
+
+      if (password !== confirmPassword) {
+        messageDiv.className = "message error";
+        messageDiv.textContent = "• Passwords do not match!";
+        messageDiv.style.whiteSpace = "normal";
+        return;
+      }
+
       const registerBtn = document.getElementById("registerBtn");
 
       toggleLoading(registerBtn, true);
       const result = await auth.register(form);
       toggleLoading(registerBtn, false);
-
-      const messageDiv = document.getElementById("registerMessage");
 
       if (result.success) {
         messageDiv.className = "message success";
@@ -1763,28 +1883,111 @@ class Router {
     const user = auth.getCurrentUser();
 
     appDiv.innerHTML = `
-      <div class="dashboard student-dashboard">
-        <h2>Welcome, ${user.name || user.email}! 👋</h2>
-        <div class="dashboard-grid">
-          <div class="dashboard-card">
+      <style>
+        .student-dashboard-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+          gap: 1.5rem;
+          margin-top: 2rem;
+        }
+        .premium-card {
+          background: var(--bg-color);
+          border: 1px solid var(--border-color);
+          border-radius: 12px;
+          padding: 1.5rem;
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+          transition: transform 0.3s, box-shadow 0.3s;
+          position: relative;
+          overflow: hidden;
+        }
+        .premium-card:hover {
+          transform: translateY(-5px);
+          box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        html:not([data-theme="light"]) .premium-card:hover {
+          box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+        }
+        .premium-card-icon {
+          width: 50px;
+          height: 50px;
+          border-radius: 12px;
+          background: rgba(232, 112, 42, 0.1);
+          color: #E8702A;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin-bottom: 1rem;
+        }
+        html:not([data-theme="light"]) .premium-card-icon {
+          background: rgba(102, 126, 234, 0.15);
+          color: #667eea;
+        }
+        .premium-card h3 {
+          font-size: 1.25rem;
+          margin: 0 0 0.5rem 0;
+          color: var(--text-color);
+        }
+        .premium-card p {
+          font-size: 0.95rem;
+          color: var(--text-color);
+          opacity: 0.8;
+          margin: 0 0 1.5rem 0;
+          flex-grow: 1;
+        }
+        .premium-card-link {
+          margin-top: auto;
+          text-decoration: none;
+          font-weight: 600;
+          color: #E8702A;
+          display: flex;
+          align-items: center;
+          gap: 0.3rem;
+          transition: gap 0.2s;
+        }
+        html:not([data-theme="light"]) .premium-card-link {
+          color: #667eea;
+        }
+        .premium-card-link:hover {
+          gap: 0.6rem;
+        }
+      </style>
+      <div class="dashboard student-dashboard" style="max-width: 1200px; margin: 0 auto; padding: 2rem;">
+        <h2 style="font-size: 2rem; margin-bottom: 0.5rem;">Welcome, ${user.name || user.email}! 👋</h2>
+        <p style="color: var(--text-color); opacity: 0.8; font-size: 1.1rem;">Here is an overview of your progress and activities.</p>
+        <div class="student-dashboard-grid">
+          <div class="premium-card">
+            <div class="premium-card-icon">
+              <span class="material-icons" style="font-size: 1.8rem;">school</span>
+            </div>
             <h3>My Enrollments</h3>
-            <p>Explore courses you're enrolled in</p>
-            <a href="/my-enrollments" class="btn btn-secondary">View</a>
+            <p>Explore courses you're currently enrolled in and track your learning progress.</p>
+            <a href="/my-enrollments" class="premium-card-link">View Enrollments <span class="material-icons" style="font-size: 1.2rem;">arrow_forward</span></a>
           </div>
-          <div class="dashboard-card">
+          <div class="premium-card">
+            <div class="premium-card-icon">
+              <span class="material-icons" style="font-size: 1.8rem;">explore</span>
+            </div>
             <h3>Browse Courses</h3>
-            <p>Discover new courses to learn</p>
-            <a href="/courses" class="btn btn-secondary">Explore</a>
+            <p>Discover new courses, gain new skills, and unlock better opportunities.</p>
+            <a href="/courses" class="premium-card-link">Explore Courses <span class="material-icons" style="font-size: 1.2rem;">arrow_forward</span></a>
           </div>
-          <div class="dashboard-card">
+          <div class="premium-card">
+            <div class="premium-card-icon">
+              <span class="material-icons" style="font-size: 1.8rem;">person</span>
+            </div>
             <h3>My Profile</h3>
-            <p>Manage your account settings</p>
-            <a href="/profile" class="btn btn-secondary">Edit</a>
+            <p>Manage your account settings, update your details, and personalize your experience.</p>
+            <a href="/profile" class="premium-card-link">Edit Profile <span class="material-icons" style="font-size: 1.2rem;">arrow_forward</span></a>
           </div>
-          <div class="dashboard-card">
+          <div class="premium-card">
+            <div class="premium-card-icon">
+              <span class="material-icons" style="font-size: 1.8rem;">receipt_long</span>
+            </div>
             <h3>Payments</h3>
-            <p>View your transaction history</p>
-            <a href="/payment" class="btn btn-secondary">History</a>
+            <p>View your transaction history, receipts, and manage your billing information.</p>
+            <a href="/payment" class="premium-card-link">View History <span class="material-icons" style="font-size: 1.2rem;">arrow_forward</span></a>
           </div>
         </div>
       </div>

@@ -27,13 +27,18 @@
 
     <link rel="stylesheet" href="css/style.css" />
     <link rel="stylesheet" href="css/responsive.css" />
+    <link
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet"
+    />
     <script src="js/router.js" defer></script>
     <script src="js/api.js" defer></script>
     <script src="js/auth.js" defer></script>
     <style>
       body {
         margin: 0;
-        overflow: hidden;
+        overflow-y: auto;
+        overflow-x: hidden;
         background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
         font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
         display: flex;
@@ -41,6 +46,7 @@
         align-items: center;
         min-height: 100vh;
         color: #fff;
+        padding: 0;
       }
 
       /* Background animated glowing orbs */
@@ -299,9 +305,9 @@
               <div class="form-group" style="margin-bottom: 0">
                 <select id="role" name="role" required>
                   <option value="" disabled selected>Select Role</option>
-                  <option value="student">Student 🎓</option>
-                  <option value="teacher">Teacher 👨‍🏫</option>
-                  <option value="client">Client 💼</option>
+                  <option value="student">Student</option>
+                  <option value="teacher">Teacher</option>
+                  <option value="client">Client</option>
                 </select>
               </div>
               <div class="form-group" style="margin-bottom: 0">
@@ -343,8 +349,21 @@
             />
           </div>
 
-          <button type="submit" class="btn-finish" id="finishBtn">
-            Launch Dashboard ?
+          <button
+            type="submit"
+            class="btn-finish"
+            id="finishBtn"
+            style="
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              gap: 0.5rem;
+            "
+          >
+            Launch Dashboard
+            <span class="material-icons" style="font-size: 1.2rem"
+              >arrow_forward</span
+            >
           </button>
         </form>
       </div>
