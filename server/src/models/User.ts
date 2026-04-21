@@ -6,7 +6,7 @@ export interface IUser extends Document {
   name: string;
   email: string;
   password: string;
-  role: "admin" | "teacher" | "student";
+  role: "admin" | "teacher" | "student" | "client";
   mobileNumber?: string;
   interests: string[];
   upiId?: string; // For teachers
@@ -48,7 +48,7 @@ const UserSchema = new Schema<IUser>(
     },
     role: {
       type: String as any,
-      enum: [ROLES.ADMIN, ROLES.TEACHER, ROLES.STUDENT],
+      enum: [ROLES.ADMIN, ROLES.TEACHER, ROLES.STUDENT, ROLES.CLIENT],
       default: ROLES.STUDENT,
     },
     authProvider: {

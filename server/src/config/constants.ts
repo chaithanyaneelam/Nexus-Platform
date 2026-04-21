@@ -13,6 +13,7 @@ export const ROLES = {
   ADMIN: "admin",
   TEACHER: "teacher",
   STUDENT: "student",
+  CLIENT: "client",
 };
 
 export const PAYMENT_STATUS = {

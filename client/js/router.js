@@ -228,6 +228,50 @@ class Router {
       role: "teacher",
       render: () => this.renderTeacherTerms(),
     };
+
+    // Client / Freelance Routes
+    this.routes["client-projects"] = {
+      path: "/client-projects",
+      requiresAuth: true,
+      role: "client",
+      render: () => this.renderClientProjects(),
+    };
+    this.routes["client-dashboard"] = {
+      path: "/client-dashboard",
+      requiresAuth: true,
+      role: "client",
+      render: () => this.renderClientProjects(),
+    };
+    this.routes["client-create-project"] = {
+      path: "/client-create-project",
+      requiresAuth: true,
+      role: "client",
+      render: () => this.renderCreateProject(),
+    };
+    this.routes["client-project-details"] = {
+      path: "/client-project-details",
+      requiresAuth: true,
+      role: "client",
+      render: (id) => this.renderProjectDetailsAdmin(id),
+    };
+    this.routes["freelance"] = {
+      path: "/freelance",
+      requiresAuth: true,
+      role: "student",
+      render: () => this.renderFreelance(),
+    };
+    this.routes["freelance-project"] = {
+      path: "/freelance-project",
+      requiresAuth: true,
+      role: "student",
+      render: (id) => this.renderProjectDetailsStudent(id),
+    };
+    this.routes["my-applications"] = {
+      path: "/my-applications",
+      requiresAuth: true,
+      role: "student",
+      render: () => this.renderStudentApplications(),
+    };
   }
 
   /**
@@ -387,6 +431,8 @@ class Router {
       this.navigate("admin-dashboard");
     } else if (role === "teacher") {
       this.navigate("teacher-dashboard");
+    } else if (role === "client") {
+      this.navigate("client-dashboard");
     } else {
       this.navigate("student-dashboard");
     }
@@ -400,6 +446,9 @@ class Router {
     const settingsLink = document.getElementById("settingsLink");
     const coursesMenuItem = document.getElementById("coursesMenuItem");
     const yourCoursesMenuItem = document.getElementById("yourCoursesMenuItem");
+    const yourProjectsMenuItem = document.getElementById(
+      "yourProjectsMenuItem",
+    );
     const myEnrollmentsMenuItem = document.getElementById(
       "myEnrollmentsMenuItem",
     );
@@ -408,6 +457,7 @@ class Router {
     const adminMenuItem = document.getElementById("adminMenuItem");
     const servicesMenuItem = document.getElementById("servicesMenuItem");
     const supportMenuItem = document.getElementById("supportMenuItem");
+    const freelanceMenuItem = document.getElementById("freelanceMenuItem");
     const documentationsMenuItem = document.getElementById(
       "documentationsMenuItem",
     );
@@ -431,12 +481,14 @@ class Router {
       // Hide all dynamic menu items first
       coursesMenuItem.style.display = "none";
       yourCoursesMenuItem.style.display = "none";
+      if (yourProjectsMenuItem) yourProjectsMenuItem.style.display = "none";
       myEnrollmentsMenuItem.style.display = "none";
       myCoursesMenuItem.style.display = "none";
       studentsMenuItem.style.display = "none";
       adminMenuItem.style.display = "none";
       if (servicesMenuItem) servicesMenuItem.style.display = "none";
       supportMenuItem.style.display = "none";
+      if (freelanceMenuItem) freelanceMenuItem.style.display = "none";
       documentationsMenuItem.style.display = "none";
       if (createMeetingMenuItem) createMeetingMenuItem.style.display = "none";
 
@@ -445,6 +497,12 @@ class Router {
         coursesMenuItem.style.display = "block";
         yourCoursesMenuItem.style.display = "block";
         myEnrollmentsMenuItem.style.display = "block";
+        if (servicesMenuItem) servicesMenuItem.style.display = "block";
+        supportMenuItem.style.display = "block";
+        if (freelanceMenuItem) freelanceMenuItem.style.display = "block";
+        documentationsMenuItem.style.display = "block";
+      } else if (user.role === "client") {
+        if (yourProjectsMenuItem) yourProjectsMenuItem.style.display = "block";
         if (servicesMenuItem) servicesMenuItem.style.display = "block";
         supportMenuItem.style.display = "block";
         documentationsMenuItem.style.display = "block";
@@ -912,6 +970,7 @@ class Router {
               <select id="role" name="role" required>
                 <option value="student">Student</option>
                 <option value="teacher">Teacher</option>
+                <option value="client">Client</option>
               </select>
             </div>
             <div class="form-group">
@@ -1370,10 +1429,10 @@ class Router {
           html:not([data-theme="light"]) .icon-card h1,
           html:not([data-theme="light"]) .course-content-card h3,
           html:not([data-theme="light"]) .details-info-card div {
-            color: var(--text-color) !important;
+             !important;
           }
           html:not([data-theme="light"]) .details-info-card span {
-             color: var(--text-color) !important;
+              !important;
           }
 
           /* DARK MODE SPECIFIC STYLES TO MATCH IMAGE */
@@ -1395,7 +1454,7 @@ class Router {
           html:not([data-theme="light"]) .course-detail-card a,
           html:not([data-theme="light"]) .course-content-card p,
           html:not([data-theme="light"]) .course-content-card li {
-            color: var(--text-color) !important;
+             !important;
           }
           
           /* Special teal/primary colors for headers and specific links */
@@ -1444,11 +1503,32 @@ class Router {
              width: 6px;
              height: 6px;
              display: inline-block !important;
-             background-color: var(--text-color) !important;
+             background- !important;
              border-radius: 50% !important;
              color: transparent !important;
              overflow: hidden !important;
              margin-right: 8px;
+          }
+          
+          /* Dark mode text and icons overrides */
+          html:not([data-theme="light"]) .course-detail-card [style*="color: #475569"],
+          html:not([data-theme="light"]) .course-detail-card [style*="color: #64748b"],
+          html:not([data-theme="light"]) .instructor-name,
+          html:not([data-theme="light"]) .course-detail-card [style*="color: #0f172a;"] {
+             color: #ffffff !important;
+          }
+          html:not([data-theme="light"]) .course-detail-card [style*="color: #475569"] svg,
+          html:not([data-theme="light"]) .course-detail-card [style*="color: #64748b"] svg {
+             stroke: #ffffff !important;
+          }
+          html:not([data-theme="light"]) .course-detail-card a[style*="color: #0284c7;"] {
+             color: #ffffff !important;
+          }
+          html:not([data-theme="light"]) .course-content-card ul[style*="color: #334155;"] {
+             color: #ffffff !important;
+          }
+          html:not([data-theme="light"]) .course-content-card .highlight-item {
+             color: #ffffff !important;
           }
         </style>
         <div class="course-detail-wrapper" style="min-height: calc(100vh - 70px); padding: 40px 0;">
@@ -2644,7 +2724,7 @@ class Router {
               <h2 style="margin:0">My Courses</h2>
               <div class="search-bar" style="display:flex; align-items:center; background: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 0.1rem 0.5rem; flex: 1; max-width: 500px; min-width: 250px;">
                 <span class="material-icons" style="color: #94a3b8; padding: 0 0.5rem; font-size: 1.3rem;">search</span>
-                <input type="text" id="myCourseSearchInput" placeholder="Search my courses..." style="background: transparent; border: none; color: var(--text-color); padding: 0.5rem; outline: none; width: 100%;">
+                <input type="text" id="myCourseSearchInput" placeholder="Search my courses..." style="background: transparent; border: none;  padding: 0.5rem; outline: none; width: 100%;">
               </div>
             </div>
             <a href="/create-course" class="btn btn-primary" style="margin-left:auto">Create New Course</a>
@@ -4948,6 +5028,575 @@ function openWhatsApp(teacherPhone, courseName) {
   // Open in new tab
   window.open(whatsappURL, "_blank");
 }
+
+// ==== FREELANCE / CLIENT FEATURES ====
+Router.prototype.renderClientProjects = async function () {
+  this.updateNavbar();
+  const appDiv = document.getElementById("app");
+
+  appDiv.innerHTML = `
+    <style>
+      .client-project-price {
+        color: #E8702A !important;
+      }
+      html:not([data-theme="light"]) .client-project-price {
+        color: #0f766e !important;
+      }
+    </style>
+    <div class="dashboard-container" style="max-width: 1000px; margin: 0 auto; padding: 2rem;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+        <h2 style="font-size: 2rem; margin: 0;">Your Projects</h2>
+        <button class="btn" style="background: var(--primary-color); color: white; border: none; padding: 0.6rem 1.2rem; border-radius: 6px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 0.5rem;" onclick="router.navigate('client-create-project')">
+          <span class="material-icons" style="font-size: 1.2rem;">add</span> Create Project
+        </button>
+      </div>
+      
+      <div class="tabs" style="display: flex; gap: 1.5rem; margin-bottom: 2rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0;">
+        <button id="tab-open" style="background: transparent; color: var(--primary-color); border: none; border-bottom: 2px solid var(--primary-color); padding: 0.5rem 0.5rem; font-weight: 600; cursor: pointer; font-size: 1.05rem;" onclick="filterProjects('open', this)">Open / Ongoing</button>
+        <button id="tab-completed" style="background: transparent;  opacity: 0.7; border: none; border-bottom: 2px solid transparent; padding: 0.5rem 0.5rem; font-weight: 600; cursor: pointer; font-size: 1.05rem;" onclick="filterProjects('completed', this)">Completed</button>
+      </div>
+
+      <div id="projectsList" class="projects-list" style="display: grid; gap: 1.2rem;">
+        <div class="loader" style="margin: 2rem auto;"></div>
+      </div>
+    </div>
+  `;
+
+  try {
+    const response = await api.getClientProjects();
+    const projects = response.data || [];
+    window.clientProjectsData = projects;
+
+    window.filterProjects = (statusPattern, btnElement) => {
+      // Update tab styles
+      document.getElementById("tab-open").style.color = "var(--text-color)";
+      document.getElementById("tab-open").style.opacity = "0.7";
+      document.getElementById("tab-open").style.borderBottomColor =
+        "transparent";
+      document.getElementById("tab-completed").style.color =
+        "var(--text-color)";
+      document.getElementById("tab-completed").style.opacity = "0.7";
+      document.getElementById("tab-completed").style.borderBottomColor =
+        "transparent";
+
+      if (btnElement) {
+        btnElement.style.color = "var(--primary-color)";
+        btnElement.style.opacity = "1";
+        btnElement.style.borderBottomColor = "var(--primary-color)";
+      }
+
+      const filtered = projects.filter((p) => {
+        if (statusPattern === "open")
+          return ["open", "in-progress"].includes(p.status);
+        return p.status === "completed" || p.status === "closed";
+      });
+
+      const listDiv = document.getElementById("projectsList");
+      if (filtered.length === 0) {
+        listDiv.innerHTML =
+          '<p class="empty-state" style=" opacity: 0.7; text-align: center; padding: 3rem; border: 1px dashed var(--border-color); border-radius: 8px;">You have no projects in this category.</p>';
+        return;
+      }
+
+      listDiv.innerHTML = filtered
+        .map(
+          (p) => `
+        <div class="project-card" style="border: 1px solid var(--border-color); padding: 1.5rem; border-radius: 12px; background: var(--bg-color); display: flex; justify-content: space-between; align-items: center; transition: all 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.05);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)'" onmouseout="this.style.transform='none'; this.style.boxShadow='0 2px 4px rgba(0,0,0,0.05)'">
+          <div style="flex: 1; padding-right: 1.5rem;">
+            <h3 style="margin-bottom: 0.8rem; font-size: 1.3rem; ">${p.title}</h3>
+            <div style="display: flex; gap: 1.5rem; align-items: center; flex-wrap: wrap;">
+              <div class="client-project-price" style="display: flex; align-items: center; gap: 0.4rem; font-weight: 700; font-size: 1.1rem;">
+                <span class="material-icons" style="font-size: 1.2rem;">payments</span> ₹${p.price}
+              </div>
+              <div style="display: flex; align-items: center; gap: 0.4rem;  opacity: 0.8; font-size: 0.95rem;">
+                <span class="material-icons" style="font-size: 1.1rem;">group</span> ${p.applicationCount || 0} candidates
+              </div>
+              <div style="display: flex; align-items: center; gap: 0.4rem;">
+                <span style="background: ${p.status === "open" ? "rgba(59, 130, 246, 0.15)" : p.status === "in-progress" ? "rgba(234, 179, 8, 0.15)" : "rgba(34, 197, 94, 0.15)"}; color: ${p.status === "open" ? "#3b82f6" : p.status === "in-progress" ? "#eab308" : "#22c55e"}; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.5px; border: 1px solid ${p.status === "open" ? "rgba(59, 130, 246, 0.4)" : p.status === "in-progress" ? "rgba(234, 179, 8, 0.4)" : "rgba(34, 197, 94, 0.4)"};">
+                  ${p.status ? p.status.toUpperCase() : "UNKNOWN"}
+                </span>
+              </div>
+            </div>
+          </div>
+          <div>
+            <button class="btn" style="background: transparent; border: 1px solid var(--primary-color); color: var(--primary-color); padding: 0.6rem 1.2rem; border-radius: 6px; cursor: pointer; font-weight: 600; transition: all 0.2s;" onmouseover="this.style.background='var(--primary-color)'; this.style.color='white'" onmouseout="this.style.background='transparent'; this.style.color='var(--primary-color)'" onclick="router.navigate('client-project-details/${p._id}')">View Details</button>
+          </div>
+        </div>
+      `,
+        )
+        .join("");
+    };
+
+    window.filterProjects("open");
+  } catch (error) {
+    document.getElementById("projectsList").innerHTML =
+      `<div class="error-message">Server error or network issue. Please reach out or try again after a few minutes.</div>`;
+  }
+};
+
+Router.prototype.renderCreateProject = function () {
+  this.updateNavbar();
+  const appDiv = document.getElementById("app");
+
+  appDiv.innerHTML = `
+    <div class="dashboard-container" style="max-width: 800px; margin: 0 auto; padding: 2rem;">
+      <div style="display: flex; align-items: center; margin-bottom: 2rem; gap: 1rem;">
+        <button class="icon-btn" onclick="router.navigate('client-dashboard')">
+          <span class="material-icons">arrow_back</span>
+        </button>
+        <h2>Create New Project</h2>
+      </div>
+
+      <form id="createProjectForm" class="auth-form" style="max-width: 100%;">
+        <div class="form-group">
+          <label>Project Title (Name)</label>
+          <input type="text" id="pTitle" required placeholder="e.g. Build an E-commerce Website">
+        </div>
+        
+        <div class="form-group">
+          <label>Description</label>
+          <textarea id="pDescription" rows="5" required placeholder="Detailed requirements..."></textarea>
+        </div>
+        
+        <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+          <div class="form-group">
+            <label>Price ($)</label>
+            <input type="number" id="pPrice" required min="1">
+          </div>
+          
+          <div class="form-group">
+            <label>Time Period</label>
+            <input type="text" id="pTimePeriod" required placeholder="e.g. 1 month, 2 weeks">
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label>Language/Tech Preferences (Optional)</label>
+          <input type="text" id="pLanguage" placeholder="e.g. React, Node.js, Python. Default: any language">
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;" id="submitProjectBtn">Publish Project</button>
+      </form>
+    </div>
+  `;
+
+  document
+    .getElementById("createProjectForm")
+    .addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById("submitProjectBtn");
+      btn.disabled = true;
+      btn.textContent = "Publishing...";
+
+      try {
+        const data = {
+          title: document.getElementById("pTitle").value,
+          description: document.getElementById("pDescription").value,
+          price: Number(document.getElementById("pPrice").value),
+          timePeriod: document.getElementById("pTimePeriod").value,
+        };
+
+        const lang = document.getElementById("pLanguage").value.trim();
+        if (lang) data.languagePreferences = lang;
+
+        await api.createProject(data);
+        showInfoPopup("Project published successfully!", "Success");
+        this.navigate("client-dashboard");
+      } catch (error) {
+        showInfoPopup(error.message, "Error");
+        btn.disabled = false;
+        btn.textContent = "Publish Project";
+      }
+    });
+};
+
+Router.prototype.renderProjectDetailsAdmin = async function (projectId) {
+  this.updateNavbar();
+  const appDiv = document.getElementById("app");
+
+  appDiv.innerHTML = `
+    <style>
+      .client-detail-icon {
+        color: #E8702A !important;
+      }
+      .client-detail-price {
+        color: #E8702A !important;
+      }
+      .client-detail-radio {
+        accent-color: #E8702A !important;
+      }
+      html:not([data-theme="light"]) .client-detail-icon {
+        color: #0f766e !important;
+      }
+      html:not([data-theme="light"]) .client-detail-price {
+        color: #0f766e !important;
+      }
+      html:not([data-theme="light"]) .client-detail-radio {
+        accent-color: #0f766e !important;
+      }
+    </style>
+    <div class="dashboard-container" style="max-width: 1000px; margin: 0 auto; padding: 2rem;">
+      <div style="display: flex; align-items: center; margin-bottom: 2rem; gap: 1rem;">
+        <button class="icon-btn" onclick="router.navigate('client-dashboard')">
+          <span class="material-icons">arrow_back</span>
+        </button>
+        <h2>Project Details</h2>
+      </div>
+      <div id="projectDetailsContent">
+        <div class="loader" style="margin: 2rem auto;"></div>
+      </div>
+    </div>
+  `;
+
+  try {
+    const projectResponse = await api.getProjectDetailsByClient(projectId);
+    const applicationsResponse = await api.getProjectApplications(projectId);
+
+    console.log("Project Details Response:", projectResponse);
+    console.log("Applications Response:", applicationsResponse);
+
+    const project = projectResponse.data || projectResponse || {};
+    const applications =
+      applicationsResponse.data || applicationsResponse || [];
+
+    let appsHtml = '<p class="empty-state">No candidates have applied yet.</p>';
+    if (applications && applications.length > 0) {
+      appsHtml = applications
+        .map((app) => {
+          let actionButtons = "";
+          if (app.status === "pending") {
+            actionButtons = `
+            <button class="btn btn-primary" onclick="updateAppStatus('${app._id}', 'approved')" style="padding: 0.3rem 0.6rem; font-size: 0.8rem;">Approve</button>
+            <button class="btn btn-danger" onclick="updateAppStatus('${app._id}', 'rejected')" style="padding: 0.3rem 0.6rem; font-size: 0.8rem;">Reject</button>
+          `;
+          } else if (app.status === "approved") {
+            actionButtons = `<span style="color: green; font-weight: bold;">Approved</span>`;
+          } else {
+            actionButtons = `<span style="color: red; font-weight: bold;">${app.status ? app.status.toUpperCase() : "UNKNOWN"}</span>`;
+          }
+
+          let contactInfo =
+            app.status === "approved" && app.studentId
+              ? `<div style="margin-top: 0.5rem; font-size: 0.9rem; padding: 0.5rem; background: rgba(128,128,128,0.1); border-radius: 4px; color: var(--text-color);">
+               <b>Contact Student:</b><br/>
+               Name: ${app.studentId.name}<br/>
+               Email: <a href="mailto:${app.studentId.email}">${app.studentId.email}</a><br/>
+               Mobile: ${app.studentId.mobileNumber || "N/A"}
+             </div>`
+              : "";
+
+          return `
+          <div style="border: 1px solid var(--border-color); padding: 1rem; border-radius: 6px; margin-bottom: 1rem; background: var(--bg-color);">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+              <div>
+                <strong style="color: var(--text-color);">${app.studentId?.name || "Unknown Student"}</strong>
+                <p style="font-size: 0.9rem; color: var(--text-color); opacity: 0.8; margin-top: 0.2rem;">Applied on: ${app.createdAt ? new Date(app.createdAt).toLocaleDateString() : "N/A"}</p>
+                <div style="margin-top: 0.5rem; font-size: 0.9rem; color: var(--text-color);">
+                  <strong>Message/Pitch:</strong><br/>
+                  ${app.message || "No additional message provided."}
+                </div>
+                ${contactInfo}
+              </div>
+              <div style="display: flex; gap: 0.5rem;">
+                ${actionButtons}
+              </div>
+            </div>
+          </div>
+        `;
+        })
+        .join("");
+    }
+
+    document.getElementById("projectDetailsContent").innerHTML = `
+      <div style="background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; margin-bottom: 2rem;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 2rem;">
+          <div style="flex: 1; min-width: 300px;">
+            <h3 style="margin-bottom: 0.5rem; font-size: 1.5rem; ">${project.title}</h3>
+            <p style="margin-bottom: 1.5rem;  opacity: 0.8; line-height: 1.5;">${project.description || "No description provided."}</p>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; font-size: 0.95rem; background: rgba(128,128,128,0.1); padding: 1rem; border-radius: 8px; ">
+              <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <span class="material-icons client-detail-icon" style="font-size: 1.2rem;">payments</span>
+                <div><strong>Price:</strong> <span class="client-detail-price" style="font-weight: bold;">₹${project.price}</span></div>
+              </div>
+              <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <span class="material-icons client-detail-icon" style="font-size: 1.2rem;">schedule</span>
+                <div><strong>Time Period:</strong> ${project.timePeriod}</div>
+              </div>
+              <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <span class="material-icons client-detail-icon" style="font-size: 1.2rem;">info</span>
+                <div><strong>Status:</strong> <span style="font-weight: bold; color: ${project.status === "completed" ? "#22c55e" : project.status === "in-progress" ? "#eab308" : "#3b82f6"};">${project.status ? project.status.toUpperCase() : "UNKNOWN"}</span></div>
+              </div>
+              <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <span class="material-icons client-detail-icon" style="font-size: 1.2rem;">code</span>
+                <div><strong>Tech Pref:</strong> ${Array.isArray(project.languagePreferences) ? project.languagePreferences.join(", ") : project.languagePreferences || "Any Language"}</div>
+              </div>
+            </div>
+          </div>
+          
+          <div style="background: rgba(128,128,128,0.1); border: 1px solid var(--border-color); padding: 1.5rem; border-radius: 8px; width: 250px;">
+            <h4 style="margin-bottom: 1rem;  font-size: 1.1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">Update Project Status</h4>
+            <div style="display: flex; flex-direction: column; gap: 0.8rem; margin-top: 1rem;">
+              <label style="display: flex; align-items: center; gap: 0.8rem; cursor: pointer; padding: 0.5rem; border-radius: 4px; transition: background 0.2s;" onmouseover="this.style.background='rgba(128,128,128,0.1)'" onmouseout="this.style.background='transparent'">
+                <input type="radio" class="client-detail-radio" name="projStatus" value="open" ${project.status === "open" ? "checked" : ""} onchange="changeProjectStatus('${project._id}', this.value)" style="transform: scale(1.2);">
+                <span style=" font-weight: ${project.status === "open" ? "bold" : "normal"}">Open</span>
+              </label>
+              <label style="display: flex; align-items: center; gap: 0.8rem; cursor: pointer; padding: 0.5rem; border-radius: 4px; transition: background 0.2s;" onmouseover="this.style.background='rgba(128,128,128,0.1)'" onmouseout="this.style.background='transparent'">
+                <input type="radio" class="client-detail-radio" name="projStatus" value="in-progress" ${project.status === "in-progress" ? "checked" : ""} onchange="changeProjectStatus('${project._id}', this.value)" style="transform: scale(1.2);">
+                <span style=" font-weight: ${project.status === "in-progress" ? "bold" : "normal"}">In-Progress</span>
+              </label>
+              <label style="display: flex; align-items: center; gap: 0.8rem; cursor: pointer; padding: 0.5rem; border-radius: 4px; transition: background 0.2s;" onmouseover="this.style.background='rgba(128,128,128,0.1)'" onmouseout="this.style.background='transparent'">
+                <input type="radio" class="client-detail-radio" name="projStatus" value="completed" ${project.status === "completed" ? "checked" : ""} onchange="changeProjectStatus('${project._id}', this.value)" style="transform: scale(1.2);">
+                <span style=" font-weight: ${project.status === "completed" ? "bold" : "normal"}">Completed</span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <h3>Student Applications (${applications ? applications.length : 0})</h3>
+      <div style="margin-top: 1rem;">
+        ${appsHtml}
+      </div>
+    `;
+
+    // Expose helpers to window for injected HTML handlers
+    window.updateAppStatus = async (appId, status) => {
+      try {
+        await api.updateApplicationStatus(appId, status);
+        showInfoPopup(`Application marked as ${status}.`, "Success");
+        router.navigate(`client-project-details/${projectId}`);
+      } catch (err) {
+        showInfoPopup(
+          "Server error or network issue while updating. Please try again later.",
+          "Error",
+        );
+      }
+    };
+
+    window.changeProjectStatus = async (pId, status) => {
+      try {
+        await api.updateProjectStatus(pId, status);
+        showInfoPopup(`Project status updated to ${status}.`, "Success");
+        router.navigate(`client-project-details/${projectId}`);
+      } catch (err) {
+        showInfoPopup(
+          "Server error or network issue while updating. Please try again later.",
+          "Error",
+        );
+      }
+    };
+  } catch (error) {
+    console.error("renderProjectDetailsAdmin Error:", error);
+    document.getElementById("projectDetailsContent").innerHTML =
+      `<div class="error-message">Server error or network issue. Please reach out or try again after a few minutes. <br/> [Debug] ${error.message}</div>`;
+  }
+};
+
+Router.prototype.renderFreelance = async function () {
+  this.updateNavbar();
+  const appDiv = document.getElementById("app");
+
+  appDiv.innerHTML = `
+    <style>
+      html:not([data-theme="light"]) .freelance-my-apps-btn {
+        border-color: #0f766e !important;
+        color: #0f766e !important;
+      }
+      html:not([data-theme="light"]) .freelance-my-apps-btn:hover {
+        background-color: #0f766e !important;
+        color: #ffffff !important;
+      }
+      html:not([data-theme="light"]) .freelance-price {
+        color: #0f766e !important;
+      }
+    </style>
+    <div class="dashboard-container" style="max-width: 1000px; margin: 0 auto; padding: 2rem;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <h2>Freelance Marketplace</h2>
+        <button class="btn btn-outline freelance-my-apps-btn" onclick="router.navigate('my-applications')">My Applications</button>
+      </div>
+      
+      <p style="margin-bottom: 2rem; color: #64748b;">Browse open projects posted by clients and apply to build them.</p>
+
+      <div id="freelanceProjectsList" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem;">
+        <div class="loader" style="margin: 2rem auto; grid-column: 1 / -1;"></div>
+      </div>
+    </div>
+  `;
+
+  try {
+    const response = await api.getOpenProjectsForStudents();
+    const projects = response.data || [];
+    const listDiv = document.getElementById("freelanceProjectsList");
+
+    if (!projects || projects.length === 0) {
+      listDiv.innerHTML =
+        '<p class="empty-state" style="grid-column: 1 / -1;">No open projects available right now. Check back later!</p>';
+      return;
+    }
+
+    listDiv.innerHTML = projects
+      .map(
+        (p) => `
+      <div style="border: 1px solid var(--border-color); padding: 1.5rem; border-radius: 8px; background: var(--bg-color); display: flex; flex-direction: column; justify-content: space-between;">
+        <div>
+          <h3 style="margin-bottom: 0.5rem; font-size: 1.2rem;">${p.title}</h3>
+          <p style="font-size: 0.9rem; color: #64748b; margin-bottom: 1rem; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">${p.description || `Posted by: ${p.clientId?.name || "Unknown Client"}`}</p>
+          <div class="freelance-price" style="font-weight: bold; margin-bottom: 0.5rem; color: #E8702A;">₹${p.price}</div>
+          <div style="font-size: 0.85rem; color: #64748b; margin-bottom: 1rem;">Time: ${p.timePeriod}</div>
+        </div>
+        <button class="btn btn-primary" style="width: 100%" onclick="router.navigate('freelance-project/${p._id}')">View Project Details</button>
+      </div>
+    `,
+      )
+      .join("");
+  } catch (error) {
+    document.getElementById("freelanceProjectsList").innerHTML =
+      `<div class="error-message" style="grid-column: 1 / -1; text-align: center;">Server error or network issue. Please reach out or try again after a few minutes.</div>`;
+  }
+};
+
+Router.prototype.renderProjectDetailsStudent = async function (projectId) {
+  this.updateNavbar();
+  const appDiv = document.getElementById("app");
+
+  appDiv.innerHTML = `
+    <style>
+      html:not([data-theme="light"]) .freelance-price {
+        color: #0f766e !important;
+      }
+    </style>
+    <div class="dashboard-container" style="max-width: 800px; margin: 0 auto; padding: 2rem;">
+      <div style="display: flex; align-items: center; margin-bottom: 2rem; gap: 1rem;">
+        <button class="icon-btn" onclick="router.navigate('freelance')">
+          <span class="material-icons">arrow_back</span>
+        </button>
+        <h2>Project Details</h2>
+      </div>
+      <div id="projectInfoContent">
+        <div class="loader" style="margin: 2rem auto;"></div>
+      </div>
+    </div>
+  `;
+
+  try {
+    const response = await api.getProjectDetailsForStudent(projectId);
+    const project = response.data || {};
+
+    document.getElementById("projectInfoContent").innerHTML = `
+      <div style="background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; margin-bottom: 2rem;">
+        <h3 style="margin-bottom: 1rem; font-size: 1.5rem; ">${project.title}</h3>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; font-size: 0.95rem; background: rgba(128, 128, 128, 0.1); padding: 1rem; border-radius: 6px; ">
+          <div><strong>Price:</strong> <span class="freelance-price" style="font-weight: bold; color: #E8702A;">₹${project.price}</span></div>
+          <div><strong>Time Period:</strong> ${project.timePeriod}</div>
+          <div><strong>Preferred Tech:</strong> ${Array.isArray(project.languagePreferences) ? project.languagePreferences.join(", ") : project.languagePreferences || "Any"}</div>
+          <div><strong>Posted By:</strong> ${project.clientId?.name || "Unknown Client"}</div>
+        </div>
+        <div style="margin-bottom: 2rem; ">
+          <h4 style="margin-bottom: 0.5rem;">Description</h4>
+          <p style="line-height: 1.6;">${project.description ? project.description.replace(/\n/g, "<br/>") : ""}</p>
+        </div>
+        
+        <button id="applyBtn" class="btn btn-primary" style="width: 100%; padding: 0.8rem; font-size: 1.1rem;">Get Connection / Apply</button>
+      </div>
+    `;
+
+    document.getElementById("applyBtn").addEventListener("click", async () => {
+      try {
+        document.getElementById("applyBtn").disabled = true;
+        document.getElementById("applyBtn").textContent = "Applying...";
+        await api.applyToProject(projectId);
+        showInfoPopup("Application submitted successfully!", "Success");
+        router.navigate("my-applications");
+      } catch (err) {
+        showInfoPopup(err.message, "Error");
+        document.getElementById("applyBtn").disabled = false;
+        document.getElementById("applyBtn").textContent =
+          "Get Connection / Apply";
+      }
+    });
+  } catch (error) {
+    document.getElementById("projectInfoContent").innerHTML =
+      `<div class="error-message">Server error or network issue. Please reach out or try again after a few minutes.</div>`;
+  }
+};
+
+Router.prototype.renderStudentApplications = async function () {
+  this.updateNavbar();
+  const appDiv = document.getElementById("app");
+
+  appDiv.innerHTML = `
+    <div class="dashboard-container" style="max-width: 1000px; margin: 0 auto; padding: 2rem;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <div style="display: flex; align-items: center; gap: 1rem;">
+          <button class="icon-btn" onclick="router.navigate('freelance')">
+            <span class="material-icons">arrow_back</span>
+          </button>
+          <h2>My Applications</h2>
+        </div>
+      </div>
+      
+      <div id="studentAppsList" style="display: grid; gap: 1rem;">
+        <div class="loader" style="margin: 2rem auto;"></div>
+      </div>
+    </div>
+  `;
+
+  try {
+    const response = await api.getStudentApplications();
+    const apps = response.data || [];
+    const listDiv = document.getElementById("studentAppsList");
+
+    if (!apps || apps.length === 0) {
+      listDiv.innerHTML =
+        '<p class="empty-state">You haven\'t applied to any projects yet.</p>';
+      return;
+    }
+
+    listDiv.innerHTML = apps
+      .map((a) => {
+        let clientContact = "";
+        if (a.status === "approved" && a.client) {
+          clientContact = `
+          <div style="margin-top: 1rem; padding: 1rem; background: rgba(34, 197, 94, 0.05); border: 1px solid rgba(34, 197, 94, 0.2); border-radius: 6px;">
+            <h4 style="margin-bottom: 0.5rem; color: #22c55e;">Client Contact Info</h4>
+            <p><strong>Name:</strong> ${a.client.name}</p>
+            <p><strong>Email:</strong> <a href="mailto:${a.client.email}">${a.client.email}</a></p>
+            <p><strong>Mobile:</strong> ${a.client.mobileNumber || "N/A"}</p>
+          </div>
+        `;
+        }
+
+        let statusColor =
+          a.status === "approved" || a.status === "completed"
+            ? "#22c55e"
+            : a.status === "rejected"
+              ? "#ef4444"
+              : "#f59e0b";
+
+        return `
+        <div class="project-card" style="border: 1px solid var(--border-color); padding: 1.5rem; border-radius: 8px; background: var(--bg-color);">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+            <div>
+              <h3 style="margin-bottom: 0.5rem;">${a.project?.title || "Deleted Project"}</h3>
+              <p class="freelance-price" style="font-weight: bold; color: #E8702A;">₹${a.project?.price || 0}</p>
+            </div>
+            <span style="background: ${statusColor}; color: white; padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.85rem; font-weight: bold;">
+              ${a.status ? a.status.toUpperCase() : "UNKNOWN"}
+            </span>
+          </div>
+          <p style="font-size: 0.9rem;  opacity: 0.8;">Applied on: ${a.createdAt ? new Date(a.createdAt).toLocaleDateString() : "N/A"}</p>
+          ${clientContact}
+        </div>
+      `;
+      })
+      .join("");
+  } catch (error) {
+    document.getElementById("studentAppsList").innerHTML =
+      `<div class="error-message">Server error or network issue. Please reach out or try again after a few minutes.</div>`;
+  }
+};
 
 // Teacher Dashboard Tab Switching
 function switchTeacherTab(tabName) {

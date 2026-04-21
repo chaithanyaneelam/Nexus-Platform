@@ -1,5 +1,7 @@
 const API_BASE_URL = "https://nexus-platform-three.vercel.app/api";
 
+// const API_BASE_URL = "http://localhost:5001/api";
+
 class APIClient {
   constructor(baseURL = API_BASE_URL) {
     this.baseURL = baseURL;
@@ -381,7 +383,85 @@ class APIClient {
   async getCourseReviews(courseId) {
     return this.request(`/reviews/course/${courseId}`, "GET", null, false);
   }
+
+  // ===== Freelance / Project Routes =====
+
+  // Client specific routes
+  async createProject(projectData) {
+    return this.request(
+      "/freelance/client/projects",
+      "POST",
+      projectData,
+      true,
+    );
+  }
+
+  async getClientProjects() {
+    return this.request("/freelance/client/projects", "GET", null, true);
+  }
+
+  async getProjectDetailsByClient(projectId) {
+    return this.request(
+      `/freelance/client/projects/${projectId}`,
+      "GET",
+      null,
+      true,
+    );
+  }
+
+  async updateProjectStatus(projectId, status) {
+    return this.request(
+      `/freelance/client/projects/${projectId}/status`,
+      "PATCH",
+      { status },
+      true,
+    );
+  }
+
+  async getProjectApplications(projectId) {
+    return this.request(
+      `/freelance/client/projects/${projectId}/applications`,
+      "GET",
+      null,
+      true,
+    );
+  }
+
+  async updateApplicationStatus(appId, status) {
+    return this.request(
+      `/freelance/client/applications/${appId}`,
+      "PATCH",
+      { status },
+      true,
+    );
+  }
+
+  // Student specific routes
+  async getOpenProjectsForStudents() {
+    return this.request("/freelance/student/projects", "GET", null, true);
+  }
+
+  async getProjectDetailsForStudent(projectId) {
+    return this.request(
+      `/freelance/student/projects/${projectId}`,
+      "GET",
+      null,
+      true,
+    );
+  }
+
+  async applyToProject(projectId) {
+    return this.request(
+      "/freelance/student/applications",
+      "POST",
+      { projectId },
+      true,
+    );
+  }
+
+  async getStudentApplications() {
+    return this.request("/freelance/student/applications", "GET", null, true);
+  }
 }
 
 const api = new APIClient();
-

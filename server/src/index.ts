@@ -12,6 +12,7 @@ import enrollmentRoutes from "./routes/enrollmentRoutes";
 import paymentRoutes from "./routes/paymentRoutes";
 import adminRoutes from "./routes/adminRoutes";
 import classRoutes from "./routes/classRoutes";
+import freelanceRoutes from "./routes/freelanceRoutes";
 import reviewRoutes from "./routes/reviewRoutes";
 
 dotenv.config();
@@ -63,6 +64,7 @@ app.use("/api/payments", paymentRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/classes", classRoutes);
 app.use("/api/reviews", reviewRoutes);
+app.use("/api/freelance", freelanceRoutes);
 
 const validationMessages: Record<string, string> = {
   password:
@@ -70,7 +72,7 @@ const validationMessages: Record<string, string> = {
   email: "Please enter a valid email address",
   name: "Please enter a valid name",
   mobileNumber: "Please enter a valid 10-digit mobile number",
-  role: "Please select a valid role (student, teacher, or admin)",
+  role: "Please select a valid role (student, teacher, client, or admin)",
   "confirm password": "Passwords do not match",
   upiId: "Please enter a valid UPI ID",
   linkedinUrl: "Please enter a valid LinkedIn URL",

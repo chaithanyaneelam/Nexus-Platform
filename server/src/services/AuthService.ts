@@ -18,7 +18,7 @@ export class AuthService {
     name: string;
     email: string;
     password: string;
-    role: "student" | "teacher" | "admin";
+    role: "student" | "teacher" | "admin" | "client";
     mobileNumber?: string | null;
     company?: string;
     upiId?: string;
