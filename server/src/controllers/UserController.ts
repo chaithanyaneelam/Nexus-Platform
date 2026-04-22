@@ -9,7 +9,11 @@ export class UserController {
     this.userRepository = new UserRepository();
   }
 
-  async completeOnboarding(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async completeOnboarding(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
     try {
       const userId = (req as any).userId;
       if (!userId) {
@@ -19,8 +23,11 @@ export class UserController {
       const { role, mobileNumber, linkedinUrl, githubUrl } = req.body;
 
       // Validate inputs
-      if (!role || !["teacher", "student"].includes(role)) {
-        throw new AppError("Valid role (teacher or student) is required", 400);
+      if (!role || !["teacher", "student", "client"].includes(role)) {
+        throw new AppError(
+          "Valid role (teacher, student, or client) is required",
+          400,
+        );
       }
       if (!mobileNumber) {
         throw new AppError("Mobile number is required", 400);

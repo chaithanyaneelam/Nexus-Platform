@@ -5632,6 +5632,18 @@ Router.prototype.renderFreelance = async function () {
       html:not([data-theme="light"]) .freelance-price {
         color: #0f766e !important;
       }
+      .freelance-loading-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 300px;
+        gap: 1rem;
+      }
+      .loading-text {
+        color: var(--text-color);
+        font-size: 1rem;
+      }
     </style>
     <div class="dashboard-container" style="max-width: 1000px; margin: 0 auto; padding: 2rem;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
@@ -5642,7 +5654,10 @@ Router.prototype.renderFreelance = async function () {
       <p style="margin-bottom: 2rem; color: #64748b;">Browse open projects posted by clients and apply to build them.</p>
 
       <div id="freelanceProjectsList" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem;">
-        <div class="loader" style="margin: 2rem auto; grid-column: 1 / -1;"></div>
+        <div class="freelance-loading-container" style="grid-column: 1 / -1;">
+          <div class="loader"></div>
+          <p class="loading-text">Loading projects...</p>
+        </div>
       </div>
     </div>
   `;
@@ -5654,14 +5669,14 @@ Router.prototype.renderFreelance = async function () {
 
     if (!projects || projects.length === 0) {
       listDiv.innerHTML =
-        '<p class="empty-state" style="grid-column: 1 / -1;">No open projects available right now. Check back later!</p>';
+        '<p class="empty-state" style="grid-column: 1 / -1; text-align: center; padding: 2rem; color: #64748b;">No open projects available right now. Check back later!</p>';
       return;
     }
 
     listDiv.innerHTML = projects
       .map(
         (p) => `
-      <div style="border: 1px solid var(--border-color); padding: 1.5rem; border-radius: 8px; background: var(--bg-color); display: flex; flex-direction: column; justify-content: space-between;">
+      <div style="border: 1px solid var(--border-color); padding: 1.5rem; border-radius: 8px; background: var(--bg-color); display: flex; flex-direction: column; justify-content: space-between; transition: all 0.3s ease;">
         <div>
           <h3 style="margin-bottom: 0.5rem; font-size: 1.2rem;">${p.title}</h3>
           <p style="font-size: 0.9rem; color: #64748b; margin-bottom: 1rem; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">${p.description || `Posted by: ${p.clientId?.name || "Unknown Client"}`}</p>
@@ -5675,7 +5690,7 @@ Router.prototype.renderFreelance = async function () {
       .join("");
   } catch (error) {
     document.getElementById("freelanceProjectsList").innerHTML =
-      `<div class="error-message" style="grid-column: 1 / -1; text-align: center;">Server error or network issue. Please reach out or try again after a few minutes.</div>`;
+      `<div class="error-message" style="grid-column: 1 / -1; text-align: center; padding: 2rem;">Server error or network issue. Please reach out or try again after a few minutes.</div>`;
   }
 };
 
@@ -5688,6 +5703,18 @@ Router.prototype.renderProjectDetailsStudent = async function (projectId) {
       html:not([data-theme="light"]) .freelance-price {
         color: #0f766e !important;
       }
+      .project-loading-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 400px;
+        gap: 1rem;
+      }
+      .loading-text {
+        color: var(--text-color);
+        font-size: 1rem;
+      }
     </style>
     <div class="dashboard-container" style="max-width: 800px; margin: 0 auto; padding: 2rem;">
       <div style="display: flex; align-items: center; margin-bottom: 2rem; gap: 1rem;">
@@ -5697,7 +5724,10 @@ Router.prototype.renderProjectDetailsStudent = async function (projectId) {
         <h2>Project Details</h2>
       </div>
       <div id="projectInfoContent">
-        <div class="loader" style="margin: 2rem auto;"></div>
+        <div class="project-loading-container">
+          <div class="loader"></div>
+          <p class="loading-text">Loading project details...</p>
+        </div>
       </div>
     </div>
   `;
@@ -5740,7 +5770,7 @@ Router.prototype.renderProjectDetailsStudent = async function (projectId) {
     });
   } catch (error) {
     document.getElementById("projectInfoContent").innerHTML =
-      `<div class="error-message">Server error or network issue. Please reach out or try again after a few minutes.</div>`;
+      `<div class="error-message" style="text-align: center; padding: 2rem;">Server error or network issue. Please reach out or try again after a few minutes.</div>`;
   }
 };
 
@@ -5749,6 +5779,20 @@ Router.prototype.renderStudentApplications = async function () {
   const appDiv = document.getElementById("app");
 
   appDiv.innerHTML = `
+    <style>
+      .apps-loading-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 300px;
+        gap: 1rem;
+      }
+      .loading-text {
+        color: var(--text-color);
+        font-size: 1rem;
+      }
+    </style>
     <div class="dashboard-container" style="max-width: 1000px; margin: 0 auto; padding: 2rem;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
         <div style="display: flex; align-items: center; gap: 1rem;">
@@ -5760,7 +5804,10 @@ Router.prototype.renderStudentApplications = async function () {
       </div>
       
       <div id="studentAppsList" style="display: grid; gap: 1rem;">
-        <div class="loader" style="margin: 2rem auto;"></div>
+        <div class="apps-loading-container">
+          <div class="loader"></div>
+          <p class="loading-text">Loading your applications...</p>
+        </div>
       </div>
     </div>
   `;
@@ -5772,7 +5819,7 @@ Router.prototype.renderStudentApplications = async function () {
 
     if (!apps || apps.length === 0) {
       listDiv.innerHTML =
-        '<p class="empty-state">You haven\'t applied to any projects yet.</p>';
+        '<p class="empty-state" style="text-align: center; padding: 2rem; color: #64748b;">You haven\'t applied to any projects yet.</p>';
       return;
     }
 
@@ -5816,7 +5863,7 @@ Router.prototype.renderStudentApplications = async function () {
       .join("");
   } catch (error) {
     document.getElementById("studentAppsList").innerHTML =
-      `<div class="error-message">Server error or network issue. Please reach out or try again after a few minutes.</div>`;
+      `<div class="error-message" style="text-align: center; padding: 2rem;">Server error or network issue. Please reach out or try again after a few minutes.</div>`;
   }
 };
 

@@ -1393,6 +1393,31 @@ p {
   }
 }
 
+/* ===== LOADER ===== */
+.loader {
+  position: relative;
+  width: 50px;
+  height: 50px;
+  margin: 2rem auto;
+}
+
+.loader::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg'%3E%3Cg stroke='%230f766e' stroke-width='10' stroke-linecap='round'%3E%3Cline x1='60' y1='10' x2='60' y2='30' opacity='1'/%3E%3Cline x1='85' y1='16.7' x2='75' y2='34' opacity='0.9'/%3E%3Cline x1='103.3' y1='35' x2='86' y2='45' opacity='0.8'/%3E%3Cline x1='110' y1='60' x2='90' y2='60' opacity='0.7'/%3E%3Cline x1='103.3' y1='85' x2='86' y2='75' opacity='0.6'/%3E%3Cline x1='85' y1='103.3' x2='75' y2='86' opacity='0.5'/%3E%3Cline x1='60' y1='110' x2='60' y2='90' opacity='0.4'/%3E%3Cline x1='35' y1='103.3' x2='45' y2='86' opacity='0.3'/%3E%3Cline x1='16.7' y1='85' x2='34' y2='75' opacity='0.2'/%3E%3Cline x1='10' y1='60' x2='30' y2='60' opacity='0.1'/%3E%3Cline x1='16.7' y1='35' x2='34' y2='45' opacity='0.1'/%3E%3Cline x1='35' y1='16.7' x2='45' y2='34' opacity='0.1'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 100%;
+  animation: ios-spinner 1s steps(12, end) infinite;
+}
+
+/* Light mode loader color adjustment */
+[data-theme="light"] .loader::after {
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg'%3E%3Cg stroke='%23f97316' stroke-width='10' stroke-linecap='round'%3E%3Cline x1='60' y1='10' x2='60' y2='30' opacity='1'/%3E%3Cline x1='85' y1='16.7' x2='75' y2='34' opacity='0.9'/%3E%3Cline x1='103.3' y1='35' x2='86' y2='45' opacity='0.8'/%3E%3Cline x1='110' y1='60' x2='90' y2='60' opacity='0.7'/%3E%3Cline x1='103.3' y1='85' x2='86' y2='75' opacity='0.6'/%3E%3Cline x1='85' y1='103.3' x2='75' y2='86' opacity='0.5'/%3E%3Cline x1='60' y1='110' x2='60' y2='90' opacity='0.4'/%3E%3Cline x1='35' y1='103.3' x2='45' y2='86' opacity='0.3'/%3E%3Cline x1='16.7' y1='85' x2='34' y2='75' opacity='0.2'/%3E%3Cline x1='10' y1='60' x2='30' y2='60' opacity='0.1'/%3E%3Cline x1='16.7' y1='35' x2='34' y2='45' opacity='0.1'/%3E%3Cline x1='35' y1='16.7' x2='45' y2='34' opacity='0.1'/%3E%3C/g%3E%3C/svg%3E");
+}
+
 .button-group {
   display: flex;
   gap: 1rem;

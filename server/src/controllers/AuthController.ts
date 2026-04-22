@@ -39,7 +39,7 @@ export class AuthController {
       }
 
       // Default to student if an invalid role is somehow provided
-      const requestedRole = ["student", "teacher"].includes(role)
+      const requestedRole = ["student", "teacher", "client"].includes(role)
         ? role
         : "student";
 
