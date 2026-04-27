@@ -23,7 +23,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(
   cors({
-    origin: ["https://studbridge.com", "https://studbridge.vercel.app"],
+    origin: true,
     credentials: true,
   }),
 );
