@@ -3,6 +3,7 @@ import { OAuth2Client } from "google-auth-library";
 import { AuthService } from "../services/AuthService";
 import { UserRepository } from "../repositories/UserRepository";
 import { generateToken } from "../utils/jwt";
+import { generateUniqueUsername } from "../utils/username";
 import {
   RegistrationSchema,
   LoginSchema,
@@ -59,8 +60,15 @@ export class AuthController {
 
       // Create a user if they don't exist
       if (!user) {
+        // Generate unique username for new Google user
+        const username = await generateUniqueUsername(
+          name || "Google User",
+          this.userRepository,
+        );
+
         user = await this.userRepository.create({
           name: name || "Google User",
+          username: username,
           email: email,
           // Generate a long random password for Google-auth users
           password:

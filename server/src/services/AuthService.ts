@@ -2,6 +2,11 @@ import bcryptjs from "bcryptjs";
 import { AppError, ValidationError } from "../utils/errors";
 import { generateToken, verifyToken } from "../utils/jwt";
 import { UserRepository } from "../repositories/UserRepository";
+import {
+  generateUniqueUsername,
+  isUsernameReserved,
+  validateUsername,
+} from "../utils/username";
 import type { IUser } from "../models/User";
 
 export class AuthService {
@@ -16,6 +21,7 @@ export class AuthService {
    */
   async register(data: {
     name: string;
+    username?: string;
     email: string;
     password: string;
     role: "student" | "teacher" | "admin" | "client";
@@ -33,9 +39,43 @@ export class AuthService {
       throw new ValidationError("User with this email already exists");
     }
 
+    // Check if name is already taken
+    const existingName = await this.userRepository.findByName(data.name);
+    if (existingName) {
+      throw new ValidationError("This name is already taken");
+    }
+
+    // Generate unique username if not provided
+    let username = data.username;
+    if (!username) {
+      username = await generateUniqueUsername(data.name, this.userRepository);
+    } else {
+      // Check if username is reserved
+      if (isUsernameReserved(username)) {
+        throw new ValidationError(
+          `The username "${username}" is reserved and cannot be used. Please choose a different username.`,
+        );
+      }
+
+      // Validate username format
+      if (!validateUsername(username)) {
+        throw new ValidationError(
+          "Username must be 3-20 characters with only lowercase letters, numbers, underscores, and hyphens",
+        );
+      }
+
+      // Check if provided username is available
+      const existingUsername =
+        await this.userRepository.findByUsername(username);
+      if (existingUsername) {
+        throw new ValidationError("This username is already taken");
+      }
+    }
+
     // Create user - password hashing is handled by User model's pre-save hook
     const userData = {
       ...data,
+      username,
       authProvider: "local",
     };
 

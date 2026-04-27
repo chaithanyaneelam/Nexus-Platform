@@ -4,6 +4,7 @@ import { ROLES } from "../config/constants";
 
 export interface IUser extends Document {
   name: string;
+  username?: string; // Unique username for profile URLs like studbridge/student/username
   email: string;
   password: string;
   role: "admin" | "teacher" | "student" | "client";
@@ -33,6 +34,21 @@ const UserSchema = new Schema<IUser>(
       type: String,
       required: true,
       trim: true,
+      unique: true,
+      sparse: true,
+      index: true,
+    },
+    username: {
+      type: String,
+      unique: true,
+      sparse: true,
+      lowercase: true,
+      trim: true,
+      match: [
+        /^[a-z0-9_-]{3,20}$/,
+        "Username must be 3-20 characters, lowercase letters, numbers, underscores and hyphens only",
+      ],
+      index: true,
     },
     email: {
       type: String,

@@ -7,6 +7,16 @@ export const RegistrationSchema = z.object({
     .min(2, "Name must be at least 2 characters")
     .max(50, "Name must not exceed 50 characters"),
 
+  username: z
+    .string()
+    .min(3, "Username must be at least 3 characters")
+    .max(20, "Username must not exceed 20 characters")
+    .regex(
+      /^[a-z0-9_-]+$/,
+      "Username can only contain lowercase letters, numbers, underscores, and hyphens",
+    )
+    .optional(),
+
   email: z.string().email("Invalid email format"),
 
   password: z
@@ -81,6 +91,16 @@ export const UpdateProfileSchema = z.object({
     .string()
     .min(2, "Name must be at least 2 characters")
     .max(50, "Name must not exceed 50 characters")
+    .optional(),
+
+  username: z
+    .string()
+    .min(3, "Username must be at least 3 characters")
+    .max(20, "Username must not exceed 20 characters")
+    .regex(
+      /^[a-z0-9_-]+$/,
+      "Username can only contain lowercase letters, numbers, underscores, and hyphens",
+    )
     .optional(),
 
   mobileNumber: z

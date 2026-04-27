@@ -17,6 +17,20 @@ export class UserRepository {
   }
 
   /**
+   * Find user by username
+   */
+  async findByUsername(username: string): Promise<IUser | null> {
+    return await User.findOne({ username: username.toLowerCase() });
+  }
+
+  /**
+   * Find user by name
+   */
+  async findByName(name: string): Promise<IUser | null> {
+    return await User.findOne({ name });
+  }
+
+  /**
    * Find user by ID
    */
   async findById(id: string): Promise<IUser | null> {
